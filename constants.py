@@ -110,6 +110,9 @@ CMAIN:
 
 """
 
+scratch_reg_order = ["rdi","r10","r11","r12","r13"]
+
+
 int_allocator = 32
 int_allocator_ref = "DWORD"
 int_allocator_glob = "resb 4"
@@ -130,7 +133,12 @@ def allocate(amt):
     return """
     push rbp
     mov rbp, rsp
-    sub rsp, """+str(amt)
+    sub rsp, """+str(amt)+"\n"
 
 def place_value(ptr, value):
     return """mov DWORD [rbp-"""+str(ptr)+"""], """+str(value)
+
+def load_value_toreg(ptr,reg):
+    return """
+    mov %s, DWORD [rbp-%s]\n
+    """%(reg,ptr)
