@@ -1,5 +1,6 @@
-int beans = 32;
+var beans = 32;
 
-int joe = 12;
+final var joe = 12;
 
 #define JOES_BEANS 36
+

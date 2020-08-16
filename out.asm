@@ -5,30 +5,18 @@
 
 
 section .data
-    
+    &&DATA&&
 
 
 section .bss
-    beans : resb 4
-	joe : resb 4
-	bruhman : resb 4
-	
+    &&BSS&&
 
 
 section .text
 global CMAIN
 
 
-main:
-
-    push rbp
-    mov rbp, rsp
-    sub rsp, 32
-mov DWORD [rbp-32], 36
-	leave
-	ret
-
-
+&&FDEF&&
 
 
 
@@ -37,7 +25,7 @@ mov DWORD [rbp-32], 36
 CMAIN:
     mov rbp, rsp
     xor rax, rax
-    call main
+    &&TEXT&&
 
     ret
 

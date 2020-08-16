@@ -1,9 +1,14 @@
+import sys
+class Preprocessor:
+    pass
+
 
 
 def include(file_indicator, data,cc):
+
     if(file_indicator.startswith("\"")):
         with open(file_indicator.replace("\"",""), "rb") as f:
-            
+            cc["FILES"].append(file_indicator.replace("\"",""))        
             return pre_process(f.read().decode(),cc)
 
 
@@ -22,10 +27,11 @@ def include(file_indicator, data,cc):
 def pre_process(data,cc):
     lines = data.split("\n")
     i =0
+    
     for line in lines:
         if(line.startswith("#")):
             if(line[1:8] == "include"):
-               lines[i]=include(line.split(" ")[1],data,cc)
+               lines[i]=include(line.split(" ")[1],data,cc)+chr(3)#+"\n&&FN:"+line.split(" ")[1]+"&&"
             elif(line[1:7] == "define"):
                 cc["DEF"][line.split(" ")[1]] = line.split(" ")[2]
                 lines[i] = ""

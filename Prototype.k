@@ -1,15 +1,16 @@
 #include "other.k"
 
-int bruhman = 100;
+var bruhman = 100;
 
 
 
-int main(){
+function main(){
 
 
-    int number_of_beans;
+    var number_of_beans;
     number_of_beans = JOES_BEANS;
-
+    number_of_beans = (bruhman == JOES_BEANS);
+    var value = number_of_beans->value;
 
 
 }
