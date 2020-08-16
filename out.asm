@@ -5,7 +5,7 @@
 
 
 section .data
-    &&DATA&&
+    
 
 
 section .bss
@@ -17,9 +17,28 @@ section .bss
 
 section .text
 global CMAIN
+
+
+main:
+
+    push rbp
+    mov rbp, rsp
+    sub rsp, 32
+mov DWORD [rbp-32], 36
+	leave
+	ret
+
+
+
+
+
+
+
 CMAIN:
     mov rbp, rsp
     xor rax, rax
-    &&TEXT&&
+    call main
+
+    ret
 
 

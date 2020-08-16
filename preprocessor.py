@@ -41,4 +41,9 @@ def pre_process(data,cc):
     data = ""
     for line in lines:
         data+=line+"\n"
+
+    for definition in cc["DEF"]:
+        data = data.replace(definition,cc["DEF"][definition])
+
+
     return data

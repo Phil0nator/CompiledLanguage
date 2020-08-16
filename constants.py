@@ -14,10 +14,20 @@ section .bss
 
 section .text
 global CMAIN
+
+
+&&FDEF&&
+
+
+
+
+
 CMAIN:
     mov rbp, rsp
     xor rax, rax
     &&TEXT&&
+
+    ret
 
 
 """
@@ -42,4 +52,7 @@ def allocate(amt):
     return """
     push rbp
     mov rbp, rsp
-    sub rsp, """+amt
+    sub rsp, """+str(amt)
+
+def place_value(ptr, value):
+    return """mov DWORD [rbp-"""+str(ptr)+"""], """+str(value)
