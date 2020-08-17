@@ -126,9 +126,14 @@ class Lexer:
             elif self.current_char == "[":
                 tokens.append(Token(T_OPENLINDEX, start=self.loc))
                 self.advance()
-
+            elif self.current_char == ",":
+                tokens.append(Token(T_COMMA,start=self.loc))
+                self.advance()
             elif self.current_char == "]":
                 tokens.append(Token(T_CLSLINDEX, start=self.loc))
+                self.advance()
+            elif self.current_char == ":":
+                tokens.append(Token(T_COLON, start=self.loc))
                 self.advance()
 
 
@@ -216,175 +221,6 @@ class Lexer:
 
         return Token(_type, value=out,start=start,end=self.loc)
 
-class Identifier:
-    def __init__(self, name, offset):
-        self.name=name
-        self.offset = offset
-        self.initial_value = 0x00000000
-
-    
-
-
-
-class Scope:
-    def __init__(self, ids):
-        self.ids = ids
-        self.offset = 0
-    def append(self, id):
-        self.ids.append(id)
-        self.offset+=4
-    def lastId(self):
-        return self.ids[len(self.ids)-1]
-
-class Function:
-    def __init__(self, name, params, scope, asm):
-        self.name=name
-        self.params=params
-        self.scope=scope
-        self.asm = asm
-    def finalize(self):
-        self.asm = allocate(self.scope.offset)+self.asm
-    def __repr__(self):
-        return f"function {self.name}({self.params})"
-
-
-class Compiler:
-    def __init__(self, tokens, cc):
-        self.tokens=tokens
-        self.asm = ""+top_stub
-        self._data = ""
-        self._text = "call main"
-        self._bss = ""
-        self._fdef = ""
-        self.cc= cc
-        self.current_token = self.tokens[0]
-        self.ct_idx = 0
-        self.scopestack = [Scope([])]
-        self.functions = [Function("CMAIN", [], self.lastStack(), "")]
-
-    def lastStack(self):
-        return self.scopestack[len(self.scopestack)-1]
-
-    def lastFunc(self):
-        return self.functions[len(self.functions)-1]
-
-    def offsetOf(self, name):
-        for id in self.scopestack[0].ids:
-            if id.name == name:
-                return id.offset
-        for id in self.lastStack().ids:
-            if id.name == name:
-                return id.offset
-
-    def evaluateSmallExpression(self):
-        reg = 0
-        while self.current_token.tok != "EOF":
-            if(self.current_token.tok == "ID"):
-                self.lastFunc().asm+=load_value_toreg(self.offsetOf(self.current_token.value),scratch_reg_order[reg])
-                print(self.lastFunc().asm)
-
-            self.advance()
-    def make_function_header(self, func):
-        inParams = False
-        
-        while (True):
-            self.advance()
-            if(self.current_token.tok == "ID" and not inParams):
-                func.name = self.current_token.value
-            elif(self.current_token.tok == "("):
-                inParams=True
-            elif(self.current_token.tok==")"):
-                inParams=False
-            elif(self.current_token.tok == "ID" and inParams):
-                func.params.append(self.current_token.value)
-            elif(self.current_token.tok == T_OSCOPE):
-                self.advance()
-                break
-        print(func)
-    
-
-    def evaluateLine(self, line, func):
-        if(line[0].tok == "KEYWORD"):
-            if(line[0].value == "var"):
-                func.scope.append(Identifier(line[1], func.scope.offset))
-
-            pass
-        else:
-            #line[0].tok will = ID
-            pass
-                
-
-
-    def make_function(self):
-        func = Function("",[],Scope([]),"")
-        ignorables = 0
-        print("test")
-        self.make_function_header(func)
-        contents = self.tokens[self.ct_idx:]
-        while(self.current_token.tok!=T_EOF):
-            if(self.current_token.tok == T_OSCOPE):
-                ignorables+=1
-            elif (self.current_token.tok == T_CLSCOPE):
-                if(ignorables>0):
-                    ignorables-=1
-                else:
-                    
-                    break
-            self.advance()
-        contents = contents[0:self.ct_idx]
-        
-        lines = []
-        line = []
-        for tok in contents:
-            if(tok.tok == T_EOL):
-                lines.append(line)
-                line = []
-            else:
-                line.append(tok)
-
-
-
-        for line in lines:
-            self.evaluateLine(line,func)
-        
-        
-
-
-
-    def fill_info(self):
-        doFunctionCreate = False
-        ignorableCloses = 0
-        while self.current_token.tok != "EOF":
-            
-            if(self.current_token.tok == "KEYWORD" and self.current_token.value == "function"):
-                self.make_function()
-            self.advance()
-
-
-
-
-
-
-             
-        
-    def fillvalues(self):
-        self._text = ""
-        for func in self.functions[1:]:
-            self._text+=func.name+":\n"+func.asm
-        self.asm = self.asm.replace("&&FDEF&&",self._text)
-        
-
-
-    def advance(self):
-        self.ct_idx+=1
-        self.current_token = self.tokens[self.ct_idx]
-
-    def writeToFile(self, fname):
-        with open(fname, "wb") as f:
-            f.write(self.asm.encode())
-
-
-
 
 
 
@@ -414,11 +250,41 @@ def main(file_to_compile):
     if(errors != None):
         print(errors.as_string())
         exit(1)
-    compiler = Compiler(tokens,cc)
-    compiler.fill_info()
-    compiler.fillvalues()
-    print(compiler.asm)
+    
+    print(tokens)
 
+
+    ############################################
+    # All tokens -> global variables
+    #       define global vars in bss, finals in .data
+    # Remaining tokens -> functions
+    #    for each function:
+    #       pusha
+    #       determine the total allocation space for function
+    #       
+    #       lines that start with keyword
+    #           if: cmp
+    #           var: allocator
+    #           while: cmp
+    #           for: cmp
+    #           call: fn
+    #           label: name
+    #           jump: label
+    #
+    #       lines that start with id
+    #           
+    #           variable assignment
+    #
+    #
+    #       Expressions:    
+    #
+    #           Only two term expressions allowed (excluding function calls)
+    #
+    #       return:
+    #           value returned by the function will be pushed
+    #
+    #
+    #############################################
 
     
     

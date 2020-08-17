@@ -29,7 +29,7 @@ T_COMMA = ","
 T_STRING = "STR"
 T_KEYWORD = "KEYWORD"
 T_EOF = "EOF"
-
+T_COLON = ":"
 T_EOL = "EOL"
 
 #MULTICHAR
@@ -47,7 +47,7 @@ TM_PP = "++"
 
 
 
-TM_ALL = "&|><=-"
+TM_ALL = "&|><=-()!"
 
 
 
@@ -72,7 +72,7 @@ ESCAPE_CHARS = {
 
 #Keywords
 
-KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "enum", "true", "false", "null", "nullptr", "break", "return", "continue"]
+KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "enum", "true", "false", "null", "nullptr", "return"]
 
 
 

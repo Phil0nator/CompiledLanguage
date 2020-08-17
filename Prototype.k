@@ -2,15 +2,39 @@
 
 var bruhman = 100;
 
+function bigfunc{
+
+    var beans = JOES_BEANS;
+    
+}
+
+function getNumber{
 
 
-function main(){
+    return 36;
 
 
-    var number_of_beans;
-    number_of_beans = JOES_BEANS;
-    number_of_beans = (bruhman == JOES_BEANS);
-    var value = number_of_beans->value;
+}
+
+
+function main{
+
+
+    label top;
+
+    var factual_statement = true;
+    var notrue = false;
+    var ifstate = factual_statement || notrue;
+    if(ifstate,0){
+
+        > : bigfunc
+
+    };
+
+    var aldenForehead = getNumber();
+
+
+
 
 
 }
