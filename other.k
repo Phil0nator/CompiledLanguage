@@ -1,4 +1,5 @@
-var beans = 32;
+var __beans = 32;
+
 
 final var joe = 12;
 

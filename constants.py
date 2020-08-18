@@ -3,7 +3,7 @@
 T_NUMBERS = "0123456789"
 T_INT = "INT"
 T_FLOAT = "FLOAT"
-
+T_BOOLEAN = "BOOL"
 
 T_PLUS = "+"
 T_MINUS = "-"
@@ -29,7 +29,7 @@ T_COMMA = ","
 T_STRING = "STR"
 T_KEYWORD = "KEYWORD"
 T_EOF = "EOF"
-
+T_COLON = ":"
 T_EOL = "EOL"
 
 #MULTICHAR
@@ -47,7 +47,7 @@ TM_PP = "++"
 
 
 
-TM_ALL = "&|><=-"
+TM_ALL = "&|><=-!"
 
 
 
@@ -72,7 +72,7 @@ ESCAPE_CHARS = {
 
 #Keywords
 
-KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "enum", "true", "false", "null", "nullptr", "break", "return", "continue"]
+KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", "null", "nullptr", "return"]
 
 
 
@@ -83,11 +83,11 @@ top_stub = """
 
 
 section .data
-    &&DATA&&
+&&DATA&&
 
 
 section .bss
-    &&BSS&&
+&&BSS&&
 
 
 section .text
@@ -101,17 +101,17 @@ global CMAIN
 
 
 CMAIN:
-    mov rbp, rsp
-    xor rax, rax
-    &&TEXT&&
+mov rbp, rsp
+xor rax, rax
+&&TEXT&&
 
-    ret
+ret
 
 
 """
 
-scratch_reg_order = ["rdi","r10","r11","r12","r13"]
-
+parameter_registers = ["r9","r10","r11"]
+return_register = "r8"
 
 int_allocator = 32
 int_allocator_ref = "DWORD"
@@ -126,19 +126,22 @@ allocator_table = {
 
 
 }
+def define_global(name):
+    return name+": resb 0x4\n"
 
-
+def value_of_global(name):
+    return "["+name+"]"
 
 def allocate(amt):
     return """
-    push rbp
-    mov rbp, rsp
-    sub rsp, """+str(amt)+"\n"
+push rbp
+mov rbp, rsp
+sub rsp, """+hex(amt)+"\n"
 
 def place_value(ptr, value):
-    return """mov DWORD [rbp-"""+str(ptr)+"""], """+str(value)
+    return """mov DWORD [rbp-"""+hex(ptr)+"""], """+hex(value)
 
 def load_value_toreg(ptr,reg):
     return """
-    mov %s, DWORD [rbp-%s]\n
-    """%(reg,ptr)
+mov %s, DWORD [rbp-%s]\n
+    """%(reg,hex(ptr))
