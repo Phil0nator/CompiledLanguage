@@ -51,7 +51,7 @@ def main(file_to_compile):
 
     asm = top_stub
     asm = asm.replace("&&FDEF&&", compiler._fdef)
-    asm = asm.replace("&&TEXT&&", compiler.main) #m replaces the actual main function for naming purposes
+    asm = asm.replace("&&TEXT&&", compiler.main) 
     asm = asm.replace("&&BSS&&", compiler._bss)
     asm = asm.replace("&&DATA&&", compiler._data)
 

@@ -48,7 +48,7 @@ class InvalidVariableAssignment(Error):
 
 class ExpressionOverflow(Error):
     def __init__(self, start, end, details):
-            super().__init__(start,end,"Expression too long (operator_a operator operator_b)", details)
+            super().__init__(start,end,"Expression too long (Use parenthesis to split up your expression)", details)
 
 class InvalidExpressionComponent(Error):
     def __init__(self, start, end, details):

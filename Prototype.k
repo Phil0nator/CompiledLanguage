@@ -5,7 +5,7 @@ var bruhman = 100;
 function bigfunc (input){
 
     var beans = JOES_BEANS;
-    beans = beans + input;
+    beans = beans + (input-(JOES_BEANS-36));
     return beans;
 }
 

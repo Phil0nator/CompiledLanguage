@@ -53,7 +53,7 @@ class Function:
         self.advance()
         if(self.current_token.tok == "="):
             self.advance()
-            self.evaluateExpression(self.getDeclarationByID(id))
+            self.evaluateExpression(decl=self.getDeclarationByID(id))
             return
 
         elif (self.current_token.tok == T_OPENP):
@@ -80,7 +80,7 @@ class Function:
     """
     #Based on current position, generate assembly to: evaluate an expression, and place its final result into the variable described by decl 
     """
-    def evaluateExpression(self, decl): #using rbx and rcx as scratch, returning to decl
+    def evaluateExpression(self, decl=None, reg=None, glob=None):
         expr = [] #holds the expression
         
         
@@ -88,7 +88,7 @@ class Function:
 
         #determine the contents of the expression:
         """
-        while self.current_token.tok != None and self.current_token.tok != T_EOL:
+        while self.current_token.tok != None and self.current_token.tok != T_EOL and self.current_token.tok != T_CLOSEP:
             if(self.current_token.tok == T_EOL): break
             
             if(self.current_token.tok == T_INT or self.current_token == T_FLOAT or self.current_token.tok == T_BOOLEAN):
@@ -108,24 +108,17 @@ class Function:
 
                 expr.append(self.current_token.tok)
                 self.advance()
+            elif(self.current_token.tok == T_OPENP):
+                self.advance()
+                self.evaluateExpression(reg="rdi")
+                expr.append("rdi")
             else:
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
             #max expression size
-            if(len(expr) > 3):
-                    throw(ExpressionOverflow(self.current_token.start,self.current_token.end,self.current_token.value))   
+            
+        if(self.current_token.tok == T_CLOSEP):
+            self.advance()
         
-        
-
-
-
-
-
-
-
-
-
-        
-        #move value into rbx, then into correct memory address
         if(len(expr) == 1):
             if(isinstance(expr[0], Declaration )):
                 self.addline("mov ebx, DWORD [rbp-"+hex(expr[0].offset)+"]")
@@ -133,62 +126,35 @@ class Function:
                 self.addline("mov ebx, "+hex(expr[0]))
             elif (self.compiler.globalExists( expr[0])):
                 self.addline("mov %s, %s"%("ebx",value_of_global(expr[0])))
+            elif (expr[0] == "rdi"):
+                self.addline("mov ebx, rdi")
             else:
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
-
-            self.addline("mov DWORD [rbp-"+hex(decl.offset)+"], ebx")
+            if(decl is not None): self.addline("mov DWORD [rbp-"+hex(decl.offset)+"], ebx")
+            elif (reg is not None): self.addline("mov %s, ebx"%reg)
+            else: self.addline("mov %s, ebx"%value_of_global(glob))
             return
-        
 
 
-
-
-
-
-
-
-        #an expression of length 2 would be illogical
-        if(len(expr) == 2):
-            throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
-        
-
-
-
-
-
-
-
-
-        #at this point it is confirmed that the expression requires aritmatic, and two variables
-
-
-        #mov operand a into ebx or eax depending on operation
-        reg = "ebx"
+        _reg = "ebx"
         if(str(expr[0]) in "*/"):
-            reg="eax"
+            _reg="eax"
 
         """
 
         #Create assembly for the move
         """
         if(isinstance(expr[0], Declaration )):
-            self.addline(("mov %s, DWORD [rbp-"+hex(expr[0].offset)+"]")%reg)
+            self.addline(("mov %s, DWORD [rbp-"+hex(expr[0].offset)+"]")%_reg)
         elif(isinstance(expr[0], int)):
-            self.addline(("mov %s, "+hex(expr[0]))%reg)
+            self.addline(("mov %s, "+hex(expr[0]))%_reg)
         elif (self.compiler.globalExists( expr[0])):
-            self.addline("mov %s, %s"%(reg,value_of_global(expr[0])))
+            self.addline("mov %s, %s"%(_reg,value_of_global(expr[0])))
         elif (expr[0] in parameter_registers):
             self.addline("mov rax,"+expr[0])
-            if(reg=="ebx"):
-                self.addline("mov ebx, rax")
+            if(_reg=="ebx"):
+                self.addline("mov ebx, eax")
         
-
-
-
-
-
-
-
 
 
         #move operand b into rcx reguardless
@@ -200,8 +166,10 @@ class Function:
             self.addline("mov %s, %s"%("ecx",value_of_global(expr[2])))
         elif (expr[2] in parameter_registers):
             self.addline("mov rcx, "+expr[2])
-        
+        elif (expr[2] == "rdi"):
+            self.addline("mov rcx, rdi")
         else:
+
             throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
 
 
@@ -219,19 +187,22 @@ class Function:
         #Create assembly for the math, and the re-deposit
         """
         #perform arithmatic, and move result into decl
+        outputreg = "ebx"
         if(expr[1] == "+"):
             self.addline("add ebx, ecx")
-            self.addline("mov DWORD [rbp-%s], ebx"%hex(decl.offset))
         elif(expr[1] == "-"):
             self.addline("sub ebx, ecx")
-            self.addline("mov DWORD [rbp-%s], ebx"%hex(decl.offset))
         elif(expr[1] == "*"):
             self.addline("mul ecx")
-            self.addline("mov DWORD [rbp-%s], eax"%hex(decl.offset))
+            outputreg = "eax"
         elif(expr[1] == "/"):
             self.addline("xor edx, edx")
             self.addline("div ecx")
-            self.addline("mov DWORD [rbp-%s], eax"%hex(decl.offset))
+            outputreg = "eax"
+
+        if(decl is not None): self.addline("mov DWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
+        elif (reg is not None): self.addline("mov %s,%s"%(reg, outputreg.replace("e","r")))
+        else: self.addline("mov %s,%s"%(value_of_global(glob), outputreg))
 
 
 
@@ -243,6 +214,9 @@ class Function:
 
 
 
+
+
+    
 
 
 
@@ -261,9 +235,10 @@ class Function:
         if(self.current_token.tok == "="): #with assignment
             self.advance()
             self.appendDeclaration(id)
-            if(self.compiler.globalExists(id)):
-                self.evaluateExpression(self.declarations[len(self.declarations)-1])#evaluate expression, and place it into this declaration
-
+            if(not self.compiler.globalExists(id)):
+                self.evaluateExpression(decl=self.declarations[len(self.declarations)-1])#evaluate expression, and place it into this declaration
+            else:
+                self.evaluateExpression(glob=id)
 
         else: #invalid statement
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
@@ -341,6 +316,7 @@ class Function:
             elif(self.current_token.tok == T_ID):
                 self.buildIDStatement()
             else:
+                print(self.current_token)
                 throw(UnkownStatementInitiator(self.current_token.start,self.current_token.end,self.current_token.value))
 
 
