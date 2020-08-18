@@ -2,38 +2,37 @@
 
 var bruhman = 100;
 
-function bigfunc{
+function bigfunc (input){
 
     var beans = JOES_BEANS;
-    
+    beans = beans + input;
+    return beans;
 }
 
-function getNumber{
+function nothingfunction(){
 
+    var empty = 0;
+    var globaltest = joe;
 
+}
+
+function getNumber(){
+
+    
     return 36;
 
 
 }
 
 
-function main{
+function main(){
 
 
-    label top;
+    
 
     var factual_statement = true;
-    var notrue = false;
-    var ifstate = factual_statement || notrue;
-    if(ifstate,0){
-
-        > : bigfunc
-
-    };
-
-    var aldenForehead = getNumber();
-
-
+    
+    
 
 
 

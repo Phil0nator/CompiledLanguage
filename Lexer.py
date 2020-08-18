@@ -1,63 +1,8 @@
-import os
-import sys
-from preprocessor import *
+
+from Location import *
 from constants import *
-
-
-
-class Error:
-    def __init__(self, start, end, error, details):
-        self.start=start
-        self.end=end
-        self.error=error
-        self.details=details
-    def as_string(self):
-        result = f'{self.error}:{self.details}\n'
-        result += f'File : {cc["FILES"][len(cc["FILES"])-1-self.start.fn]}, line : {self.start.ln+1}'
-        return result
-
-def throw(e):
-    print(e.as_string())
-    exit(1)
-
-class UnexpectedTokenError(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Unexpected Token", details)
-
-
-
-class Location:
-    def __init__(self, idx, ln, col, fn, ftext):
-        self.idx=idx
-        self.ln = ln
-        self.col=col
-        self.fn=fn
-        self.ftext=ftext
-
-    def advance(self, current_char):
-        self.idx+=1
-        self.col+=1
-        if current_char == "\n":
-            self.ln+=1
-            self.col=0
-
-        return self
-
-    def copy(self):
-        return Location(self.idx,self.ln,self.col,self.fn,self.ftext)
-
-
-
-class Token:
-    def __init__(self, tok, value=None, start=None, end=None):
-        self.tok=tok
-        self.value=value
-        self.start = start
-        self.end = end
-    def __repr__(self):
-        if self.value:
-            return f'{self.tok} : {self.value}'
-        return f'{self.tok}'
+from Token import *
+from errors import *
 
 
 class Lexer:
@@ -167,10 +112,10 @@ class Lexer:
                 num+=self.current_char
             self.advance()
 
-            if(dots==0):
-                return Token(T_INT, value=int(num), start=start,end=self.loc)
-            else:
-                return Token(T_FLOAT,value=float(num), start=start,end=self.loc)
+        if(dots==0):
+            return Token(T_INT, value=int(num), start=start,end=self.loc)
+        else:
+            return Token(T_FLOAT,value=float(num), start=start,end=self.loc)
 
 
     def make_multichar(self):
@@ -216,6 +161,9 @@ class Lexer:
         
         if out in KEYWORDS:
             _type = T_KEYWORD
+            if(out == "true" or out == "false"):
+                _type = T_BOOLEAN
+                out = int(out=="true")
         else:
             _type = T_ID
 
@@ -224,72 +172,3 @@ class Lexer:
 
 
 
-
-
-cc = {}
-
-def main(file_to_compile):
-    
-    global cc
-    data = ""
-
-    
-
-
-    
-    cc["DEF"] = {}
-    cc["GL_VAR"] = []
-    cc["FILES"] = [sys.argv[1]]
-
-    with open(file_to_compile, "rb") as f:
-        data = f.read().decode()
-
-    data = pre_process(data,cc)
-    l = Lexer(0, data)
-    tokens, errors = l.make_tokens()
-    if(errors != None):
-        print(errors.as_string())
-        exit(1)
-    
-    print(tokens)
-
-
-    ############################################
-    # All tokens -> global variables
-    #       define global vars in bss, finals in .data
-    # Remaining tokens -> functions
-    #    for each function:
-    #       pusha
-    #       determine the total allocation space for function
-    #       
-    #       lines that start with keyword
-    #           if: cmp
-    #           var: allocator
-    #           while: cmp
-    #           for: cmp
-    #           call: fn
-    #           label: name
-    #           jump: label
-    #
-    #       lines that start with id
-    #           
-    #           variable assignment
-    #
-    #
-    #       Expressions:    
-    #
-    #           Only two term expressions allowed (excluding function calls)
-    #
-    #       return:
-    #           value returned by the function will be pushed
-    #
-    #
-    #############################################
-
-    
-    
-
-    
-    
-if( __name__ == "__main__"):
-    main(sys.argv[1])
