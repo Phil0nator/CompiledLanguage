@@ -87,7 +87,6 @@ top_stub = """
 ;PROGRAM START
 ;
 ;
-;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -119,6 +118,20 @@ ret
 
 """
 
+
+C_ASSEMBLE_LINK_RUN = "nasm -felf64 out.asm && gcc \"include/macro.c\" -Wimplicit-function-declaration out.o -no-pie  && ./a.out"
+C_ASSEMBLE = "nasm -felf64 out.asm"
+
+C_LINK = "gcc \"include/macro.c\" -Wimplicit-function-declaration out.o -no-pie -o **OUT**"
+
+
+def updateCommands(inp,outp):
+    global C_ASSEMBLE, C_LINK
+    C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"%outp)
+    
+    C_LINK = C_LINK.replace("out.o","\""+outp+".o"+"\"").replace("**OUT**",outp)
+
+    return [C_ASSEMBLE, C_LINK, "./%s"%"\""+outp+".o"+"\""]
 with open("include/io64.inc", "rb") as f:
     top_stub =top_stub.replace("&&IO64&&",f.read().decode())
 

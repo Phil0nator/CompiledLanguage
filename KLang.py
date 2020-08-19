@@ -18,10 +18,15 @@ from Function import *
 
 from Compiler import *
 
+import argparse as arg
+
+__fileinput__ = ""
+__fileoutput__ = ""
+__tonasm__ = False
+__autorun__ = False
 
 
-
-def main(file_to_compile):
+def main():
     
     global cc
     data = ""
@@ -36,8 +41,7 @@ def main(file_to_compile):
 
     
 
-
-    with open(file_to_compile, "rb") as f:
+    with open(__fileinput__, "rb") as f:
         data = f.read().decode()
 
     data = pre_process(data,cc)
@@ -60,9 +64,18 @@ def main(file_to_compile):
 
     
 
-    with open("out.asm", "wb") as f:
+    with open("%s.asm"%__fileoutput__, "wb") as f:
         f.write(asm.encode())
-        print(asm)
+    commands = updateCommands(__fileinput__, __fileoutput__)
+    os.system(commands[0] + " && " + commands[1])
+    os.remove(__fileoutput__+".o")
+
+    if(not __tonasm__):
+        os.remove("%s.asm"%__fileoutput__)
+
+
+    if(__autorun__):
+        os.system("./%s"%__fileoutput__)
 
     ############################################
     # All tokens -> global variables
@@ -101,10 +114,21 @@ def main(file_to_compile):
     #
     #############################################
 
-    
-    
 
-    
-    
+
+def handleArgs():
+    global __fileinput__,__fileoutput__,__tonasm__,__autorun__
+    parser = arg.ArgumentParser(description='Compile .smpl programs into either nasm assembly, or directly to an executable.')
+    parser.add_argument("-o", "--output", required=True)
+    parser.add_argument("-i", "--input", required=True)
+    parser.add_argument("-nasm", action="store_true", default=False)
+    parser.add_argument("-r", action="store_true", default=False)
+    args = parser.parse_args()
+    __fileinput__=args.input
+    __fileoutput__=args.output
+    __tonasm__=args.nasm
+    __autorun__=args.r
 if( __name__ == "__main__"):
-    main(sys.argv[1])
+    handleArgs()
+
+    main()
