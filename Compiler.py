@@ -85,7 +85,7 @@ class Compiler:
         for glob in self.globals[1] : #data:
             for g in glob:
                 if(isinstance(glob[g], str)):
-                    self._data += g+": db \""+glob[g]+"\", 0\n"
+                    self._data += g+": db `"+glob[g]+"`, 0\n"
                 else:
                     self._data += g+": db "+hex(glob[g])+"\n"
         self.main+="call m"

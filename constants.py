@@ -62,9 +62,9 @@ ID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 
 ESCAPE_CHARS = {
 
-    "n":"\n",
-    "t":"\t",
-    "\"":"\"",
+    "n":"\\n",
+    "t":"\\t",
+    "\"":" \\\" ",
     "\\":"\\"
 
 
@@ -112,7 +112,7 @@ CMAIN:
 mov rbp, rsp
 xor rax, rax
 &&TEXT&&
-
+NEWLINE
 ret
 
 

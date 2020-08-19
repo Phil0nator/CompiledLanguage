@@ -1,0 +1,22 @@
+
+var bruhman = 100;
+
+
+#include "include/prints.rud"
+#include "include/entryexit.rud"
+#include "include/memory.rud"
+
+function main(){
+
+    var test = 106;
+    print_integer(test);
+    test = test + 6;
+    print_integer(test);
+    print_string("Hello World");
+
+    exit(1);
+
+    print_two_formats("This is %s a value \n  %s", " < A STRING OF CHARACTERS >", " ( and another)" ) ;
+    
+
+}

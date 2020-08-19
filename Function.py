@@ -53,9 +53,12 @@ class Function:
         else:
             self.evaluateExpression(reg=parameter_registers[len(params)])
             params.append(parameter_registers[len(params)])
-            while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->":
+            while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->" and self.current_token.tok != T_EOL:
                 if(self.current_token.tok == T_COMMA):
                     self.advance()
+                    self.evaluateExpression(reg=parameter_registers[len(params)])
+                    params.append(parameter_registers[len(params)])
+                elif(self.current_token.tok == T_ID):
                     self.evaluateExpression(reg=parameter_registers[len(params)])
                     params.append(parameter_registers[len(params)])
                 else:
@@ -80,7 +83,7 @@ class Function:
                 throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value))
 
             if(self.compiler.globalExists( self.current_token.value ) ):
-                self.addline("mov %s,r8"% value_of_global(self.current_token.value) )
+                self.addline("mov %s,r8"% value_of_global(self.current_token.value, self.compiler) )
             else:
                 self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "r8"))
         for i in range(len(self.params)):

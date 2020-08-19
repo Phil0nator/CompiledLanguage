@@ -1005,7 +1005,10 @@ section .text
 
 
 section .data
-STRING_CONSTANT_0: db "Hello World", 0
+STRING_CONSTANT_0: db `Hello World`, 0
+STRING_CONSTANT_1: db `This is %s a value \n  %s`, 0
+STRING_CONSTANT_2: db ` < A STRING OF CHARACTERS >`, 0
+STRING_CONSTANT_3: db ` ( and another)`, 0
 
 
 
@@ -1060,6 +1063,147 @@ sub rsp, 0x0
 leave
 ret
 
+printformat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x0
+
+    
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (format)
+    mov     rsi, r10                 ; set 2nd parameter (current_number)
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    
+    
+
+
+leave
+ret
+
+print_two_formats:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x0
+
+    
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (value)
+    mov     rsi, r10                 ; set 2nd parameter (fa)
+    mov     rdx, r11                ; set 3rd parameter (fb)
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    
+    
+
+
+leave
+ret
+
+print_three_formats:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x0
+
+    
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (value)
+    mov     rsi, r10                 ; set 2nd parameter (fa)
+    mov     rdx, r11                ; set 3rd parameter (fb)
+    mov     rcx, r12                ; set 4th parameter (fc)
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    
+    
+
+
+leave
+ret
+
+exit:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x0
+
+    
+    
+    mov eax, 1  ; 1 = exit system call
+    mov rdi, r9 ; r9 = exit code given in parameter
+    int 0x80    ; interrupt
+    
+    
+
+
+leave
+ret
+
+Array:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x0
+
+
+
+
+
+
+
+leave
+ret
+
+alloc:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x0
+
+
+   
+   mov	rax, r9	 ;number of bytes to be reserved
+   mov	ebx, eax
+   mov	eax, 45		 ;sys_brk
+   int	80h
+	
+   cmp	eax, 0
+   jl	exit	;exit, if error 
+   mov	edi, eax	 ;EDI = highest available address
+   sub	edi, 4		 ;pointing to the last DWORD  
+   mov	ecx, 4096	 ;number of DWORDs allocated
+   xor	eax, eax	 ;clear eax
+   std			 ;backward
+   rep	stosd            ;repete for entire allocated area
+   cld			 ;put DF flag to normal state
+
+
+
+
+
+leave
+ret
+
 m:
 
 push rbp
@@ -1080,6 +1224,16 @@ call print_integer
 mov ebx, STRING_CONSTANT_0
 mov r9,rbx
 call print_string
+mov ebx, 0x1
+mov r9,rbx
+call exit
+mov ebx, STRING_CONSTANT_1
+mov r9,rbx
+mov ebx, STRING_CONSTANT_2
+mov r10,rbx
+mov ebx, STRING_CONSTANT_3
+mov r11,rbx
+call print_two_formats
 
 
 leave
@@ -1096,7 +1250,7 @@ mov rbp, rsp
 xor rax, rax
 mov DWORD [bruhman], 0x64
 call m
-
+NEWLINE
 ret
 
 
