@@ -1,6 +1,9 @@
-#include "standards.k"
 
 var bruhman = 100;
+
+#include "standards.k"
+
+
 
 function main(){
 

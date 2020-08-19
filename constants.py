@@ -48,7 +48,7 @@ TM_PP = "++"
 
 
 
-TM_ALL = "&|><=-!"
+TM_ALL = "&|><=-!+"
 
 
 
@@ -79,9 +79,16 @@ KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function",
 
 
 top_stub = """
-"""+"""%"""+"""include "io64.inc"
+&&IO64&&
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
+;PROGRAM START
+;
+;
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 section .data
@@ -111,6 +118,12 @@ ret
 
 
 """
+
+with open("include/io64.inc", "rb") as f:
+    top_stub =top_stub.replace("&&IO64&&",f.read().decode())
+
+
+
 
 parameter_registers = ["r9","r10","r11"]
 return_register = "r8"

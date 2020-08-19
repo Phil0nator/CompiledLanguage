@@ -98,11 +98,21 @@ class Function:
             self.advance()
             self.evaluateExpression(decl=self.getDeclarationByID(id))
             return
-
+        elif (self.current_token.tok == "++"):
+            self.advance()
+            self.addline(load_value_toreg(self.getDeclarationByID(id).offset,"eax"))
+            self.addline("inc eax")
+            self.addline(place_value_from_reg(self.getDeclarationByID(id).offset, "eax"))
+        elif (self.current_token.tok == "--"):
+            self.advance()
+            self.addline(load_value_toreg(self.getDeclarationByID(id).offset,"eax"))
+            self.addline("dec eax")
+            self.addline(place_value_from_reg(self.getDeclarationByID(id).offset, "eax"))
         elif (self.current_token.tok == T_OPENP):
             self.advance()
             self.buildFunctionCall(id)
         else:
+            print(self.current_token)
             throw(InvalidVariableAssignment(self.current_token.start,self.current_token.end,self.current_token.value))
 
 

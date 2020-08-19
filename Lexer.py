@@ -28,6 +28,8 @@ class Lexer:
                 self.fn+=1
                 self.loc.fn+=1
                 self.loc.ln = 0
+                self.loc.col = 0
+                
                 self.advance()
             elif self.current_char in T_NUMBERS:
                 tokens.append(self.make_number())

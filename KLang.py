@@ -34,6 +34,9 @@ def main(file_to_compile):
     cc["GL_VAR"] = []
     cc["FILES"] = [sys.argv[1]]
 
+    
+
+
     with open(file_to_compile, "rb") as f:
         data = f.read().decode()
 
