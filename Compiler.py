@@ -1,7 +1,7 @@
 from constants import *
 from Token import *
 from Function import *
-
+from Location import *
 
 class Compiler:
     def __init__(self, tokens):
@@ -23,6 +23,30 @@ class Compiler:
     #step through token by token, and organize the program into functions and globals
     """
     def fill_info(self):
+
+
+        #move constant strings to .data
+        
+        counter = 0
+        i=0
+        while(i < len(self.tokens)):
+            tok = self.tokens[i]
+            if(tok.value == "__asm"):
+                i+=3
+                continue
+            
+            if(tok.tok == T_STRING):
+                
+                tok.tok = T_ID
+                value = tok.value
+                tok.value = "STRING_CONSTANT_"+str(counter)
+                
+                self.globals[1].append({"STRING_CONSTANT_"+str(counter): value})
+                counter += 1
+            i+=1
+
+
+
         while self.current_token.tok != T_EOF:
             
             if(self.current_token.tok == T_EOL):
@@ -60,7 +84,10 @@ class Compiler:
         
         for glob in self.globals[1] : #data:
             for g in glob:
-                self._data += g+": db "+hex(glob[g])
+                if(isinstance(glob[g], str)):
+                    self._data += g+": db \""+glob[g]+"\", 0\n"
+                else:
+                    self._data += g+": db "+hex(glob[g])+"\n"
         self.main+="call m"
 
 
@@ -131,6 +158,14 @@ class Compiler:
         return False
 
     
+    def globalIsString(self, name):
+        for c in self.globals:
+            for glob in c:
+                for g in glob:
+                    if(g == name):
+                        return isinstance( glob[g], str)
+        return False
+
     """
     #Based on the current position, read the current line and identify a global variable
     """
@@ -170,7 +205,8 @@ class Compiler:
             for glob in catagory:
                 for g in glob:
                     if g == self.current_token.value:
-                        self.globals[int(isFinal)].append({id:catagory[glob][g]})
+                        
+                        self.globals[int(isFinal)].append({id:glob[g]})
                         self.advance() #EOL
                         self.advance()
                         return

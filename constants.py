@@ -31,6 +31,7 @@ T_KEYWORD = "KEYWORD"
 T_EOF = "EOF"
 T_COLON = ":"
 T_EOL = "EOL"
+T_EQUALS = "="
 
 #MULTICHAR
 
@@ -72,7 +73,8 @@ ESCAPE_CHARS = {
 
 #Keywords
 
-KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", "null", "nullptr", "return", "new", "__asm", "__c"]
+KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", \
+            "null", "nullptr", "return", "new", "__asm", "__c", "#include", "#define", "#ifdef", "#ifndef", "#else", "#endif"]
 
 
 
@@ -129,8 +131,11 @@ allocator_table = {
 def define_global(name):
     return name+": resb 0x4\n"
 
-def value_of_global(name):
+def value_of_global(name, comp):
+    if(comp.globalIsString(name)):
+        return name
     return "["+name+"]"
+
 
 def allocate(amt):
     return """

@@ -46,14 +46,13 @@ class Function:
 
         #collect parameters
         params = []
-        print(params)
 
         if(self.current_token.tok == T_CLOSEP): #No parameters
-            print("NO PARAMETER")
+            pass
+            
         else:
             self.evaluateExpression(reg=parameter_registers[len(params)])
             params.append(parameter_registers[len(params)])
-            
             while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->":
                 if(self.current_token.tok == T_COMMA):
                     self.advance()
@@ -65,14 +64,18 @@ class Function:
         #params are filled
         self.addline("call "+fn_name)
         
+        if(len(params) == 0):
+            for i in range(len(self.params)):
+                self.addline("pop %s"%parameter_registers[len(self.params)-(i+1)])
+            
+            
+
         if(self.current_token.tok == ")"):
             self.advance()#move past ')'
         
         
-        print(self.current_token)
         if(self.current_token.tok == "->"): #use return value
             self.advance()
-            print(self.current_token)
             if(self.current_token.tok != T_ID):
                 throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value))
 
@@ -80,13 +83,15 @@ class Function:
                 self.addline("mov %s,r8"% value_of_global(self.current_token.value) )
             else:
                 self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "r8"))
+        for i in range(len(self.params)):
+            self.addline("pop %s"%(parameter_registers[len(self.params)-(i+1)]))
+        
         self.advance() # end the line
 
     """
     #Construct a statement that starts with a T_ID (based on current position)
     """
     def buildIDStatement(self):
-        print(self.current_token)
         id = self.current_token.value
         self.advance()
         if(self.current_token.tok == "="):
@@ -165,14 +170,14 @@ class Function:
             elif(isinstance(expr[0], int)):
                 self.addline("mov ebx, "+hex(expr[0]))
             elif (self.compiler.globalExists( expr[0])):
-                self.addline("mov %s, %s"%("ebx",value_of_global(expr[0])))
+                self.addline("mov %s, %s"%("ebx",value_of_global(expr[0], self.compiler  )))
             elif (expr[0] == "rdi"):
                 self.addline("mov ebx, rdi")
             else:
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
             if(decl is not None): self.addline("mov DWORD [rbp-"+hex(decl.offset)+"], ebx")
             elif (reg is not None): self.addline(correct_mov(reg,"ebx"))
-            else: self.addline("mov %s, ebx"%value_of_global(glob))
+            else: self.addline("mov %s, ebx"%value_of_global(glob, self.compiler))
             return
 
 
@@ -189,7 +194,7 @@ class Function:
         elif(isinstance(expr[0], int)):
             self.addline(("mov %s, "+hex(expr[0]))%_reg)
         elif (self.compiler.globalExists( expr[0])):
-            self.addline("mov %s, %s"%(_reg,value_of_global(expr[0])))
+            self.addline("mov %s, %s"%(_reg,value_of_global(expr[0], self.compiler)))
         elif (expr[0] in parameter_registers):
             self.addline("mov rax,"+expr[0])
             if(_reg=="ebx"):
@@ -203,7 +208,7 @@ class Function:
         elif(isinstance(expr[2], int)):
             self.addline("mov ecx, "+hex(expr[2]))
         elif (self.compiler.globalExists( expr[2])):
-            self.addline("mov %s, %s"%("ecx",value_of_global(expr[2])))
+            self.addline("mov %s, %s"%("ecx",value_of_global(expr[2], self.compiler)))
         elif (expr[2] in parameter_registers):
             self.addline("mov rcx, "+expr[2])
         elif (expr[2] == "rdi"):
@@ -233,17 +238,17 @@ class Function:
         elif(expr[1] == "-"):
             self.addline("sub ebx, ecx")
         elif(expr[1] == "*"):
-            self.addline("mul ecx")
+            self.addline("imul ecx")
             outputreg = "eax"
         elif(expr[1] == "/"):
             self.addline("xor edx, edx")
-            self.addline("div ecx")
+            self.addline("idiv ecx")
             outputreg = "eax"
 
         if(decl is not None): self.addline("mov DWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
         elif (reg is not None): 
             self.addline(correct_mov(reg,outputreg))
-        else: self.addline("mov %s,%s"%(value_of_global(glob), outputreg))
+        else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), outputreg))
 
 
 
@@ -296,27 +301,23 @@ class Function:
 
     def buildReturnStatement(self):
         #current token will already be the return value
-        if(self.current_token.tok == T_INT):
-            self.addline("mov %s,%s"%(return_register, hex(self.current_token.value)))
-            self.advance()
-            
-        elif (self.current_token.tok == T_ID):
-            addr = self.getDeclarationByID(self.current_token.value).offset
-            self.addline(load_value_toreg(addr,"ecx")) #use ecx as buffer to maintain correct operation size
-            self.addline("mov %s, rcx"%return_register)
-            self.advance()
+        self.evaluateExpression(reg="r8")
         
-        else:
-            throw(InvalidExpressionComponent(self.current_token.start, self.current_token.end,self.current_token.value))
 
 
 
 
 
 
+    def buildAsmBlock(self):
+        if(self.current_token.tok != T_OSCOPE):
+            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value))
 
-
-
+        self.advance()
+        if(self.current_token.tok != T_STRING):
+            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value))
+        self.addline(self.current_token.value)
+        self.advance()
 
 
 
@@ -328,7 +329,10 @@ class Function:
         if(self.current_token.value == "return"):
             self.advance()
             self.buildReturnStatement()
-
+        if(self.current_token.value == "__asm"):
+            self.advance()
+            self.buildAsmBlock()
+            
         else:
             self.advance()
 

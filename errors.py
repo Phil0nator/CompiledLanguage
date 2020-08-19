@@ -61,3 +61,15 @@ class InvalidParameter(Error):
 class InvalidFunctionReturnDestination(Error):
     def __init__(self, start, end, details):
             super().__init__(start,end,"Invalid Function Return Destination", details)
+
+class EmptyIncludeStatement(Error):
+    def __init__(self, start, end, details):
+            super().__init__(start,end,"Empty Include Statement", details)
+
+class InvalidDefineDirective(Error):
+    def __init__(self, start, end, details):
+            super().__init__(start,end,"Invalid Define Directive", details)
+
+class InvalidASMBlock(Error):
+    def __init__(self, start, end, details):
+        super().__init__(start,end,"Invalid Assembly Block", details)

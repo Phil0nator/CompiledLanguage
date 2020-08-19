@@ -30,7 +30,7 @@ def main(file_to_compile):
 
 
     
-    cc["DEF"] = {}
+    cc["DEF"] = []
     cc["GL_VAR"] = []
     cc["FILES"] = [sys.argv[1]]
 

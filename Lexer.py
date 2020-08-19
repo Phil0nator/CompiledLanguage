@@ -136,7 +136,7 @@ class Lexer:
         start = self.loc.copy()
         self.advance()
         esc = False
-        while self.current_char != None and self.current_char != "!":
+        while self.current_char != None and self.current_char != "\"":
             if (self.current_char == "\\"):
                 esc=True
             else:
@@ -163,7 +163,7 @@ class Lexer:
             _type = T_KEYWORD
             if(out == "true" or out == "false"):
                 _type = T_BOOLEAN
-                out = int(out=="true")
+                out = -int(out=="true")
         else:
             _type = T_ID
 
