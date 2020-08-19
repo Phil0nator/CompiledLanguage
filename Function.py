@@ -38,17 +38,55 @@ class Function:
 
 
 
+    def buildFunctionCall(self, id):
+        fn_name = id
+        #first push the parameter registers in use:
+        for i in range(len(self.params)):
+            self.addline("push %s"%parameter_registers[i])
 
+        #collect parameters
+        params = []
+        print(params)
 
+        if(self.current_token.tok == T_CLOSEP): #No parameters
+            print("NO PARAMETER")
+        else:
+            self.evaluateExpression(reg=parameter_registers[len(params)])
+            params.append(parameter_registers[len(params)])
+            
+            while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->":
+                if(self.current_token.tok == T_COMMA):
+                    self.advance()
+                    self.evaluateExpression(reg=parameter_registers[len(params)])
+                    params.append(parameter_registers[len(params)])
+                else:
+                    throw(InvalidParameter(self.current_token.start,self.current_token.end,self.current_token.value))
 
+        #params are filled
+        self.addline("call "+fn_name)
+        
+        if(self.current_token.tok == ")"):
+            self.advance()#move past ')'
+        
+        
+        print(self.current_token)
+        if(self.current_token.tok == "->"): #use return value
+            self.advance()
+            print(self.current_token)
+            if(self.current_token.tok != T_ID):
+                throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value))
 
-
-
+            if(self.compiler.globalExists( self.current_token.value ) ):
+                self.addline("mov %s,r8"% value_of_global(self.current_token.value) )
+            else:
+                self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "r8"))
+        self.advance() # end the line
 
     """
     #Construct a statement that starts with a T_ID (based on current position)
     """
     def buildIDStatement(self):
+        print(self.current_token)
         id = self.current_token.value
         self.advance()
         if(self.current_token.tok == "="):
@@ -57,7 +95,8 @@ class Function:
             return
 
         elif (self.current_token.tok == T_OPENP):
-            pass
+            self.advance()
+            self.buildFunctionCall(id)
         else:
             throw(InvalidVariableAssignment(self.current_token.start,self.current_token.end,self.current_token.value))
 
@@ -72,6 +111,7 @@ class Function:
             if decl.name == name : return decl
         for p in self.params:
             if p == name : return parameter_registers[self.params.index(p)]
+        throw(UndefinedVariable(self.current_token.start,self.current_token.end,self.current_token.value))
         return None
 
 
@@ -89,7 +129,7 @@ class Function:
         #determine the contents of the expression:
         """
         while self.current_token.tok != None and self.current_token.tok != T_EOL and self.current_token.tok != T_CLOSEP:
-            if(self.current_token.tok == T_EOL): break
+            if(self.current_token.tok in T_EOL+T_COMMA): break
             
             if(self.current_token.tok == T_INT or self.current_token == T_FLOAT or self.current_token.tok == T_BOOLEAN):
                 expr.append(self.current_token.value)
@@ -116,7 +156,7 @@ class Function:
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
             #max expression size
             
-        if(self.current_token.tok == T_CLOSEP):
+        if(self.current_token.tok in T_CLOSEP+T_COMMA):
             self.advance()
         
         if(len(expr) == 1):
@@ -131,7 +171,7 @@ class Function:
             else:
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
             if(decl is not None): self.addline("mov DWORD [rbp-"+hex(decl.offset)+"], ebx")
-            elif (reg is not None): self.addline("mov %s, ebx"%reg)
+            elif (reg is not None): self.addline(correct_mov(reg,"ebx"))
             else: self.addline("mov %s, ebx"%value_of_global(glob))
             return
 
@@ -201,7 +241,8 @@ class Function:
             outputreg = "eax"
 
         if(decl is not None): self.addline("mov DWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
-        elif (reg is not None): self.addline("mov %s,%s"%(reg, outputreg.replace("e","r")))
+        elif (reg is not None): 
+            self.addline(correct_mov(reg,outputreg))
         else: self.addline("mov %s,%s"%(value_of_global(glob), outputreg))
 
 
@@ -229,7 +270,7 @@ class Function:
         self.advance()
         if(self.current_token.tok == T_EOL): #variable declaration without assignment
             self.appendDeclaration(id)
-            self.advance()
+            #self.advance()
             return
         
         if(self.current_token.tok == "="): #with assignment

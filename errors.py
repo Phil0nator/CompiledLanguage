@@ -54,3 +54,10 @@ class InvalidExpressionComponent(Error):
     def __init__(self, start, end, details):
             super().__init__(start,end,"Invalid Expression Component", details)
 
+class InvalidParameter(Error):
+    def __init__(self, start, end, details):
+            super().__init__(start,end,"Invalid Parameter", details)
+
+class InvalidFunctionReturnDestination(Error):
+    def __init__(self, start, end, details):
+            super().__init__(start,end,"Invalid Function Return Destination", details)

@@ -25,6 +25,10 @@ mov rbp, rsp
 sub rsp, 0x4
 mov ebx, 0x24
 mov DWORD [rbp-0x4], ebx
+push r9
+call getNumber
+mov rcx, r8
+mov DWORD [rbp-0x4], ecx
 mov ebx, 0x24
 mov ecx, 0x24
 sub ebx, ecx
@@ -43,7 +47,7 @@ mov ecx, DWORD [rbp-0x4]
 
     
 mov r8, rcx
-PRINT_DEC 4, r8
+
 
 leave
 ret
@@ -73,15 +77,40 @@ mov r8,0x24
 leave
 ret
 
-m:
+multiply:
 
 push rbp
 mov rbp, rsp
 sub rsp, 0x4
+mov rax,r9
+mov ebx, eax
+mov ecx, 0x19
+xor edx, edx
+div ecx
+mov DWORD [rbp-0x4], eax
+
+mov ecx, DWORD [rbp-0x4]
+
+    
+mov r8, rcx
+
+
+leave
+ret
+
+m:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
 mov ebx, 0x1
 mov DWORD [rbp-0x4], ebx
-mov r9, 24
-call bigfunc
+mov ebx, 0x19
+mov r9,rbx
+call multiply
+mov rcx, r8
+mov DWORD [rbp-0x8], ecx
+PRINT_DEC 4, ecx
 
 leave
 ret

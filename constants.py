@@ -72,7 +72,7 @@ ESCAPE_CHARS = {
 
 #Keywords
 
-KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", "null", "nullptr", "return"]
+KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", "null", "nullptr", "return", "new", "__asm", "__c"]
 
 
 
@@ -141,7 +141,28 @@ sub rsp, """+hex(amt)+"\n"
 def place_value(ptr, value):
     return """mov DWORD [rbp-"""+hex(ptr)+"""], """+hex(value)
 
+def place_value_from_reg(ptr, reg):
+    if(reg.startswith("e")):
+        return """mov DWORD [rbp-"""+hex(ptr)+"""], %s"""%reg
+    return ("""mov rcx, %s"""%reg)+"\nmov DWORD [rbp-"+hex(ptr)+"], ecx"
+
 def load_value_toreg(ptr,reg):
     return """
 mov %s, DWORD [rbp-%s]\n
     """%(reg,hex(ptr))
+
+def correct_mov(regdest, regsource):
+    if(regdest.startswith("e") and regsource.startswith("e")):
+        return "mov %s,%s"%(regdest,regsource)
+    if(regdest.startswith("e") and regsource.startswith("r")):
+        if(regsource[1] in "189"):
+            return "mov rcx, %s \nmov %s, ecx"%(regsource, regdest)
+        else:
+            return "mov %s,%s"%(regdest,regsource.replace("r","e"))
+    
+    if(regdest.startswith("r") and regsource.startswith("e")):
+        return "mov %s,%s"%(regdest, regsource.replace("e","r") )
+    
+    
+    return "mov %s,%s"%(regdest,regdest)
+
