@@ -1,10 +1,11 @@
 #include "include/prints.rud"
 
-final var __isincluded__MEMORY_ = 34598;
+final var __isincluded__MEMORY_ = 38598;
 
 function Array(len){
 
     var out;
+    len = len * 8;
     alloc(len)->out;
     return out;
 
@@ -13,41 +14,20 @@ function Array(len){
 function putValue(array, index, value){
     __asm{"
     mov rax, r11
-    mov DWORD [r9+r10], eax  
+    mov QWORD [r9+r10], rax  
     "}
 }
 function getValue(array, index){
 
     __asm{"
     
-    mov eax, DWORD [r9+r10]
+    mov rax, QWORD [r9+r10]
     mov r8, rax
     
     "}
 
 }
 
-function strAppend(stra, strb){
-
-    var lena;
-    var lenb;
-    strlen(stra)->lena;
-    strlen(strb)->lenb;
-    var newlen = lena+lenb;
-    var out;
-    reallocate(stra, newlen)->out;
-    __asm{"
-    mov rdi, r8 ;reallocated
-    mov rsi, r10;strb
-    call strcat 
-    sub rsp, 4
-    mov r8, rax
-    "}
-
-
-
-
-}
 
 function alloc(amt){
 
@@ -74,47 +54,6 @@ __asm{"
 
 
 
-function strcpy(destination, source){
-
-
-    __asm{"
-        
-        xor r8, r8
-        xor rax, rax
-        _strcpy_top_loop:
-        mov ax, word [r10 + r8]
-        cmp ax, 0
-        je _strcpy_end_loop
-        mov word [r9+r8],ax
-        inc r8
-        jmp _strcpy_top_loop
-        _strcpy_end_loop  :
-    
-    
-    "}
-
-}
-
-
-
-function strlen(ptr){
-
-    __asm{"
-    
-    xor r8,r8
-    _strlen_top_loop:
-    mov ax, word[r9+r8]
-    cmp ax,0
-    je _strlen_end_loop
-    inc r8
-    jmp _strlen_top_loop
-    
-    _strlen_end_loop:
-    "}
-
-
-}
-
 function memerror(error){
 
     print_string("Memory error encountered");
@@ -127,7 +66,10 @@ __asm{"
 
     mov rdi, r9
     call free
-    sub rsp, 4
+    xor r10, r10
+    xor r11, r11 ;gc
+    xor r12, r12
+    sub rsp,4
 
 "}
 
@@ -140,8 +82,14 @@ function reallocate(ptr, newsize){
         
         mov rdi, r9
         mov rsi, r10
+        xor r10, r10
+        xor r11, r11 ;gc
+        xor r12, r12
         call realloc
-        add rsp, 4
+        xor r10, r10
+        xor r11, r11 ;gc
+        xor r12, r12
+        sub rsp, 4
         mov r8, rax
         
         

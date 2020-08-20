@@ -147,7 +147,7 @@ class Preprocessor:
     def buildDefine(self):
         self.advance()
         if(self.current_token.tok != T_ID):
-            throw(InvalidDefineDirective(self.current_token.start.idx,self.current_token.end,self.current_token.value))
+            throw(InvalidDefinrdirective(self.current_token.start.idx,self.current_token.end,self.current_token.value))
         id = self.current_token.value
         self.advance()
         if(self.current_token.tok in T_INT+T_FLOAT+T_STRING+T_BOOLEAN):

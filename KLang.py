@@ -37,7 +37,7 @@ def main():
     
     cc["DEF"] = []
     cc["GL_VAR"] = []
-    cc["FILES"] = [sys.argv[1]]
+    cc["FILES"] = [__fileinput__]
 
     
 

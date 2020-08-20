@@ -53,7 +53,7 @@ TM_ALL = "&|><=-!+"
 
 
 #ID
-ID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+ID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_."
 
 
 
@@ -74,7 +74,8 @@ ESCAPE_CHARS = {
 #Keywords
 
 KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", \
-            "null", "nullptr", "return", "new", "__asm", "__c", "#include", "#define", "#ifdef", "#ifndef", "#else", "#endif"]
+            "null", "nullptr", "return", "new", "__asm", "__c", "#include", "#define", "#ifdef", "#ifndef", "#else", "#endif", \
+            "constructor"]
 
 
 
@@ -146,8 +147,8 @@ parameter_registers = ["r9","r10","r11","r12","r13","r14","r15"]
 return_register = "r8"
 
 int_allocator = 32
-int_allocator_ref = "DWORD"
-int_allocator_glob = "resb 4"
+int_allocator_ref = "QWORD"
+int_allocator_glob = "resb 8"
 
 
 
@@ -159,7 +160,7 @@ allocator_table = {
 
 }
 def define_global(name):
-    return name+": resb 0x4\n"
+    return name+": resb 0x8\n"
 
 def value_of_global(name, comp):
     if(comp.globalIsString(name)):
@@ -174,30 +175,18 @@ mov rbp, rsp
 sub rsp, """+hex(amt)+"\n"
 
 def place_value(ptr, value):
-    return """mov DWORD [rbp-"""+hex(ptr)+"""], """+hex(value)
+    return """mov QWORD [rbp-"""+hex(ptr)+"""], """+hex(value)
 
 def place_value_from_reg(ptr, reg):
     if(reg.startswith("e")):
-        return """mov DWORD [rbp-"""+hex(ptr)+"""], %s\n"""%reg
-    return ("""mov rcx, %s"""%reg)+"\nmov DWORD [rbp-"+hex(ptr)+"], ecx\n"
+        return """mov QWORD [rbp-"""+hex(ptr)+"""], %s\n"""%reg
+    return ("""mov rcx, %s"""%reg)+"\nmov QWORD [rbp-"+hex(ptr)+"], rcx\n"
 
 def load_value_toreg(ptr,reg):
     return """
-mov %s, DWORD [rbp-%s]\n
+mov %s, QWORD [rbp-%s]\n
     """%(reg,hex(ptr))
 
 def correct_mov(regdest, regsource):
-    if(regdest.startswith("e") and regsource.startswith("e")):
-        return "mov %s,%s"%(regdest,regsource)
-    if(regdest.startswith("e") and regsource.startswith("r")):
-        if(regsource[1] in "189"):
-            return "mov rcx, %s \nmov %s, ecx"%(regsource, regdest)
-        else:
-            return "mov %s,%s"%(regdest,regsource.replace("r","e"))
-    
-    if(regdest.startswith("r") and regsource.startswith("e")):
-        return "mov %s,%s"%(regdest, regsource.replace("e","r") )
-    
-    
-    return "mov %s,%s"%(regdest,regdest)
+    return "mov %s,%s"%(regdest,regsource)
 

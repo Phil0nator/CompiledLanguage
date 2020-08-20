@@ -5,7 +5,7 @@ function exit(code){
     __asm{"
     
     
-    mov eax, 1  ; 1 = exit system call
+    mov rax, 1  ; 1 = exit system call
     mov rdi, r9 ; r9 = exit code given in parameter
     int 0x80    ; interrupt
     
