@@ -1015,12 +1015,11 @@ section .text
 
 section .data
 STRING_CONSTANT_0: db `Memory error encountered`, 0
-STRING_CONSTANT_1: db `This is the test function`, 0
-STRING_CONSTANT_2: db `The number of commandline arguments is: %u`, 0
-STRING_CONSTANT_3: db ``, 0
-STRING_CONSTANT_4: db `Hello World`, 0
-STRING_CONSTANT_5: db `A string for testing purposes`, 0
-STRING_CONSTANT_6: db `, and this has been appended.`, 0
+STRING_CONSTANT_1: db `The number of commandline arguments is: %u`, 0
+STRING_CONSTANT_2: db ``, 0
+STRING_CONSTANT_3: db `Hello World`, 0
+STRING_CONSTANT_4: db `A string for testing purposes`, 0
+STRING_CONSTANT_5: db `, and this has been appended.`, 0
 __isincluded__MEMORY_: dd 0x8726
 
 
@@ -1470,19 +1469,6 @@ mov r8,rbx
 leave
 ret
 
-testfunction:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x0
-mov ebx, STRING_CONSTANT_1
-mov r9,rbx
-call print_string
-
-
-leave
-ret
-
 m:
 
 push rbp
@@ -1494,7 +1480,7 @@ mov rcx, r10
 mov DWORD [rbp-0x8], ecx
 push r9
 push r10
-mov ebx, STRING_CONSTANT_2
+mov ebx, STRING_CONSTANT_1
 mov r9,rbx
 mov ebx, DWORD [rbp-0x8]
 mov r10,rbx
@@ -1503,7 +1489,7 @@ pop r10
 pop r9
 push r9
 push r10
-mov ebx, STRING_CONSTANT_3
+mov ebx, STRING_CONSTANT_2
 mov r9,rbx
 call print_string
 pop r10
@@ -1530,14 +1516,14 @@ pop r10
 pop r9
 push r9
 push r10
-mov ebx, STRING_CONSTANT_4
+mov ebx, STRING_CONSTANT_3
 mov r9,rbx
 call print_string
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, STRING_CONSTANT_5
+mov ebx, STRING_CONSTANT_4
 mov r9,rbx
 call string
 mov rcx, r8
@@ -1556,7 +1542,7 @@ push r9
 push r10
 mov ebx, DWORD [rbp-0x10]
 mov r9,rbx
-mov ebx, STRING_CONSTANT_6
+mov ebx, STRING_CONSTANT_5
 mov r10,rbx
 call strAppend
 mov rcx, r8
@@ -1590,9 +1576,9 @@ pop r10
 pop r9
 push r9
 push r10
-call testfunction
-pop r10
-pop r9
+mov ebx, DWORD [rbp-0x14]
+mov r9,rbx
+call print_integer
 pop r10
 pop r9
 mov ebx, 0xa

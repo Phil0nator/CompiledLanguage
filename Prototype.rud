@@ -7,19 +7,12 @@ var bruhman = 100;
 #include "include/memory.rud"
 #include "include/string.rud"
 
-function testfunction(){
-
-
-    print_string("This is the test function");
-
-
-}
 
 function main(args, numargs){
 
 
     printformat("The number of commandline arguments is: %u", numargs);
-
+    
 
 
 
@@ -47,8 +40,7 @@ function main(args, numargs){
 
         t = i;
         print_integer(t);
-        testfunction();
-
+        print_integer(t);
 
     }
 
