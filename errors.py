@@ -48,7 +48,7 @@ class InvalidVariableAssignment(Error):
 
 class ExpressionOverflow(Error):
     def __init__(self, start, end, details):
-            super().__init__(start,end,"Expression too long (Use parenthesis to split up your expression)", details)
+            super().__init__(start,end,"Expression too long (Use parenthrsis to split up your expression)", details)
 
 class InvalidExpressionComponent(Error):
     def __init__(self, start, end, details):
@@ -66,7 +66,7 @@ class EmptyIncludeStatement(Error):
     def __init__(self, start, end, details):
             super().__init__(start,end,"Empty Include Statement", details)
 
-class InvalidDefineDirective(Error):
+class InvalidDefinrdirective(Error):
     def __init__(self, start, end, details):
             super().__init__(start,end,"Invalid Define Directive", details)
 

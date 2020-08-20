@@ -13,14 +13,14 @@ function Array(len){
 function putValue(array, index, value){
     __asm{"
     mov rax, r11
-    mov DWORD [r9+r10], eax  
+    mov QWORD [r9+r10], rax  
     "}
 }
 function getValue(array, index){
 
     __asm{"
     
-    mov eax, DWORD [r9+r10]
+    mov rax, QWORD [r9+r10]
     mov r8, rax
     
     "}

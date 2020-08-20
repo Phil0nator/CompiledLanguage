@@ -18,7 +18,7 @@ class Function:
         self.closer = "\nleave\nret\n"
         self.bodytext = ""
 
-        self.allocationCounter = 4 
+        self.allocationCounter = 8
         self.declarations = []
 
 
@@ -34,7 +34,7 @@ class Function:
     """
     def appendDeclaration(self, name):
         self.declarations.append(Declaration(name,self.allocationCounter))
-        self.allocationCounter+=4
+        self.allocationCounter+=8
 
 
 
@@ -106,14 +106,14 @@ class Function:
             return
         elif (self.current_token.tok == "++"):
             self.advance()
-            self.addline(load_value_toreg(self.getDeclarationByID(id).offset,"eax"))
-            self.addline("inc eax")
-            self.addline(place_value_from_reg(self.getDeclarationByID(id).offset, "eax"))
+            self.addline(load_value_toreg(self.getDeclarationByID(id).offset,"rax"))
+            self.addline("inc rax")
+            self.addline(place_value_from_reg(self.getDeclarationByID(id).offset, "rax"))
         elif (self.current_token.tok == "--"):
             self.advance()
-            self.addline(load_value_toreg(self.getDeclarationByID(id).offset,"eax"))
-            self.addline("dec eax")
-            self.addline(place_value_from_reg(self.getDeclarationByID(id).offset, "eax"))
+            self.addline(load_value_toreg(self.getDeclarationByID(id).offset,"rax"))
+            self.addline("dec rax")
+            self.addline(place_value_from_reg(self.getDeclarationByID(id).offset, "rax"))
         elif (self.current_token.tok == T_OPENP):
             self.advance()
             self.buildFunctionCall(id)
@@ -187,32 +187,32 @@ class Function:
         
         if(len(expr) == 1):
             if(isinstance(expr[0], Declaration )):
-                self.addline("mov ebx, DWORD [rbp-"+hex(expr[0].offset)+"]")
+                self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
             elif(isinstance(expr[0], int)):
-                self.addline("mov ebx, "+hex(expr[0]))
+                self.addline("mov rbx, "+hex(expr[0]))
             elif (self.compiler.globalExists( expr[0])):
-                self.addline("mov %s, %s"%("ebx",value_of_global(expr[0], self.compiler  )))
+                self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
             
             elif (expr[0] == "rdi"):
-                self.addline("mov ebx, rdi")
+                self.addline("mov rbx, rdi")
             else:
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
-            if(decl is not None): self.addline("mov DWORD [rbp-"+hex(decl.offset)+"], ebx")
-            elif (reg is not None): self.addline(correct_mov(reg,"ebx"))
-            else: self.addline("mov %s, ebx"%value_of_global(glob, self.compiler))
+            if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
+            elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
+            else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
             return
 
 
-        _reg = "ebx"
+        _reg = "rbx"
         if(str(expr[0]) in "*/"):
-            _reg="eax"
+            _reg="rax"
 
         """
 
         #Create assembly for the move
         """
         if(isinstance(expr[0], Declaration )):
-            self.addline(("mov %s, DWORD [rbp-"+hex(expr[0].offset)+"]")%_reg)
+            self.addline(("mov %s, QWORD [rbp-"+hex(expr[0].offset)+"]")%_reg)
         elif(isinstance(expr[0], int)):
             self.addline(("mov %s, "+hex(expr[0]))%_reg)
         elif (self.compiler.globalExists( expr[0])):
@@ -225,22 +225,22 @@ class Function:
                 self.addline("inc %s"%_reg)
             elif(expr[1] == "--"):
                 self.addline("dec %s"%_reg)
-            if(_reg != "ebx"):
-                self.addline("mov ebx, %s"%_reg)
-            if(decl is not None): self.addline("mov DWORD [rbp-%s], %s"%(hex(decl.offset), "ebx"))
+            if(_reg != "rbx"):
+                self.addline("mov rbx, %s"%_reg)
+            if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), "rbx"))
             elif (reg is not None): 
-                self.addline(correct_mov(reg,"ebx"))
-            else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), "ebx"))
+                self.addline(correct_mov(reg,"rbx"))
+            else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), "rbx"))
             return
 
 
         #move operand b into rcx reguardless
         if(isinstance(expr[2], Declaration )):
-            self.addline("mov ecx, DWORD [rbp-"+hex(expr[2].offset)+"]")
+            self.addline("mov rcx, QWORD [rbp-"+hex(expr[2].offset)+"]")
         elif(isinstance(expr[2], int)):
-            self.addline("mov ecx, "+hex(expr[2]))
+            self.addline("mov rcx, "+hex(expr[2]))
         elif (self.compiler.globalExists( expr[2])):
-            self.addline("mov %s, %s"%("ecx",value_of_global(expr[2], self.compiler)))
+            self.addline("mov %s, %s"%("rcx",value_of_global(expr[2], self.compiler)))
         
         elif (expr[2] == "rdi"):
             self.addline("mov rcx, rdi")
@@ -263,20 +263,20 @@ class Function:
         #Create assembly for the math, and the re-deposit
         """
         #perform arithmatic, and move result into decl
-        outputreg = "ebx"
+        outputreg = "rbx"
         if(expr[1] == "+"):
-            self.addline("add ebx, ecx")
+            self.addline("add rbx, rcx")
         elif(expr[1] == "-"):
-            self.addline("sub ebx, ecx")
+            self.addline("sub rbx, rcx")
         elif(expr[1] == "*"):
-            self.addline("imul ecx")
-            outputreg = "eax"
+            self.addline("imul rcx")
+            outputreg = "rax"
         elif(expr[1] == "/"):
-            self.addline("xor edx, edx")
-            self.addline("idiv ecx")
-            outputreg = "eax"
+            self.addline("xor rdx, rdx")
+            self.addline("idiv rcx")
+            outputreg = "rax"
 
-        if(decl is not None): self.addline("mov DWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
+        if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
         elif (reg is not None): 
             self.addline(correct_mov(reg,outputreg))
         else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), outputreg))
@@ -388,8 +388,8 @@ class Function:
         self.advance()#move past {
 
 
-        self.addline(load_value_toreg(maxdecl.offset,"edi"))
-        self.addline(load_value_toreg(decl.offset,"esi"))
+        self.addline(load_value_toreg(maxdecl.offset,"rdi"))
+        self.addline(load_value_toreg(decl.offset,"rsi"))
 
         self.addline("cmp rsi, rdi")
         self.addline("jl %s"%("__"+self.name+"__flp"+hex(decl.offset)))
@@ -427,15 +427,15 @@ class Function:
 
 
     def compile(self):
-        allocationoffset = len(self.params)*4
+        allocationoffset = len(self.params)*8
         for token in self.tokens:
             if(token.tok == T_KEYWORD and token.value == "var"):
-                allocationoffset += 4
+                allocationoffset += 8
 
         self.allocator = allocate(allocationoffset)
         for i in range(len(self.params)):
             self.appendDeclaration(self.params[i])
-            self.allocator += place_value_from_reg((i+1)*4,parameter_registers[i])
+            self.allocator += place_value_from_reg((i+1)*8,parameter_registers[i])
 
             
         self.bodytext = "%s%s"%(self.allocator,self.bodytext)

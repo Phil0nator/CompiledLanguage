@@ -80,14 +80,14 @@ class Compiler:
         for glob in self.globals[0] : #bss:
             for g in glob:
                 self._bss+=define_global(g)
-                self.main+="mov DWORD ["+g+"], "+hex(glob[g])+"\n"
+                self.main+="mov QWORD ["+g+"], "+hex(glob[g])+"\n"
         
         for glob in self.globals[1] : #data:
             for g in glob:
                 if(isinstance(glob[g], str)):
                     self._data += g+": db `"+glob[g]+"`, 0\n"
                 else:
-                    self._data += g+": dd "+hex(glob[g])+"\n"
+                    self._data += g+": dq "+hex(glob[g])+"\n"
         self.main+="call m"
 
 
@@ -106,7 +106,7 @@ class Compiler:
             throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
 
         self.advance()
-        #closing parenthesis, or parameters
+        #closing parenthrsis, or parameters
         params = []
         if(self.current_token.tok != T_CLOSEP):
             #parameters

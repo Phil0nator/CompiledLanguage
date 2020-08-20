@@ -46,13 +46,11 @@ CEXTERN get_stdin
 CEXTERN get_stdout
 
 
-
 CEXTERN malloc
+CEXTERN strcat
 CEXTERN realloc
 CEXTERN calloc
 CEXTERN free
-CEXTERN strlen
-CEXTERN strcat
 
 ; Make stack be 16 bytes aligned
 %macro ALIGN_STACK 0.nolist
@@ -1020,12 +1018,12 @@ STRING_CONSTANT_2: db ``, 0
 STRING_CONSTANT_3: db `Hello World`, 0
 STRING_CONSTANT_4: db `A string for testing purposes`, 0
 STRING_CONSTANT_5: db `, and this has been appended.`, 0
-__isincluded__MEMORY_: dd 0x8726
+__isincluded__MEMORY_: dq 0x8726
 
 
 
 section .bss
-bruhman: resb 0x4
+bruhman: resb 0x8
 
 
 
@@ -1037,9 +1035,9 @@ print_char:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
+sub rsp, 0x8
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 
     PRINT_CHAR r9
     NEWLINE
@@ -1053,9 +1051,9 @@ print_string:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
+sub rsp, 0x8
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 
     PRINT_STRING [r9]
     NEWLINE
@@ -1069,9 +1067,9 @@ print_integer:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
+sub rsp, 0x8
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 
     PRINT_DEC 4, r9
     NEWLINE
@@ -1085,11 +1083,11 @@ printformat:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 mov rcx, r10
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 
     
     push rax
@@ -1114,13 +1112,13 @@ print_two_formats:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0xc
+sub rsp, 0x18
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 mov rcx, r10
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 mov rcx, r11
-mov DWORD [rbp-0xc], ecx
+mov QWORD [rbp-0x18], rcx
 
     
     push rax
@@ -1146,13 +1144,13 @@ exit:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
+sub rsp, 0x8
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 
     
     
-    mov eax, 1  ; 1 = exit system call
+    mov rax, 1  ; 1 = exit system call
     mov rdi, r9 ; r9 = exit code given in parameter
     int 0x80    ; interrupt
     
@@ -1166,18 +1164,18 @@ Array:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 push r9
-mov ebx, DWORD [rbp-0x4]
+mov rbx, QWORD [rbp-0x8]
 mov r9,rbx
 call alloc
 mov rcx, r8
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 
 pop r9
-mov ebx, DWORD [rbp-0x8]
+mov rbx, QWORD [rbp-0x10]
 mov r8,rbx
 
 
@@ -1188,16 +1186,16 @@ putValue:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0xc
+sub rsp, 0x18
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 mov rcx, r10
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 mov rcx, r11
-mov DWORD [rbp-0xc], ecx
+mov QWORD [rbp-0x18], rcx
 
     mov rax, r11
-    mov DWORD [r9+r10], eax  
+    mov QWORD [r9+r10], rax  
     
 
 
@@ -1208,14 +1206,14 @@ getValue:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 mov rcx, r10
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 
     
-    mov eax, DWORD [r9+r10]
+    mov rax, QWORD [r9+r10]
     mov r8, rax
     
     
@@ -1228,44 +1226,44 @@ strAppend:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 0x30
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 mov rcx, r10
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 push r9
 push r10
-mov ebx, DWORD [rbp-0x4]
+mov rbx, QWORD [rbp-0x8]
 mov r9,rbx
 call strlen
 mov rcx, r8
-mov DWORD [rbp-0xc], ecx
+mov QWORD [rbp-0x18], rcx
 
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, DWORD [rbp-0x8]
+mov rbx, QWORD [rbp-0x10]
 mov r9,rbx
 call strlen
 mov rcx, r8
-mov DWORD [rbp-0x10], ecx
+mov QWORD [rbp-0x20], rcx
 
 pop r10
 pop r9
-mov ebx, DWORD [rbp-0xc]
-mov ecx, DWORD [rbp-0x10]
-add ebx, ecx
-mov DWORD [rbp-0x14], ebx
+mov rbx, QWORD [rbp-0x18]
+mov rcx, QWORD [rbp-0x20]
+add rbx, rcx
+mov QWORD [rbp-0x28], rbx
 push r9
 push r10
-mov ebx, DWORD [rbp-0x4]
+mov rbx, QWORD [rbp-0x8]
 mov r9,rbx
-mov ebx, DWORD [rbp-0x14]
+mov rbx, QWORD [rbp-0x28]
 mov r10,rbx
 call reallocate
 mov rcx, r8
-mov DWORD [rbp-0x18], ecx
+mov QWORD [rbp-0x30], rcx
 
 pop r10
 pop r9
@@ -1285,9 +1283,9 @@ alloc:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
+sub rsp, 0x8
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 
 
    xor r11, r11
@@ -1314,11 +1312,11 @@ strcpy:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 mov rcx, r10
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 
         
         xor r8, r8
@@ -1343,9 +1341,9 @@ strlen:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
+sub rsp, 0x8
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 
     
     xor r8,r8
@@ -1367,16 +1365,16 @@ memerror:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
+sub rsp, 0x8
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 push r9
-mov ebx, STRING_CONSTANT_0
+mov rbx, STRING_CONSTANT_0
 mov r9,rbx
 call print_string
 pop r9
 push r9
-mov ebx, DWORD [rbp-0x4]
+mov rbx, QWORD [rbp-0x8]
 mov r9,rbx
 call exit
 pop r9
@@ -1389,9 +1387,9 @@ destroy:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
+sub rsp, 0x8
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 
 
     mov rdi, r9
@@ -1408,11 +1406,11 @@ reallocate:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 mov rcx, r10
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 
         
         mov rdi, r9
@@ -1432,37 +1430,37 @@ string:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0xc
+sub rsp, 0x18
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 push r9
-mov ebx, DWORD [rbp-0x4]
+mov rbx, QWORD [rbp-0x8]
 mov r9,rbx
 call strlen
 mov rcx, r8
-mov DWORD [rbp-0xc], ecx
+mov QWORD [rbp-0x18], rcx
 
 pop r9
-mov ebx, DWORD [rbp-0xc]
-mov ecx, 0x1
-add ebx, ecx
-mov DWORD [rbp-0xc], ebx
+mov rbx, QWORD [rbp-0x18]
+mov rcx, 0x1
+add rbx, rcx
+mov QWORD [rbp-0x18], rbx
 push r9
-mov ebx, DWORD [rbp-0xc]
+mov rbx, QWORD [rbp-0x18]
 mov r9,rbx
 call Array
 mov rcx, r8
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 
 pop r9
 push r9
-mov ebx, DWORD [rbp-0x8]
+mov rbx, QWORD [rbp-0x10]
 mov r9,rbx
-mov ebx, DWORD [rbp-0x4]
+mov rbx, QWORD [rbp-0x8]
 mov r10,rbx
 call strcpy
 pop r9
-mov ebx, DWORD [rbp-0x8]
+mov rbx, QWORD [rbp-0x10]
 mov r8,rbx
 
 
@@ -1473,129 +1471,129 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 0x30
 mov rcx, r9
-mov DWORD [rbp-0x4], ecx
+mov QWORD [rbp-0x8], rcx
 mov rcx, r10
-mov DWORD [rbp-0x8], ecx
+mov QWORD [rbp-0x10], rcx
 push r9
 push r10
-mov ebx, STRING_CONSTANT_1
+mov rbx, STRING_CONSTANT_1
 mov r9,rbx
-mov ebx, DWORD [rbp-0x8]
+mov rbx, QWORD [rbp-0x10]
 mov r10,rbx
 call printformat
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, STRING_CONSTANT_2
+mov rbx, STRING_CONSTANT_2
 mov r9,rbx
 call print_string
 pop r10
 pop r9
-mov ebx, 0x6a
-mov DWORD [rbp-0xc], ebx
+mov rbx, 0x6a
+mov QWORD [rbp-0x18], rbx
 push r9
 push r10
-mov ebx, DWORD [rbp-0xc]
+mov rbx, QWORD [rbp-0x18]
 mov r9,rbx
 call print_integer
 pop r10
 pop r9
-mov ebx, DWORD [rbp-0xc]
-mov ecx, 0x6
-add ebx, ecx
-mov DWORD [rbp-0xc], ebx
+mov rbx, QWORD [rbp-0x18]
+mov rcx, 0x6
+add rbx, rcx
+mov QWORD [rbp-0x18], rbx
 push r9
 push r10
-mov ebx, DWORD [rbp-0xc]
+mov rbx, QWORD [rbp-0x18]
 mov r9,rbx
 call print_integer
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, STRING_CONSTANT_3
+mov rbx, STRING_CONSTANT_3
 mov r9,rbx
 call print_string
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, STRING_CONSTANT_4
+mov rbx, STRING_CONSTANT_4
 mov r9,rbx
 call string
 mov rcx, r8
-mov DWORD [rbp-0x10], ecx
+mov QWORD [rbp-0x20], rcx
 
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, DWORD [rbp-0x10]
+mov rbx, QWORD [rbp-0x20]
 mov r9,rbx
 call print_string
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, DWORD [rbp-0x10]
+mov rbx, QWORD [rbp-0x20]
 mov r9,rbx
-mov ebx, STRING_CONSTANT_5
+mov rbx, STRING_CONSTANT_5
 mov r10,rbx
 call strAppend
 mov rcx, r8
-mov DWORD [rbp-0x10], ecx
+mov QWORD [rbp-0x20], rcx
 
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, DWORD [rbp-0x10]
+mov rbx, QWORD [rbp-0x20]
 mov r9,rbx
 call print_string
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, DWORD [rbp-0x10]
+mov rbx, QWORD [rbp-0x20]
 mov r9,rbx
 call destroy
 pop r10
 pop r9
-__m__flp0x18:
-mov ebx, DWORD [rbp-0x18]
-mov DWORD [rbp-0x14], ebx
+__m__flp0x30:
+mov rbx, QWORD [rbp-0x30]
+mov QWORD [rbp-0x28], rbx
 push r9
 push r10
-mov ebx, DWORD [rbp-0x14]
+mov rbx, QWORD [rbp-0x28]
 mov r9,rbx
 call print_integer
 pop r10
 pop r9
 push r9
 push r10
-mov ebx, DWORD [rbp-0x14]
+mov rbx, QWORD [rbp-0x28]
 mov r9,rbx
 call print_integer
 pop r10
 pop r9
-mov ebx, 0xa
-mov DWORD [rbp-0x1c], ebx
-mov ebx, DWORD [rbp-0x18]
-inc ebx
-mov DWORD [rbp-0x18], ebx
+mov rbx, 0xa
+mov QWORD [rbp-0x38], rbx
+mov rbx, QWORD [rbp-0x30]
+inc rbx
+mov QWORD [rbp-0x30], rbx
 
-mov edi, DWORD [rbp-0x1c]
+mov rdi, QWORD [rbp-0x38]
 
     
 
-mov esi, DWORD [rbp-0x18]
+mov rsi, QWORD [rbp-0x30]
 
     
 cmp rsi, rdi
-jl __m__flp0x18
+jl __m__flp0x30
 
 
 
@@ -1615,7 +1613,7 @@ xor rax, rax
 
 mov r9, rsi     ;commandline args
 mov r10, rdi
-mov DWORD [bruhman], 0x64
+mov QWORD [bruhman], 0x64
 call m
 NEWLINE
 ret
