@@ -87,7 +87,7 @@ class Compiler:
                 if(isinstance(glob[g], str)):
                     self._data += g+": db `"+glob[g]+"`, 0\n"
                 else:
-                    self._data += g+": db "+hex(glob[g])+"\n"
+                    self._data += g+": dd "+hex(glob[g])+"\n"
         self.main+="call m"
 
 

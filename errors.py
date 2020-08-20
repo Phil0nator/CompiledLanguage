@@ -73,3 +73,11 @@ class InvalidDefineDirective(Error):
 class InvalidASMBlock(Error):
     def __init__(self, start, end, details):
         super().__init__(start,end,"Invalid Assembly Block", details)
+
+class InvalidForBlockInit(Error):
+    def __init__(self, start, end, details):
+        super().__init__(start,end,"Invalid For Block Header", details)
+
+class VariableReDeclaration(Error):
+    def __init__(self, start, end, details):
+        super().__init__(start,end,"Variable redeclared before leaving scope", details)

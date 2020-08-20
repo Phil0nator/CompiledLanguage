@@ -111,6 +111,10 @@ global CMAIN
 CMAIN:
 mov rbp, rsp
 xor rax, rax
+
+
+mov r9, rsi     ;commandline args
+mov r10, rdi
 &&TEXT&&
 NEWLINE
 ret
@@ -138,7 +142,7 @@ with open("include/io64.inc", "rb") as f:
 
 
 
-parameter_registers = ["r9","r10","r11"]
+parameter_registers = ["r9","r10","r11","r12","r13","r14","r15"]
 return_register = "r8"
 
 int_allocator = 32
@@ -174,8 +178,8 @@ def place_value(ptr, value):
 
 def place_value_from_reg(ptr, reg):
     if(reg.startswith("e")):
-        return """mov DWORD [rbp-"""+hex(ptr)+"""], %s"""%reg
-    return ("""mov rcx, %s"""%reg)+"\nmov DWORD [rbp-"+hex(ptr)+"], ecx"
+        return """mov DWORD [rbp-"""+hex(ptr)+"""], %s\n"""%reg
+    return ("""mov rcx, %s"""%reg)+"\nmov DWORD [rbp-"+hex(ptr)+"], ecx\n"
 
 def load_value_toreg(ptr,reg):
     return """

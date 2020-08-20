@@ -1,0 +1,18 @@
+#include "include/memory.rud"
+
+
+function string(source){
+
+
+    var out;
+    var len;
+    
+    strlen(source)->len;
+    len = len + 1;
+    Array(len)->out;
+    strcpy(out,source);
+    return out;
+    
+
+}
+

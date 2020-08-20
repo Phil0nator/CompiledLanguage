@@ -61,6 +61,9 @@ class Function:
                 elif(self.current_token.tok == T_ID):
                     self.evaluateExpression(reg=parameter_registers[len(params)])
                     params.append(parameter_registers[len(params)])
+                elif (self.current_token.tok == T_INT or self.current_token.tok == T_FLOAT):
+                    self.evaluateExpression(reg=parameter_registers[len(params)])
+                    params.append(parameter_registers[len(params)])
                 else:
                     throw(InvalidParameter(self.current_token.start,self.current_token.end,self.current_token.value))
 
@@ -129,7 +132,6 @@ class Function:
             if decl.name == name : return decl
         for p in self.params:
             if p == name : return parameter_registers[self.params.index(p)]
-        throw(UndefinedVariable(self.current_token.start,self.current_token.end,self.current_token.value))
         return None
 
 
@@ -137,6 +139,11 @@ class Function:
 
     """
     #Based on current position, generate assembly to: evaluate an expression, and place its final result into the variable described by decl 
+
+
+    TEST: removed parameter registers by pre-allocating them as declarations at the begining of a function
+
+
     """
     def evaluateExpression(self, decl=None, reg=None, glob=None):
         expr = [] #holds the expression
@@ -158,11 +165,12 @@ class Function:
                 if(not self.compiler.globalExists(self.current_token.value)):
                     expr.append(self.getDeclarationByID(self.current_token.value))
                     self.advance()
+                
                 else:
                     expr.append(self.current_token.value)
                     self.advance()
 
-            elif(self.current_token.tok in "+-/*&!|%"):
+            elif(self.current_token.tok in "++--/*&!|%"):
 
                 expr.append(self.current_token.tok)
                 self.advance()
@@ -184,6 +192,7 @@ class Function:
                 self.addline("mov ebx, "+hex(expr[0]))
             elif (self.compiler.globalExists( expr[0])):
                 self.addline("mov %s, %s"%("ebx",value_of_global(expr[0], self.compiler  )))
+            
             elif (expr[0] == "rdi"):
                 self.addline("mov ebx, rdi")
             else:
@@ -208,11 +217,21 @@ class Function:
             self.addline(("mov %s, "+hex(expr[0]))%_reg)
         elif (self.compiler.globalExists( expr[0])):
             self.addline("mov %s, %s"%(_reg,value_of_global(expr[0], self.compiler)))
-        elif (expr[0] in parameter_registers):
-            self.addline("mov rax,"+expr[0])
-            if(_reg=="ebx"):
-                self.addline("mov ebx, eax")
         
+        
+
+        if(len(expr) == 2):
+            if(expr[1] == "++"):
+                self.addline("inc %s"%_reg)
+            elif(expr[1] == "--"):
+                self.addline("dec %s"%_reg)
+            if(_reg != "ebx"):
+                self.addline("mov ebx, %s"%_reg)
+            if(decl is not None): self.addline("mov DWORD [rbp-%s], %s"%(hex(decl.offset), "ebx"))
+            elif (reg is not None): 
+                self.addline(correct_mov(reg,"ebx"))
+            else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), "ebx"))
+            return
 
 
         #move operand b into rcx reguardless
@@ -222,8 +241,7 @@ class Function:
             self.addline("mov ecx, "+hex(expr[2]))
         elif (self.compiler.globalExists( expr[2])):
             self.addline("mov %s, %s"%("ecx",value_of_global(expr[2], self.compiler)))
-        elif (expr[2] in parameter_registers):
-            self.addline("mov rcx, "+expr[2])
+        
         elif (expr[2] == "rdi"):
             self.addline("mov rcx, rdi")
         else:
@@ -285,6 +303,8 @@ class Function:
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
             
         id = self.current_token.value
+        if(self.getDeclarationByID(id) != None):
+            throw(VariableReDeclaration(self.current_token.start,self.current_token.end,self.current_token.value))
         self.advance()
         if(self.current_token.tok == T_EOL): #variable declaration without assignment
             self.appendDeclaration(id)
@@ -333,19 +353,68 @@ class Function:
         self.advance()
 
 
+    def buildForBlock(self):
+        if(self.current_token.tok != T_OPENP):
+            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value))
+        
+        self.advance()
+        if(self.current_token.tok != T_KEYWORD or self.current_token.value != "var"):
+            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value))
+
+        
+        
+
+
+        self.buildVariableDeclaration() #determine incrementor
+        decl = self.declarations[len(self.declarations)-1]
+        self.addline("__"+self.name+"__flp"+hex(decl.offset)+":")
+
+        beginidx = len(self.bodytext) #anything added after this point, and before doCompilations will go at the end of the loop's asm
+        
+        self.appendDeclaration("__%s__flp_maxnum%s"%(self.name,hex(decl.offset)))
+        maxdecl = self.declarations[len(self.declarations)-1]
+        self.advance()
+
+        self.evaluateExpression(decl=maxdecl)
+        self.advance()
+
+        
+        self.evaluateExpression(decl=decl)
+
+        
+        
+        if(self.current_token.tok != T_OSCOPE):
+            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value))
+        self.advance()#move past {
+
+
+        self.addline(load_value_toreg(maxdecl.offset,"edi"))
+        self.addline(load_value_toreg(decl.offset,"esi"))
+
+        self.addline("cmp rsi, rdi")
+        self.addline("jl %s"%("__"+self.name+"__flp"+hex(decl.offset)))
+
+        header = self.bodytext[beginidx:]
+        self.bodytext = self.bodytext[:beginidx]
+        self.doCompilations(forblock=True)
+        self.addline(header)
+        
+    
 
 
     def buildKeywordStatement(self):
 
         if(self.current_token.value == "var"):
             self.buildVariableDeclaration()
-        if(self.current_token.value == "return"):
+        elif(self.current_token.value == "return"):
             self.advance()
             self.buildReturnStatement()
-        if(self.current_token.value == "__asm"):
+        elif(self.current_token.value == "__asm"):
             self.advance()
             self.buildAsmBlock()
-            
+        elif(self.current_token.value == "for"):
+            self.advance()
+            self.buildForBlock()
         else:
             self.advance()
 
@@ -358,16 +427,35 @@ class Function:
 
 
     def compile(self):
-        allocationoffset = 0
+        allocationoffset = len(self.params)*4
         for token in self.tokens:
             if(token.tok == T_KEYWORD and token.value == "var"):
                 allocationoffset += 4
 
         self.allocator = allocate(allocationoffset)
-        self.bodytext = "%s%s"%(self.allocator,self.bodytext)
+        for i in range(len(self.params)):
+            self.appendDeclaration(self.params[i])
+            self.allocator += place_value_from_reg((i+1)*4,parameter_registers[i])
 
+            
+        self.bodytext = "%s%s"%(self.allocator,self.bodytext)
+        self.doCompilations()
+
+        
+
+
+    def doCompilations(self, forblock=False):
+        opens = 0
         while self.current_token != None and self.current_token.tok != T_EOF:
             if(self.current_token.tok in T_EOL+T_OPENP+T_OSCOPE+T_CLSCOPE+T_COLON):
+                if(self.current_token.tok == T_OSCOPE):
+                    opens+=1
+                elif (self.current_token.tok == T_CLSCOPE):
+                    opens-=1
+
+                if(opens <= -1):
+                    return
+
                 self.advance()
             elif(self.current_token.tok == T_KEYWORD):
                 self.buildKeywordStatement()
@@ -376,9 +464,6 @@ class Function:
             else:
                 print(self.current_token)
                 throw(UnkownStatementInitiator(self.current_token.start,self.current_token.end,self.current_token.value))
-
-
-
 
     def getFinalText(self):
         return self.header+"\n"+self.bodytext+"\n"+self.closer+"\n"

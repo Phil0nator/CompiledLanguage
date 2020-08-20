@@ -115,12 +115,24 @@ class Preprocessor:
         self.ct_idx+=1
         self.current_token=self.tokens[self.ct_idx]
     
+    def fileExists(self, file):
+        for f in self.cc["FILES"]:
+            if f == file:
+                return True
+        return False 
+    
     def buildInclude(self):
         self.advance()
         if(self.current_token.tok != T_STRING):
             throw(EmptyIncludeStatement(self.current_token.start,self.current_token.end,self.current_token.value))
         
         file = self.current_token.value
+
+        if(self.fileExists(file)):
+            self.data=self.data.replace("#include \""+file+"\"", "",1)
+            self.advance()
+            return
+
         self.cc["FILES"].append(file)
         try:
             with open(file, "rb") as f:

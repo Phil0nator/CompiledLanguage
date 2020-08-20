@@ -44,6 +44,15 @@ CEXTERN fflush
 CEXTERN get_stdin
 CEXTERN get_stdout
 
+
+
+CEXTERN malloc
+CEXTERN realloc
+CEXTERN calloc
+CEXTERN free
+CEXTERN strlen
+CEXTERN strcat
+
 ; Make stack be 16 bytes aligned
 %macro ALIGN_STACK 0.nolist
     enter 0, 0

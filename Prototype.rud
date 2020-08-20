@@ -5,18 +5,52 @@ var bruhman = 100;
 #include "include/prints.rud"
 #include "include/entryexit.rud"
 #include "include/memory.rud"
+#include "include/string.rud"
 
-function main(){
+function testfunction(){
+
+
+    print_string("This is the test function");
+
+
+}
+
+function main(args, numargs){
+
+
+    printformat("The number of commandline arguments is: %u", numargs);
+
+
+
+
+    print_string("");
 
     var test = 106;
     print_integer(test);
     test = test + 6;
     print_integer(test);
-    print_string("Hello World");
+    print_string("Hello World");    
 
-    exit(1);
+    var teststring;
+    string("A string for testing purposes")->teststring;
+    print_string(teststring);
 
-    print_two_formats("This is %s a value \n  %s", " < A STRING OF CHARACTERS >", " ( and another)" ) ;
+
+    strAppend(teststring, ", and this has been appended.")->teststring;
+    print_string(teststring);
+
+
+    destroy(teststring);
     
+    var t;
+    for(var i; 10 ; i++){
+
+        t = i;
+        print_integer(t);
+        testfunction();
+
+
+    }
+
 
 }

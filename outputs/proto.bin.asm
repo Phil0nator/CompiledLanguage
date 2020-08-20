@@ -45,6 +45,15 @@ CEXTERN fflush
 CEXTERN get_stdin
 CEXTERN get_stdout
 
+
+
+CEXTERN malloc
+CEXTERN realloc
+CEXTERN calloc
+CEXTERN free
+CEXTERN strlen
+CEXTERN strcat
+
 ; Make stack be 16 bytes aligned
 %macro ALIGN_STACK 0.nolist
     enter 0, 0
@@ -1005,10 +1014,14 @@ section .text
 
 
 section .data
-STRING_CONSTANT_0: db `Hello World`, 0
-STRING_CONSTANT_1: db `This is %s a value \n  %s`, 0
-STRING_CONSTANT_2: db ` < A STRING OF CHARACTERS >`, 0
-STRING_CONSTANT_3: db ` ( and another)`, 0
+STRING_CONSTANT_0: db `Memory error encountered`, 0
+STRING_CONSTANT_1: db `This is the test function`, 0
+STRING_CONSTANT_2: db `The number of commandline arguments is: %u`, 0
+STRING_CONSTANT_3: db ``, 0
+STRING_CONSTANT_4: db `Hello World`, 0
+STRING_CONSTANT_5: db `A string for testing purposes`, 0
+STRING_CONSTANT_6: db `, and this has been appended.`, 0
+__isincluded__MEMORY_: dd 0x8726
 
 
 
@@ -1025,7 +1038,9 @@ print_char:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x0
+sub rsp, 0x4
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
 
     PRINT_CHAR r9
     NEWLINE
@@ -1039,7 +1054,9 @@ print_string:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x0
+sub rsp, 0x4
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
 
     PRINT_STRING [r9]
     NEWLINE
@@ -1053,7 +1070,9 @@ print_integer:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x0
+sub rsp, 0x4
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
 
     PRINT_DEC 4, r9
     NEWLINE
@@ -1067,7 +1086,11 @@ printformat:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x0
+sub rsp, 0x8
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+mov rcx, r10
+mov DWORD [rbp-0x8], ecx
 
     
     push rax
@@ -1092,7 +1115,13 @@ print_two_formats:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x0
+sub rsp, 0xc
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+mov rcx, r10
+mov DWORD [rbp-0x8], ecx
+mov rcx, r11
+mov DWORD [rbp-0xc], ecx
 
     
     push rax
@@ -1100,33 +1129,6 @@ sub rsp, 0x0
     mov     rdi, r9                ; set 1st parameter (value)
     mov     rsi, r10                 ; set 2nd parameter (fa)
     mov     rdx, r11                ; set 3rd parameter (fb)
-    xor     rax, rax                ; because printf is varargs
-
-    ; Stack is already aligned because we pushed three 8 byte registers
-    call    printf                  ; printf(format, current_number)
-
-    pop     rcx                     ; restore caller-save register
-    pop     rax                     ; restore caller-save register
-    
-    
-
-
-leave
-ret
-
-print_three_formats:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x0
-
-    
-    push rax
-    push rcx
-    mov     rdi, r9                ; set 1st parameter (value)
-    mov     rsi, r10                 ; set 2nd parameter (fa)
-    mov     rdx, r11                ; set 3rd parameter (fb)
-    mov     rcx, r12                ; set 4th parameter (fc)
     xor     rax, rax                ; because printf is varargs
 
     ; Stack is already aligned because we pushed three 8 byte registers
@@ -1145,7 +1147,9 @@ exit:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x0
+sub rsp, 0x4
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
 
     
     
@@ -1163,12 +1167,116 @@ Array:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x0
+sub rsp, 0x8
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+push r9
+mov ebx, DWORD [rbp-0x4]
+mov r9,rbx
+call alloc
+mov rcx, r8
+mov DWORD [rbp-0x8], ecx
+
+pop r9
+mov ebx, DWORD [rbp-0x8]
+mov r8,rbx
 
 
+leave
+ret
+
+putValue:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0xc
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+mov rcx, r10
+mov DWORD [rbp-0x8], ecx
+mov rcx, r11
+mov DWORD [rbp-0xc], ecx
+
+    mov rax, r11
+    mov DWORD [r9+r10], eax  
+    
 
 
+leave
+ret
 
+getValue:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+mov rcx, r10
+mov DWORD [rbp-0x8], ecx
+
+    
+    mov eax, DWORD [r9+r10]
+    mov r8, rax
+    
+    
+
+
+leave
+ret
+
+strAppend:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+mov rcx, r10
+mov DWORD [rbp-0x8], ecx
+push r9
+push r10
+mov ebx, DWORD [rbp-0x4]
+mov r9,rbx
+call strlen
+mov rcx, r8
+mov DWORD [rbp-0xc], ecx
+
+pop r10
+pop r9
+push r9
+push r10
+mov ebx, DWORD [rbp-0x8]
+mov r9,rbx
+call strlen
+mov rcx, r8
+mov DWORD [rbp-0x10], ecx
+
+pop r10
+pop r9
+mov ebx, DWORD [rbp-0xc]
+mov ecx, DWORD [rbp-0x10]
+add ebx, ecx
+mov DWORD [rbp-0x14], ebx
+push r9
+push r10
+mov ebx, DWORD [rbp-0x4]
+mov r9,rbx
+mov ebx, DWORD [rbp-0x14]
+mov r10,rbx
+call reallocate
+mov rcx, r8
+mov DWORD [rbp-0x18], ecx
+
+pop r10
+pop r9
+
+    mov rdi, r8 ;reallocated
+    mov rsi, r10;strb
+    call strcat 
+    sub rsp, 4
+    mov r8, rax
+    
 
 
 leave
@@ -1178,27 +1286,198 @@ alloc:
 
 push rbp
 mov rbp, rsp
+sub rsp, 0x4
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+
+
+   xor r11, r11
+   xor r12, r12
+   mov rdi, r9
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   add rsp, 4
+   test rax, rax ; check for error
+
+   mov byte[rax+r9], 0x0
+
+   mov r8, rax
+
+
+
+
+
+leave
+ret
+
+strcpy:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+mov rcx, r10
+mov DWORD [rbp-0x8], ecx
+
+        
+        xor r8, r8
+        xor rax, rax
+        _strcpy_top_loop:
+        mov ax, word [r10 + r8]
+        cmp ax, 0
+        je _strcpy_end_loop
+        mov word [r9+r8],ax
+        inc r8
+        jmp _strcpy_top_loop
+        _strcpy_end_loop  :
+    
+    
+    
+
+
+leave
+ret
+
+strlen:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x4
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+
+    
+    xor r8,r8
+    _strlen_top_loop:
+    mov ax, word[r9+r8]
+    cmp ax,0
+    je _strlen_end_loop
+    inc r8
+    jmp _strlen_top_loop
+    
+    _strlen_end_loop:
+    
+
+
+leave
+ret
+
+memerror:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x4
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+push r9
+mov ebx, STRING_CONSTANT_0
+mov r9,rbx
+call print_string
+pop r9
+push r9
+mov ebx, DWORD [rbp-0x4]
+mov r9,rbx
+call exit
+pop r9
+
+
+leave
+ret
+
+destroy:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x4
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+
+
+    mov rdi, r9
+    call free
+    sub rsp, 4
+
+
+
+
+leave
+ret
+
+reallocate:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+mov rcx, r10
+mov DWORD [rbp-0x8], ecx
+
+        
+        mov rdi, r9
+        mov rsi, r10
+        call realloc
+        add rsp, 4
+        mov r8, rax
+        
+        
+        
+
+
+leave
+ret
+
+string:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0xc
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+push r9
+mov ebx, DWORD [rbp-0x4]
+mov r9,rbx
+call strlen
+mov rcx, r8
+mov DWORD [rbp-0xc], ecx
+
+pop r9
+mov ebx, DWORD [rbp-0xc]
+mov ecx, 0x1
+add ebx, ecx
+mov DWORD [rbp-0xc], ebx
+push r9
+mov ebx, DWORD [rbp-0xc]
+mov r9,rbx
+call Array
+mov rcx, r8
+mov DWORD [rbp-0x8], ecx
+
+pop r9
+push r9
+mov ebx, DWORD [rbp-0x8]
+mov r9,rbx
+mov ebx, DWORD [rbp-0x4]
+mov r10,rbx
+call strcpy
+pop r9
+mov ebx, DWORD [rbp-0x8]
+mov r8,rbx
+
+
+leave
+ret
+
+testfunction:
+
+push rbp
+mov rbp, rsp
 sub rsp, 0x0
-
-
-   
-   mov	rax, r9	 ;number of bytes to be reserved
-   mov	ebx, eax
-   mov	eax, 45		 ;sys_brk
-   int	80h
-	
-   cmp	eax, 0
-   jl	exit	;exit, if error 
-   mov	edi, eax	 ;EDI = highest available address
-   sub	edi, 4		 ;pointing to the last DWORD  
-   mov	ecx, 4096	 ;number of DWORDs allocated
-   xor	eax, eax	 ;clear eax
-   std			 ;backward
-   rep	stosd            ;repete for entire allocated area
-   cld			 ;put DF flag to normal state
-
-
-
+mov ebx, STRING_CONSTANT_1
+mov r9,rbx
+call print_string
 
 
 leave
@@ -1208,32 +1487,130 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x4
-mov ebx, 0x6a
-mov DWORD [rbp-0x4], ebx
-mov ebx, DWORD [rbp-0x4]
+sub rsp, 0x18
+mov rcx, r9
+mov DWORD [rbp-0x4], ecx
+mov rcx, r10
+mov DWORD [rbp-0x8], ecx
+push r9
+push r10
+mov ebx, STRING_CONSTANT_2
 mov r9,rbx
-call print_integer
-mov ebx, DWORD [rbp-0x4]
-mov ecx, 0x6
-add ebx, ecx
-mov DWORD [rbp-0x4], ebx
-mov ebx, DWORD [rbp-0x4]
-mov r9,rbx
-call print_integer
-mov ebx, STRING_CONSTANT_0
+mov ebx, DWORD [rbp-0x8]
+mov r10,rbx
+call printformat
+pop r10
+pop r9
+push r9
+push r10
+mov ebx, STRING_CONSTANT_3
 mov r9,rbx
 call print_string
-mov ebx, 0x1
+pop r10
+pop r9
+mov ebx, 0x6a
+mov DWORD [rbp-0xc], ebx
+push r9
+push r10
+mov ebx, DWORD [rbp-0xc]
 mov r9,rbx
-call exit
-mov ebx, STRING_CONSTANT_1
+call print_integer
+pop r10
+pop r9
+mov ebx, DWORD [rbp-0xc]
+mov ecx, 0x6
+add ebx, ecx
+mov DWORD [rbp-0xc], ebx
+push r9
+push r10
+mov ebx, DWORD [rbp-0xc]
 mov r9,rbx
-mov ebx, STRING_CONSTANT_2
+call print_integer
+pop r10
+pop r9
+push r9
+push r10
+mov ebx, STRING_CONSTANT_4
+mov r9,rbx
+call print_string
+pop r10
+pop r9
+push r9
+push r10
+mov ebx, STRING_CONSTANT_5
+mov r9,rbx
+call string
+mov rcx, r8
+mov DWORD [rbp-0x10], ecx
+
+pop r10
+pop r9
+push r9
+push r10
+mov ebx, DWORD [rbp-0x10]
+mov r9,rbx
+call print_string
+pop r10
+pop r9
+push r9
+push r10
+mov ebx, DWORD [rbp-0x10]
+mov r9,rbx
+mov ebx, STRING_CONSTANT_6
 mov r10,rbx
-mov ebx, STRING_CONSTANT_3
-mov r11,rbx
-call print_two_formats
+call strAppend
+mov rcx, r8
+mov DWORD [rbp-0x10], ecx
+
+pop r10
+pop r9
+push r9
+push r10
+mov ebx, DWORD [rbp-0x10]
+mov r9,rbx
+call print_string
+pop r10
+pop r9
+push r9
+push r10
+mov ebx, DWORD [rbp-0x10]
+mov r9,rbx
+call destroy
+pop r10
+pop r9
+__m__flp0x18:
+mov ebx, DWORD [rbp-0x18]
+mov DWORD [rbp-0x14], ebx
+push r9
+push r10
+mov ebx, DWORD [rbp-0x14]
+mov r9,rbx
+call print_integer
+pop r10
+pop r9
+push r9
+push r10
+call testfunction
+pop r10
+pop r9
+pop r10
+pop r9
+mov ebx, 0xa
+mov DWORD [rbp-0x1c], ebx
+mov ebx, DWORD [rbp-0x18]
+inc ebx
+mov DWORD [rbp-0x18], ebx
+
+mov edi, DWORD [rbp-0x1c]
+
+    
+
+mov esi, DWORD [rbp-0x18]
+
+    
+cmp rsi, rdi
+jl __m__flp0x18
+
 
 
 leave
@@ -1248,6 +1625,10 @@ ret
 CMAIN:
 mov rbp, rsp
 xor rax, rax
+
+
+mov r9, rsi     ;commandline args
+mov r10, rdi
 mov DWORD [bruhman], 0x64
 call m
 NEWLINE
