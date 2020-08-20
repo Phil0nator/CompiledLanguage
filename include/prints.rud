@@ -12,7 +12,7 @@ function print_string(string){
 }
 function print_integer(number){
     __asm{"
-    PRINT_DEC 4, r9
+    PRINT_DEC 8, r9
     NEWLINE
     "}
 }

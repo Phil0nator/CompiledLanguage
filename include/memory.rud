@@ -1,6 +1,6 @@
 #include "include/prints.rud"
 
-final var __isincluded__MEMORY_ = 34598;
+final var __isincluded__MEMORY_ = 38598;
 
 function Array(len){
 
@@ -40,7 +40,7 @@ function strAppend(stra, strb){
     mov rdi, r8 ;reallocated
     mov rsi, r10;strb
     call strcat 
-    sub rsp, 4
+    sub rsp, 8
     mov r8, rax
     "}
 
@@ -59,7 +59,7 @@ __asm{"
    call malloc
    xor r11, r11
    xor r12, r12
-   add rsp, 4
+   add rsp, 8
    test rax, rax ; check for error
 
    mov byte[rax+r9], 0x0
@@ -127,7 +127,7 @@ __asm{"
 
     mov rdi, r9
     call free
-    sub rsp, 4
+    sub rsp, 8
 
 "}
 
@@ -141,7 +141,7 @@ function reallocate(ptr, newsize){
         mov rdi, r9
         mov rsi, r10
         call realloc
-        add rsp, 4
+        add rsp, 8
         mov r8, rax
         
         

@@ -171,20 +171,20 @@ def allocate(amt):
     return """
 push rbp
 mov rbp, rsp
-sub rsp, """+hex(amt)+"\n"
+sub rsp, """+str(amt)+"\n"
 
 def place_value(ptr, value):
-    return """mov QWORD [rbp-"""+hex(ptr)+"""], """+hex(value)
+    return """mov QWORD [rbp-"""+str(ptr)+"""], """+str(value)
 
 def place_value_from_reg(ptr, reg):
     if(reg.startswith("e")):
-        return """mov QWORD [rbp-"""+hex(ptr)+"""], %s\n"""%reg
-    return ("""mov rcx, %s"""%reg)+"\nmov QWORD [rbp-"+hex(ptr)+"], rcx\n"
+        return """mov QWORD [rbp-"""+str(ptr)+"""], %s\n"""%reg
+    return ("""mov rcx, %s"""%reg)+"\nmov QWORD [rbp-"+str(ptr)+"], rcx\n"
 
 def load_value_toreg(ptr,reg):
     return """
 mov %s, QWORD [rbp-%s]\n
-    """%(reg,hex(ptr))
+    """%(reg,str(ptr))
 
 def correct_mov(regdest, regsource):
     return "mov %s,%s"%(regdest,regsource)

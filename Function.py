@@ -179,25 +179,30 @@ class Function:
                 self.evaluateExpression(reg="rdi")
                 expr.append("rdi")
             else:
+                print(self.current_token)
+
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
             #max expression size
             
-        if(self.current_token.tok in T_CLOSEP+T_COMMA):
+        if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
             self.advance()
         
+        
+
         if(len(expr) == 1):
             if(isinstance(expr[0], Declaration )):
-                self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
+                self.addline("mov rbx, QWORD [rbp-"+str(expr[0].offset)+"]")
             elif(isinstance(expr[0], int)):
-                self.addline("mov rbx, "+hex(expr[0]))
+                self.addline("mov rbx, "+str(expr[0]))
             elif (self.compiler.globalExists( expr[0])):
                 self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
             
             elif (expr[0] == "rdi"):
                 self.addline("mov rbx, rdi")
             else:
+                print(self.current_token)
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
-            if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
+            if(decl is not None): self.addline("mov QWORD [rbp-"+str(decl.offset)+"], rbx")
             elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
             else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
             return
@@ -212,9 +217,9 @@ class Function:
         #Create assembly for the move
         """
         if(isinstance(expr[0], Declaration )):
-            self.addline(("mov %s, QWORD [rbp-"+hex(expr[0].offset)+"]")%_reg)
+            self.addline(("mov %s, QWORD [rbp-"+str(expr[0].offset)+"]")%_reg)
         elif(isinstance(expr[0], int)):
-            self.addline(("mov %s, "+hex(expr[0]))%_reg)
+            self.addline(("mov %s, "+str(expr[0]))%_reg)
         elif (self.compiler.globalExists( expr[0])):
             self.addline("mov %s, %s"%(_reg,value_of_global(expr[0], self.compiler)))
         
@@ -227,7 +232,7 @@ class Function:
                 self.addline("dec %s"%_reg)
             if(_reg != "rbx"):
                 self.addline("mov rbx, %s"%_reg)
-            if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), "rbx"))
+            if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(str(decl.offset), "rbx"))
             elif (reg is not None): 
                 self.addline(correct_mov(reg,"rbx"))
             else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), "rbx"))
@@ -236,9 +241,9 @@ class Function:
 
         #move operand b into rcx reguardless
         if(isinstance(expr[2], Declaration )):
-            self.addline("mov rcx, QWORD [rbp-"+hex(expr[2].offset)+"]")
+            self.addline("mov rcx, QWORD [rbp-"+str(expr[2].offset)+"]")
         elif(isinstance(expr[2], int)):
-            self.addline("mov rcx, "+hex(expr[2]))
+            self.addline("mov rcx, "+str(expr[2]))
         elif (self.compiler.globalExists( expr[2])):
             self.addline("mov %s, %s"%("rcx",value_of_global(expr[2], self.compiler)))
         
@@ -276,7 +281,7 @@ class Function:
             self.addline("idiv rcx")
             outputreg = "rax"
 
-        if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
+        if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(str(decl.offset), outputreg))
         elif (reg is not None): 
             self.addline(correct_mov(reg,outputreg))
         else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), outputreg))
@@ -308,6 +313,8 @@ class Function:
         self.advance()
         if(self.current_token.tok == T_EOL): #variable declaration without assignment
             self.appendDeclaration(id)
+            
+            self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "0x0"))
             #self.advance()
             return
         
@@ -367,11 +374,11 @@ class Function:
 
         self.buildVariableDeclaration() #determine incrementor
         decl = self.declarations[len(self.declarations)-1]
-        self.addline("__"+self.name+"__flp"+hex(decl.offset)+":")
+        self.addline("__"+self.name+"__flp"+str(decl.offset)+":")
 
         beginidx = len(self.bodytext) #anything added after this point, and before doCompilations will go at the end of the loop's asm
         
-        self.appendDeclaration("__%s__flp_maxnum%s"%(self.name,hex(decl.offset)))
+        self.appendDeclaration("__%s__flp_maxnum%s"%(self.name,str(decl.offset)))
         maxdecl = self.declarations[len(self.declarations)-1]
         self.advance()
 
@@ -392,11 +399,16 @@ class Function:
         self.addline(load_value_toreg(decl.offset,"rsi"))
 
         self.addline("cmp rsi, rdi")
-        self.addline("jl %s"%("__"+self.name+"__flp"+hex(decl.offset)))
+        self.addline("jl %s"%("__"+self.name+"__flp"+str(decl.offset)))
 
         header = self.bodytext[beginidx:]
         self.bodytext = self.bodytext[:beginidx]
+
         self.doCompilations(forblock=True)
+        self.advance()
+        print(self.current_token)
+        self.advance()
+        print(self.current_token)
         self.addline(header)
         
     
@@ -440,21 +452,15 @@ class Function:
             
         self.bodytext = "%s%s"%(self.allocator,self.bodytext)
         self.doCompilations()
-
+        self.advance()
         
 
 
     def doCompilations(self, forblock=False):
         opens = 0
-        while self.current_token != None and self.current_token.tok != T_EOF:
+        while self.current_token != None and self.current_token.tok != T_EOF and self.current_token.tok != T_CLSCOPE:
+            if(forblock): print(self.current_token)
             if(self.current_token.tok in T_EOL+T_OPENP+T_OSCOPE+T_CLSCOPE+T_COLON):
-                if(self.current_token.tok == T_OSCOPE):
-                    opens+=1
-                elif (self.current_token.tok == T_CLSCOPE):
-                    opens-=1
-
-                if(opens <= -1):
-                    return
 
                 self.advance()
             elif(self.current_token.tok == T_KEYWORD):
@@ -462,7 +468,6 @@ class Function:
             elif(self.current_token.tok == T_ID):
                 self.buildIDStatement()
             else:
-                print(self.current_token)
                 throw(UnkownStatementInitiator(self.current_token.start,self.current_token.end,self.current_token.value))
 
     def getFinalText(self):

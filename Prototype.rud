@@ -34,15 +34,24 @@ function main(args, numargs){
 
 
     destroy(teststring);
-    
-    var t;
-    for(var i; 10 ; i++){
+    print_string("");
 
-        t = i;
-        print_integer(t);
-        print_integer(t);
+    for(var i; 10 ; i + 1 ){
+
+
+        print_integer(i);
+        for(var j; 200; j+1){
+
+
+            print_integer(200);
+
+
+        }
 
     }
+
+
+    
 
 
 }

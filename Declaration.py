@@ -6,7 +6,7 @@ class Declaration:
         self.name = name
         self.offset = offset
     def __repr__(self):
-        return f"{self.name} : {hex(self.offset)}"
+        return f"{self.name} : {str(self.offset)}"
         
 
 

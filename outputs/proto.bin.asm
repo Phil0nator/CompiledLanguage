@@ -1018,7 +1018,8 @@ STRING_CONSTANT_2: db ``, 0
 STRING_CONSTANT_3: db `Hello World`, 0
 STRING_CONSTANT_4: db `A string for testing purposes`, 0
 STRING_CONSTANT_5: db `, and this has been appended.`, 0
-__isincluded__MEMORY_: dq 0x8726
+STRING_CONSTANT_6: db ``, 0
+__isincluded__MEMORY_: dq 38598
 
 
 
@@ -1035,9 +1036,9 @@ print_char:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 8
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 
     PRINT_CHAR r9
     NEWLINE
@@ -1051,9 +1052,9 @@ print_string:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 8
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 
     PRINT_STRING [r9]
     NEWLINE
@@ -1067,11 +1068,11 @@ print_integer:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 8
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 
-    PRINT_DEC 4, r9
+    PRINT_DEC 8, r9
     NEWLINE
     
 
@@ -1083,11 +1084,11 @@ printformat:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
+sub rsp, 16
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 
     
     push rax
@@ -1112,13 +1113,13 @@ print_two_formats:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 24
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 mov rcx, r11
-mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-24], rcx
 
     
     push rax
@@ -1144,9 +1145,9 @@ exit:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 8
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 
     
     
@@ -1164,18 +1165,21 @@ Array:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
+sub rsp, 16
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-16], rcx
+
 push r9
-mov rbx, QWORD [rbp-0x8]
+mov rbx, QWORD [rbp-8]
 mov r9,rbx
 call alloc
 mov rcx, r8
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 
 pop r9
-mov rbx, QWORD [rbp-0x10]
+mov rbx, QWORD [rbp-16]
 mov r8,rbx
 
 
@@ -1186,13 +1190,13 @@ putValue:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 24
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 mov rcx, r11
-mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-24], rcx
 
     mov rax, r11
     mov QWORD [r9+r10], rax  
@@ -1206,11 +1210,11 @@ getValue:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
+sub rsp, 16
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 
     
     mov rax, QWORD [r9+r10]
@@ -1226,44 +1230,53 @@ strAppend:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x30
+sub rsp, 48
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
+mov rcx, 0x0
+mov QWORD [rbp-24], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-32], rcx
+
 push r9
 push r10
-mov rbx, QWORD [rbp-0x8]
+mov rbx, QWORD [rbp-8]
 mov r9,rbx
 call strlen
 mov rcx, r8
-mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-24], rcx
 
 pop r10
 pop r9
 push r9
 push r10
-mov rbx, QWORD [rbp-0x10]
+mov rbx, QWORD [rbp-16]
 mov r9,rbx
 call strlen
 mov rcx, r8
-mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-32], rcx
 
 pop r10
 pop r9
-mov rbx, QWORD [rbp-0x18]
-mov rcx, QWORD [rbp-0x20]
+mov rbx, QWORD [rbp-24]
+mov rcx, QWORD [rbp-32]
 add rbx, rcx
-mov QWORD [rbp-0x28], rbx
+mov QWORD [rbp-40], rbx
+mov rcx, 0x0
+mov QWORD [rbp-48], rcx
+
 push r9
 push r10
-mov rbx, QWORD [rbp-0x8]
+mov rbx, QWORD [rbp-8]
 mov r9,rbx
-mov rbx, QWORD [rbp-0x28]
+mov rbx, QWORD [rbp-40]
 mov r10,rbx
 call reallocate
 mov rcx, r8
-mov QWORD [rbp-0x30], rcx
+mov QWORD [rbp-48], rcx
 
 pop r10
 pop r9
@@ -1271,7 +1284,7 @@ pop r9
     mov rdi, r8 ;reallocated
     mov rsi, r10;strb
     call strcat 
-    sub rsp, 4
+    sub rsp, 8
     mov r8, rax
     
 
@@ -1283,9 +1296,9 @@ alloc:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 8
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 
 
    xor r11, r11
@@ -1294,7 +1307,7 @@ mov QWORD [rbp-0x8], rcx
    call malloc
    xor r11, r11
    xor r12, r12
-   add rsp, 4
+   add rsp, 8
    test rax, rax ; check for error
 
    mov byte[rax+r9], 0x0
@@ -1312,11 +1325,11 @@ strcpy:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
+sub rsp, 16
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 
         
         xor r8, r8
@@ -1341,9 +1354,9 @@ strlen:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 8
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 
     
     xor r8,r8
@@ -1365,16 +1378,16 @@ memerror:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 8
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 push r9
 mov rbx, STRING_CONSTANT_0
 mov r9,rbx
 call print_string
 pop r9
 push r9
-mov rbx, QWORD [rbp-0x8]
+mov rbx, QWORD [rbp-8]
 mov r9,rbx
 call exit
 pop r9
@@ -1387,14 +1400,14 @@ destroy:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 8
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 
 
     mov rdi, r9
     call free
-    sub rsp, 4
+    sub rsp, 8
 
 
 
@@ -1406,17 +1419,17 @@ reallocate:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
+sub rsp, 16
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 
         
         mov rdi, r9
         mov rsi, r10
         call realloc
-        add rsp, 4
+        add rsp, 8
         mov r8, rax
         
         
@@ -1430,37 +1443,43 @@ string:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 24
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-16], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-24], rcx
+
 push r9
-mov rbx, QWORD [rbp-0x8]
+mov rbx, QWORD [rbp-8]
 mov r9,rbx
 call strlen
 mov rcx, r8
-mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-24], rcx
 
 pop r9
-mov rbx, QWORD [rbp-0x18]
-mov rcx, 0x1
+mov rbx, QWORD [rbp-24]
+mov rcx, 1
 add rbx, rcx
-mov QWORD [rbp-0x18], rbx
+mov QWORD [rbp-24], rbx
 push r9
-mov rbx, QWORD [rbp-0x18]
+mov rbx, QWORD [rbp-24]
 mov r9,rbx
 call Array
 mov rcx, r8
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 
 pop r9
 push r9
-mov rbx, QWORD [rbp-0x10]
+mov rbx, QWORD [rbp-16]
 mov r9,rbx
-mov rbx, QWORD [rbp-0x8]
+mov rbx, QWORD [rbp-8]
 mov r10,rbx
 call strcpy
 pop r9
-mov rbx, QWORD [rbp-0x10]
+mov rbx, QWORD [rbp-16]
 mov r8,rbx
 
 
@@ -1471,16 +1490,16 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x30
+sub rsp, 48
 mov rcx, r9
-mov QWORD [rbp-0x8], rcx
+mov QWORD [rbp-8], rcx
 mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-16], rcx
 push r9
 push r10
 mov rbx, STRING_CONSTANT_1
 mov r9,rbx
-mov rbx, QWORD [rbp-0x10]
+mov rbx, QWORD [rbp-16]
 mov r10,rbx
 call printformat
 pop r10
@@ -1492,22 +1511,22 @@ mov r9,rbx
 call print_string
 pop r10
 pop r9
-mov rbx, 0x6a
-mov QWORD [rbp-0x18], rbx
+mov rbx, 106
+mov QWORD [rbp-24], rbx
 push r9
 push r10
-mov rbx, QWORD [rbp-0x18]
+mov rbx, QWORD [rbp-24]
 mov r9,rbx
 call print_integer
 pop r10
 pop r9
-mov rbx, QWORD [rbp-0x18]
-mov rcx, 0x6
+mov rbx, QWORD [rbp-24]
+mov rcx, 6
 add rbx, rcx
-mov QWORD [rbp-0x18], rbx
+mov QWORD [rbp-24], rbx
 push r9
 push r10
-mov rbx, QWORD [rbp-0x18]
+mov rbx, QWORD [rbp-24]
 mov r9,rbx
 call print_integer
 pop r10
@@ -1519,81 +1538,108 @@ mov r9,rbx
 call print_string
 pop r10
 pop r9
+mov rcx, 0x0
+mov QWORD [rbp-32], rcx
+
 push r9
 push r10
 mov rbx, STRING_CONSTANT_4
 mov r9,rbx
 call string
 mov rcx, r8
-mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-32], rcx
 
 pop r10
 pop r9
 push r9
 push r10
-mov rbx, QWORD [rbp-0x20]
+mov rbx, QWORD [rbp-32]
 mov r9,rbx
 call print_string
 pop r10
 pop r9
 push r9
 push r10
-mov rbx, QWORD [rbp-0x20]
+mov rbx, QWORD [rbp-32]
 mov r9,rbx
 mov rbx, STRING_CONSTANT_5
 mov r10,rbx
 call strAppend
 mov rcx, r8
-mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-32], rcx
 
 pop r10
 pop r9
 push r9
 push r10
-mov rbx, QWORD [rbp-0x20]
+mov rbx, QWORD [rbp-32]
 mov r9,rbx
 call print_string
 pop r10
 pop r9
 push r9
 push r10
-mov rbx, QWORD [rbp-0x20]
+mov rbx, QWORD [rbp-32]
 mov r9,rbx
 call destroy
 pop r10
 pop r9
-__m__flp0x30:
-mov rbx, QWORD [rbp-0x30]
-mov QWORD [rbp-0x28], rbx
 push r9
 push r10
-mov rbx, QWORD [rbp-0x28]
+mov rbx, STRING_CONSTANT_6
 mov r9,rbx
-call print_integer
+call print_string
 pop r10
 pop r9
-push r9
-push r10
-mov rbx, QWORD [rbp-0x28]
-mov r9,rbx
-call print_integer
-pop r10
-pop r9
-mov rbx, 0xa
-mov QWORD [rbp-0x38], rbx
-mov rbx, QWORD [rbp-0x30]
-inc rbx
-mov QWORD [rbp-0x30], rbx
+mov rcx, 0x0
+mov QWORD [rbp-40], rcx
 
-mov rdi, QWORD [rbp-0x38]
+__m__flp40:
+push r9
+push r10
+mov rbx, QWORD [rbp-40]
+mov r9,rbx
+call print_integer
+pop r10
+pop r9
+mov rcx, 0x0
+mov QWORD [rbp-56], rcx
+
+__m__flp56:
+push r9
+push r10
+mov rbx, 200
+mov r9,rbx
+call print_integer
+pop r10
+pop r9
+mov rbx, 200
+mov QWORD [rbp-64], rbx
+mov QWORD [rbp-56], rbx
+
+mov rdi, QWORD [rbp-64]
 
     
 
-mov rsi, QWORD [rbp-0x30]
+mov rsi, QWORD [rbp-56]
 
     
 cmp rsi, rdi
-jl __m__flp0x30
+jl __m__flp56
+
+mov rbx, 10
+mov QWORD [rbp-48], rbx
+mov QWORD [rbp-40], rbx
+
+mov rdi, QWORD [rbp-48]
+
+    
+
+mov rsi, QWORD [rbp-40]
+
+    
+cmp rsi, rdi
+jl __m__flp40
 
 
 
@@ -1613,7 +1659,7 @@ xor rax, rax
 
 mov r9, rsi     ;commandline args
 mov r10, rdi
-mov QWORD [bruhman], 0x64
+mov QWORD [bruhman], 100
 call m
 NEWLINE
 ret
