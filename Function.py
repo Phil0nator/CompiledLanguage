@@ -42,7 +42,8 @@ class Function:
         fn_name = id
         #first push the parameter registers in use:
         for i in range(len(self.params)):
-            self.addline("push %s"%parameter_registers[i])
+            pass
+            ###########self.addline("push %s"%parameter_registers[i])
 
         #collect parameters
         params = []
@@ -72,7 +73,8 @@ class Function:
         
         if(len(params) == 0):
             for i in range(len(self.params)):
-                self.addline("pop %s"%parameter_registers[len(self.params)-(i+1)])
+                pass
+                ##########self.addline("pop %s"%parameter_registers[len(self.params)-(i+1)])
             
             
 
@@ -90,7 +92,8 @@ class Function:
             else:
                 self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "r8"))
         for i in range(len(self.params)):
-            self.addline("pop %s"%(parameter_registers[len(self.params)-(i+1)]))
+            pass
+            #########self.addline("pop %s"%(parameter_registers[len(self.params)-(i+1)]))
         
         self.advance() # end the line
 
@@ -191,9 +194,9 @@ class Function:
 
         if(len(expr) == 1):
             if(isinstance(expr[0], Declaration )):
-                self.addline("mov rbx, QWORD [rbp-"+str(expr[0].offset)+"]")
+                self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
             elif(isinstance(expr[0], int)):
-                self.addline("mov rbx, "+str(expr[0]))
+                self.addline("mov rbx, "+hex(expr[0]))
             elif (self.compiler.globalExists( expr[0])):
                 self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
             
@@ -202,7 +205,7 @@ class Function:
             else:
                 print(self.current_token)
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
-            if(decl is not None): self.addline("mov QWORD [rbp-"+str(decl.offset)+"], rbx")
+            if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
             elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
             else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
             return
@@ -217,9 +220,9 @@ class Function:
         #Create assembly for the move
         """
         if(isinstance(expr[0], Declaration )):
-            self.addline(("mov %s, QWORD [rbp-"+str(expr[0].offset)+"]")%_reg)
+            self.addline(("mov %s, QWORD [rbp-"+hex(expr[0].offset)+"]")%_reg)
         elif(isinstance(expr[0], int)):
-            self.addline(("mov %s, "+str(expr[0]))%_reg)
+            self.addline(("mov %s, "+hex(expr[0]))%_reg)
         elif (self.compiler.globalExists( expr[0])):
             self.addline("mov %s, %s"%(_reg,value_of_global(expr[0], self.compiler)))
         
@@ -232,7 +235,7 @@ class Function:
                 self.addline("dec %s"%_reg)
             if(_reg != "rbx"):
                 self.addline("mov rbx, %s"%_reg)
-            if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(str(decl.offset), "rbx"))
+            if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), "rbx"))
             elif (reg is not None): 
                 self.addline(correct_mov(reg,"rbx"))
             else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), "rbx"))
@@ -241,9 +244,9 @@ class Function:
 
         #move operand b into rcx reguardless
         if(isinstance(expr[2], Declaration )):
-            self.addline("mov rcx, QWORD [rbp-"+str(expr[2].offset)+"]")
+            self.addline("mov rcx, QWORD [rbp-"+hex(expr[2].offset)+"]")
         elif(isinstance(expr[2], int)):
-            self.addline("mov rcx, "+str(expr[2]))
+            self.addline("mov rcx, "+hex(expr[2]))
         elif (self.compiler.globalExists( expr[2])):
             self.addline("mov %s, %s"%("rcx",value_of_global(expr[2], self.compiler)))
         
@@ -281,7 +284,7 @@ class Function:
             self.addline("idiv rcx")
             outputreg = "rax"
 
-        if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(str(decl.offset), outputreg))
+        if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
         elif (reg is not None): 
             self.addline(correct_mov(reg,outputreg))
         else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), outputreg))
@@ -374,22 +377,25 @@ class Function:
 
         self.buildVariableDeclaration() #determine incrementor
         decl = self.declarations[len(self.declarations)-1]
-        self.addline("__"+self.name+"__flp"+str(decl.offset)+":")
+        self.addline("__"+self.name+"__flp"+hex(decl.offset)+":")
 
         beginidx = len(self.bodytext) #anything added after this point, and before doCompilations will go at the end of the loop's asm
         
-        self.appendDeclaration("__%s__flp_maxnum%s"%(self.name,str(decl.offset)))
+        self.appendDeclaration("__%s__flp_maxnum%s"%(self.name,hex(decl.offset)))
         maxdecl = self.declarations[len(self.declarations)-1]
         self.advance()
 
         self.evaluateExpression(decl=maxdecl)
+        self.addline("; FIRST")
+
+        
+        #self.evaluateExpression(decl=decl)
+        print(self.current_token)
+        self.buildIDStatement()
+        
+        self.addline("; POST EXPRESSION")
         self.advance()
 
-        
-        self.evaluateExpression(decl=decl)
-
-        
-        
         if(self.current_token.tok != T_OSCOPE):
             throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value))
         self.advance()#move past {
@@ -399,16 +405,14 @@ class Function:
         self.addline(load_value_toreg(decl.offset,"rsi"))
 
         self.addline("cmp rsi, rdi")
-        self.addline("jl %s"%("__"+self.name+"__flp"+str(decl.offset)))
+        self.addline("jl %s"%("__"+self.name+"__flp"+hex(decl.offset)))
 
         header = self.bodytext[beginidx:]
         self.bodytext = self.bodytext[:beginidx]
-
+        print("PRE: "+self.current_token.__repr__())
         self.doCompilations(forblock=True)
         self.advance()
-        print(self.current_token)
-        self.advance()
-        print(self.current_token)
+        print("POST :%s"%self.current_token)
         self.addline(header)
         
     

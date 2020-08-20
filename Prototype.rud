@@ -1,20 +1,92 @@
 
 var bruhman = 100;
-
+final var endl = "\n";
 
 #include "include/prints.rud"
 #include "include/entryexit.rud"
 #include "include/memory.rud"
 #include "include/string.rud"
 
+struct Vector{
+
+    var arr;
+    var length;
+    var pos;
+
+}
+
+function Vector.init(vec, len){
+    var array;
+    Array(len)->array;
+    putValue(vec, 0, array);
+    putValue(vec, 8, len);
+    putValue(vec, 16, 0);
+}
+function Vector.at(vec, index){
+
+    var array;
+    getValue(vec, 0)-> array;
+    var value;
+    getValue(array, index)->value;
+    return value;
+
+}
+function Vector.set(vec, index, value){
+    var array;
+    getValue(vec, 0)->array;
+    putValue(array,index,value);
+    return 0;
+}
+
+function Vector.destroy(vec){
+    var array;
+    getValue(vec, 0)-> array;
+    destroy(array);
+    destroy(vec);
+    return 0;
+}
+function Vector.size(vec){
+
+    var size;
+    getValue(vec, 8)->size;
+    return size;
+
+}
+
+function Vector.push_back(vec, value){
+
+    
+    var pos;
+    getValue(vec,16)->pos;
+    Vector.set(vec, pos, value);
+    pos = pos + 1;
+    putValue(vec, 16, pos);
+    return pos;
+
+}
+
 
 function main(args, numargs){
 
 
     printformat("The number of commandline arguments is: %u", numargs);
-    
+    print_string(endl);
 
+    var vec;
+    Vector()->vec;
+    Vector.init(vec, 101);
+    var printer;
+    for(var i; 99; i++ ){
 
+        Vector.push_back(vec, i);
+
+        Vector.at(vec, i)->printer;
+
+        print_integer(printer);
+        
+
+    }
+    Vector.destroy(vec);
 
     print_string("");
 
@@ -36,19 +108,7 @@ function main(args, numargs){
     destroy(teststring);
     print_string("");
 
-    for(var i; 10 ; i + 1 ){
-
-
-        print_integer(i);
-        for(var j; 200; j+1){
-
-
-            print_integer(200);
-
-
-        }
-
-    }
+    
 
 
     

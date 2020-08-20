@@ -53,7 +53,7 @@ TM_ALL = "&|><=-!+"
 
 
 #ID
-ID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+ID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_."
 
 
 
@@ -74,7 +74,8 @@ ESCAPE_CHARS = {
 #Keywords
 
 KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", \
-            "null", "nullptr", "return", "new", "__asm", "__c", "#include", "#define", "#ifdef", "#ifndef", "#else", "#endif"]
+            "null", "nullptr", "return", "new", "__asm", "__c", "#include", "#define", "#ifdef", "#ifndef", "#else", "#endif", \
+            "constructor"]
 
 
 
@@ -171,20 +172,20 @@ def allocate(amt):
     return """
 push rbp
 mov rbp, rsp
-sub rsp, """+str(amt)+"\n"
+sub rsp, """+hex(amt)+"\n"
 
 def place_value(ptr, value):
-    return """mov QWORD [rbp-"""+str(ptr)+"""], """+str(value)
+    return """mov QWORD [rbp-"""+hex(ptr)+"""], """+hex(value)
 
 def place_value_from_reg(ptr, reg):
     if(reg.startswith("e")):
-        return """mov QWORD [rbp-"""+str(ptr)+"""], %s\n"""%reg
-    return ("""mov rcx, %s"""%reg)+"\nmov QWORD [rbp-"+str(ptr)+"], rcx\n"
+        return """mov QWORD [rbp-"""+hex(ptr)+"""], %s\n"""%reg
+    return ("""mov rcx, %s"""%reg)+"\nmov QWORD [rbp-"+hex(ptr)+"], rcx\n"
 
 def load_value_toreg(ptr,reg):
     return """
 mov %s, QWORD [rbp-%s]\n
-    """%(reg,str(ptr))
+    """%(reg,hex(ptr))
 
 def correct_mov(regdest, regsource):
     return "mov %s,%s"%(regdest,regsource)

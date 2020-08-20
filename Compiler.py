@@ -2,6 +2,8 @@ from constants import *
 from Token import *
 from Function import *
 from Location import *
+from Struct import *
+
 
 class Compiler:
     def __init__(self, tokens):
@@ -56,13 +58,46 @@ class Compiler:
                     self.createGlobal()
                 elif self.current_token.value == "function":
                     self.createFunction()
+                elif self.current_token.value == "struct":
+                    self.createStructure()
                 else:
                     self.advance()
         self.fill_functions()
         self.fill_globals()
 
 
-    
+    def createStructure(self):
+        self.advance()
+        if(self.current_token.tok != T_ID):
+            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+        name = self.current_token.value
+        self.advance()
+        #looking for parameters
+        if(self.current_token.tok != T_OSCOPE):
+            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+
+        
+        print(self.current_token)
+        self.advance() #move past '{'
+        #BODY
+        body = []
+        ignorables = 0
+        while not (ignorables == 0 and self.current_token.tok == T_CLSCOPE):
+            if(self.current_token.tok == T_OSCOPE):
+                ignorables+=1
+            if(self.current_token.tok == T_CLSCOPE):
+                ignorables-=1
+            body.append(self.current_token)
+            self.advance()
+
+        if(len(body) == 0):
+            throw(EmptyFunction(self.current_token.start,self.current_token.end,self.current_token.value))
+        
+        struct = Struct(name, body)
+        self._fdef+=struct.compile()
+        self.advance()
+
+
 
     """
     Compile each function
@@ -80,14 +115,14 @@ class Compiler:
         for glob in self.globals[0] : #bss:
             for g in glob:
                 self._bss+=define_global(g)
-                self.main+="mov QWORD ["+g+"], "+str(glob[g])+"\n"
+                self.main+="mov QWORD ["+g+"], "+hex(glob[g])+"\n"
         
         for glob in self.globals[1] : #data:
             for g in glob:
                 if(isinstance(glob[g], str)):
                     self._data += g+": db `"+glob[g]+"`, 0\n"
                 else:
-                    self._data += g+": dq "+str(glob[g])+"\n"
+                    self._data += g+": dq "+hex(glob[g])+"\n"
         self.main+="call m"
 
 
