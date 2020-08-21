@@ -47,7 +47,9 @@ class PreLexer:
             else:
                 num+=self.current_char
             self.advance()
-
+        if(not num.startswith("-") and "-" in num) or (num == "-"):
+            print("Invalid Integer value: "+num)
+            exit(1)
         if(dots==0):
             return Token(T_INT, value=int(num), start=start,end=self.loc)
         else:

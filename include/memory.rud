@@ -1,6 +1,10 @@
 #include "include/prints.rud"
+#define MAX_INT 9223372036854775807
+#define INFINITY 9223372036854775807
+
 
 final var __isincluded__MEMORY_ = 38598;
+
 
 function Array(len){
 

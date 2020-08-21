@@ -1027,6 +1027,7 @@ __isincluded__MEMORY_: dq 0x96c6
 
 section .bss
 bruhman: resb 0x8
+MIN_INT: resb 0x8
 
 
 
@@ -1050,136 +1051,7 @@ mov r8, rax
 leave
 ret
 
-        print_char:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-
-    PRINT_CHAR r9
-    NEWLINE
-    
-
-
-leave
-ret
-
-print_string:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-
-    PRINT_STRING [r9]
-    NEWLINE
-    
-
-
-leave
-ret
-
-print_integer:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-
-    PRINT_DEC 8, r9
-    NEWLINE
-    
-
-
-leave
-ret
-
-printformat:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x10
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
-
-    
-    push rax
-    push rcx
-    mov     rdi, r9                ; set 1st parameter (format)
-    mov     rsi, r10                 ; set 2nd parameter (current_number)
-    xor     rax, rax                ; because printf is varargs
-
-    ; Stack is already aligned because we pushed three 8 byte registers
-    call    printf                  ; printf(format, current_number)
-
-    pop     rcx                     ; restore caller-save register
-    pop     rax                     ; restore caller-save register
-    
-    
-
-
-leave
-ret
-
-print_two_formats:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x18
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
-mov rcx, r11
-mov QWORD [rbp-0x18], rcx
-
-    
-    push rax
-    push rcx
-    mov     rdi, r9                ; set 1st parameter (value)
-    mov     rsi, r10                 ; set 2nd parameter (fa)
-    mov     rdx, r11                ; set 3rd parameter (fb)
-    xor     rax, rax                ; because printf is varargs
-
-    ; Stack is already aligned because we pushed three 8 byte registers
-    call    printf                  ; printf(format, current_number)
-
-    pop     rcx                     ; restore caller-save register
-    pop     rax                     ; restore caller-save register
-    
-    
-
-
-leave
-ret
-
-exit:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-
-    
-    
-    mov rax, 1  ; 1 = exit system call
-    mov rdi, r9 ; r9 = exit code given in parameter
-    int 0x80    ; interrupt
-    
-    
-
-
-leave
-ret
-
-Array:
+        Array:
 
 push rbp
 mov rbp, rsp
@@ -1326,17 +1198,13 @@ mov rcx, r10
 mov QWORD [rbp-0x10], rcx
 
         
-        ;mov rdi, r9
-        ;mov rsi, r10
+
         push r9
         push r10
         xor r10, r10
         xor r11, r11 ;gc
         xor r12, r12
-        
-
         call realloc
-        
         pop r9
         pop r9
         test rax, rax
@@ -1347,6 +1215,135 @@ mov QWORD [rbp-0x10], rcx
         
         
         
+
+
+leave
+ret
+
+print_char:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+    PRINT_CHAR r9
+    NEWLINE
+    
+
+
+leave
+ret
+
+print_string:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+    PRINT_STRING [r9]
+    NEWLINE
+    
+
+
+leave
+ret
+
+print_integer:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+    PRINT_DEC 8, r9
+    NEWLINE
+    
+
+
+leave
+ret
+
+printformat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+
+    
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (format)
+    mov     rsi, r10                 ; set 2nd parameter (current_number)
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    
+    
+
+
+leave
+ret
+
+print_two_formats:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, r11
+mov QWORD [rbp-0x18], rcx
+
+    
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (value)
+    mov     rsi, r10                 ; set 2nd parameter (fa)
+    mov     rdx, r11                ; set 3rd parameter (fb)
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    
+    
+
+
+leave
+ret
+
+exit:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+    
+    
+    mov rax, 1  ; 1 = exit system call
+    mov rdi, r9 ; r9 = exit code given in parameter
+    int 0x80    ; interrupt
+    
+    
 
 
 leave
@@ -1493,7 +1490,6 @@ mov QWORD [rbp-0x18], rcx
 
 mov rbx, QWORD [rbp-0x10]
 mov r9,rbx
-
 call strlen
 mov rcx, r8
 mov QWORD [rbp-0x20], rcx
@@ -1508,13 +1504,11 @@ mov QWORD [rbp-0x28], rbx
 mov rcx, 0x0
 mov QWORD [rbp-0x30], rcx
 
-mov rbx, QWORD [rbp-0x10]
+mov rbx, QWORD [rbp-0x8]
 mov r9,rbx
-
 mov rbx, QWORD [rbp-0x28]
 mov r10,rbx
 call reallocate
-
 mov rcx, r8
 mov QWORD [rbp-0x30], rcx
 
@@ -1756,7 +1750,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x38
+sub rsp, 0x40
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1857,20 +1851,29 @@ call string
 mov rcx, r8
 mov QWORD [rbp-0x40], rcx
 
-mov rbx, QWORD [rbp-0x40]
+mov rcx, 0x0
+mov QWORD [rbp-0x48], rcx
+
+mov rbx, STRING_CONSTANT_6
+mov r9,rbx
+call string
+mov rcx, r8
+mov QWORD [rbp-0x48], rcx
+
+mov rbx, QWORD [rbp-0x48]
+mov r9,rbx
+call print_string
+mov rbx, QWORD [rbp-0x48]
 mov r9,rbx
 call print_string
 mov rbx, QWORD [rbp-0x40]
 mov r9,rbx
-mov rbx, STRING_CONSTANT_6
+mov rbx, QWORD [rbp-0x48]
 mov r10,rbx
 call strAppend
 mov rcx, r8
 mov QWORD [rbp-0x40], rcx
 
-mov rbx, QWORD [rbp-0x40]
-mov r9,rbx
-call print_string
 mov rbx, QWORD [rbp-0x40]
 mov r9,rbx
 call destroy
@@ -1896,6 +1899,7 @@ xor rax, rax
 mov r9, rsi     ;commandline args
 mov r10, rdi
 mov QWORD [bruhman], 0x64
+mov QWORD [MIN_INT], 0x7fffffffffffffff
 call m
 NEWLINE
 ret

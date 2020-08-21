@@ -98,11 +98,13 @@ function main(args, numargs){
 
     var teststring;
     string("A string for testing purposes")->teststring;
-    print_string(teststring);
 
-
-    strAppend(teststring, ", and this has been appended.")->teststring;
-    print_string(teststring);
+    var tstwo;
+    string(", and this has been appended.")->tstwo;
+    print_string(tstwo);
+    print_string(tstwo);
+    
+    strAppend(teststring, tstwo)->teststring;
 
 
     destroy(teststring);
