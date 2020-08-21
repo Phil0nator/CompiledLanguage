@@ -1326,18 +1326,23 @@ mov rcx, r10
 mov QWORD [rbp-0x10], rcx
 
         
-        mov rdi, r9
-        mov rsi, r10
+        ;mov rdi, r9
+        ;mov rsi, r10
+        push r9
+        push r10
         xor r10, r10
         xor r11, r11 ;gc
         xor r12, r12
         
-       
+
         call realloc
+        
+        pop r9
+        pop r9
+        test rax, rax
         xor r10, r10
         xor r11, r11 ;gc
         xor r12, r12
-        sub rsp, 4
         mov r8, rax
         
         
@@ -1380,7 +1385,7 @@ mov rbx, QWORD [rbp-0x10]
 mov r9,rbx
 mov rbx, QWORD [rbp-0x8]
 mov r10,rbx
-call strcpy
+call stringcat
 mov rbx, QWORD [rbp-0x10]
 mov r8,rbx
 
@@ -1488,6 +1493,7 @@ mov QWORD [rbp-0x18], rcx
 
 mov rbx, QWORD [rbp-0x10]
 mov r9,rbx
+
 call strlen
 mov rcx, r8
 mov QWORD [rbp-0x20], rcx
@@ -1502,11 +1508,13 @@ mov QWORD [rbp-0x28], rbx
 mov rcx, 0x0
 mov QWORD [rbp-0x30], rcx
 
-mov rbx, QWORD [rbp-0x8]
+mov rbx, QWORD [rbp-0x10]
 mov r9,rbx
+
 mov rbx, QWORD [rbp-0x28]
 mov r10,rbx
 call reallocate
+
 mov rcx, r8
 mov QWORD [rbp-0x30], rcx
 

@@ -10,7 +10,7 @@ function string(source){
     strlen(source)->len;
     len = len + 1;
     alloc(len)->out;
-    strcpy(out,source);
+    stringcat(out,source);
     return out;
     
 
