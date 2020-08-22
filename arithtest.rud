@@ -6,9 +6,35 @@
 #include "include/memory.rud"
 #include "include/string.rud"
 
+function testmod(mod){
+return 90;
+}
 
 
 function main(){
+
+   var val = 101;
+   var testn = 2;
+
+
+
+
+
+   var div = val / testn;
+   var mod= val % testn;
+   
+   
+   for(var i = 0; val; i++){
+   
+	   print_string("main for");
+	   div = val / testn;
+	   mod = val % testn;
+	   testmod(mod);
+
+
+   }
+
+
 
 
     var test = 4 % 10;
