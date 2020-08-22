@@ -23,7 +23,7 @@ function main(){
     }->value;
 
     print_integer(value);
+
     testmod(test)->value;
-    
     //beans
 }
