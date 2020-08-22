@@ -1015,11 +1015,10 @@ section .data
 STRING_CONSTANT_0: db `\n`, 0
 STRING_CONSTANT_1: db `Memory error encountered`, 0
 STRING_CONSTANT_2: db `The number of commandline arguments is: %u`, 0
-STRING_CONSTANT_3: db ``, 0
-STRING_CONSTANT_4: db `Hello World`, 0
-STRING_CONSTANT_5: db `A string for testing purposes`, 0
-STRING_CONSTANT_6: db `, and this has been appended.`, 0
-STRING_CONSTANT_7: db ``, 0
+STRING_CONSTANT_3: db `Hello World`, 0
+STRING_CONSTANT_4: db `A string for testing purposes`, 0
+STRING_CONSTANT_5: db `, and this has been appended.`, 0
+STRING_CONSTANT_6: db ``, 0
 endl: db `\n`, 0
 __isincluded__MEMORY_: dq 0x96c6
 
@@ -1027,7 +1026,6 @@ __isincluded__MEMORY_: dq 0x96c6
 
 section .bss
 bruhman: resb 0x8
-MIN_INT: resb 0x8
 
 
 
@@ -1199,14 +1197,13 @@ mov QWORD [rbp-0x10], rcx
 
         
 
-        push r9
-        push r10
+        mov rdi, r9
+        mov rsi, r10
         xor r10, r10
         xor r11, r11 ;gc
         xor r12, r12
         call realloc
-        pop r9
-        pop r9
+
         test rax, rax
         xor r10, r10
         xor r11, r11 ;gc
@@ -1750,7 +1747,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x40
+sub rsp, 0x28
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1763,121 +1760,57 @@ call printformat
 mov rbx, endl
 mov r9,rbx
 call print_string
-mov rcx, 0x0
-mov QWORD [rbp-0x18], rcx
-
-call Vector
-mov rcx, r8
-mov QWORD [rbp-0x18], rcx
-
+mov rbx, 0x6a
+mov QWORD [rbp-0x18], rbx
 mov rbx, QWORD [rbp-0x18]
-mov r9,rbx
-mov rbx, 0x65
-mov r10,rbx
-call Vector.init
-mov rcx, 0x0
-mov QWORD [rbp-0x20], rcx
-
-mov rcx, 0x0
-mov QWORD [rbp-0x28], rcx
-
-__m__flp0x28:
-mov rbx, QWORD [rbp-0x18]
-mov r9,rbx
-mov rbx, QWORD [rbp-0x28]
-mov r10,rbx
-call Vector.push_back
-mov rbx, QWORD [rbp-0x18]
-mov r9,rbx
-mov rbx, QWORD [rbp-0x28]
-mov r10,rbx
-call Vector.at
-mov rcx, r8
-mov QWORD [rbp-0x20], rcx
-
-mov rbx, QWORD [rbp-0x20]
 mov r9,rbx
 call print_integer
-mov rbx, 0x63
-mov QWORD [rbp-0x30], rbx
-; FIRST
-
-mov rax, QWORD [rbp-0x28]
-
-    
-inc rax
-mov rcx, rax
-mov QWORD [rbp-0x28], rcx
-
-; POST EXPRESSION
-
-mov rdi, QWORD [rbp-0x30]
-
-    
-
-mov rsi, QWORD [rbp-0x28]
-
-    
-cmp rsi, rdi
-jl __m__flp0x28
-
+mov rbx, QWORD [rbp-0x18]
+mov rcx, 0x6
+add rbx, rcx
+mov QWORD [rbp-0x18], rbx
 mov rbx, QWORD [rbp-0x18]
 mov r9,rbx
-call Vector.destroy
+call print_integer
 mov rbx, STRING_CONSTANT_3
 mov r9,rbx
 call print_string
-mov rbx, 0x6a
-mov QWORD [rbp-0x38], rbx
-mov rbx, QWORD [rbp-0x38]
-mov r9,rbx
-call print_integer
-mov rbx, QWORD [rbp-0x38]
-mov rcx, 0x6
-add rbx, rcx
-mov QWORD [rbp-0x38], rbx
-mov rbx, QWORD [rbp-0x38]
-mov r9,rbx
-call print_integer
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
 mov rbx, STRING_CONSTANT_4
 mov r9,rbx
-call print_string
+call string
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
 mov rcx, 0x0
-mov QWORD [rbp-0x40], rcx
+mov QWORD [rbp-0x28], rcx
 
 mov rbx, STRING_CONSTANT_5
 mov r9,rbx
 call string
 mov rcx, r8
-mov QWORD [rbp-0x40], rcx
+mov QWORD [rbp-0x28], rcx
 
-mov rcx, 0x0
-mov QWORD [rbp-0x48], rcx
-
-mov rbx, STRING_CONSTANT_6
-mov r9,rbx
-call string
-mov rcx, r8
-mov QWORD [rbp-0x48], rcx
-
-mov rbx, QWORD [rbp-0x48]
+mov rbx, QWORD [rbp-0x28]
 mov r9,rbx
 call print_string
-mov rbx, QWORD [rbp-0x48]
+mov rbx, QWORD [rbp-0x20]
 mov r9,rbx
-call print_string
-mov rbx, QWORD [rbp-0x40]
-mov r9,rbx
-mov rbx, QWORD [rbp-0x48]
+mov rbx, QWORD [rbp-0x28]
 mov r10,rbx
 call strAppend
 mov rcx, r8
-mov QWORD [rbp-0x40], rcx
+mov QWORD [rbp-0x20], rcx
 
-mov rbx, QWORD [rbp-0x40]
+mov rbx, QWORD [rbp-0x20]
+mov r9,rbx
+call print_string
+mov rbx, QWORD [rbp-0x20]
 mov r9,rbx
 call destroy
-mov rbx, STRING_CONSTANT_7
+mov rbx, STRING_CONSTANT_6
 mov r9,rbx
 call print_string
 
@@ -1899,7 +1832,6 @@ xor rax, rax
 mov r9, rsi     ;commandline args
 mov r10, rdi
 mov QWORD [bruhman], 0x64
-mov QWORD [MIN_INT], 0x7fffffffffffffff
 call m
 NEWLINE
 ret

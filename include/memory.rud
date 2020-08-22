@@ -85,14 +85,13 @@ function reallocate(ptr, newsize){
         "
         
 
-        push r9
-        push r10
+        mov rdi, r9
+        mov rsi, r10
         xor r10, r10
         xor r11, r11 ;gc
         xor r12, r12
         call realloc
-        pop r9
-        pop r9
+
         test rax, rax
         xor r10, r10
         xor r11, r11 ;gc

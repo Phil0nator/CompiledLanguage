@@ -72,23 +72,7 @@ function main(args, numargs){
     printformat("The number of commandline arguments is: %u", numargs);
     print_string(endl);
 
-    var vec;
-    Vector()->vec;
-    Vector.init(vec, 101);
-    var printer;
-    for(var i; 99; i++ ){
-
-        Vector.push_back(vec, i);
-
-        Vector.at(vec, i)->printer;
-
-        print_integer(printer);
-        
-
-    }
-    Vector.destroy(vec);
-
-    print_string("");
+    
 
     var test = 106;
     print_integer(test);
@@ -102,10 +86,10 @@ function main(args, numargs){
     var tstwo;
     string(", and this has been appended.")->tstwo;
     print_string(tstwo);
-    print_string(tstwo);
+    
     
     strAppend(teststring, tstwo)->teststring;
-
+    print_string(teststring);
 
     destroy(teststring);
     print_string("");
