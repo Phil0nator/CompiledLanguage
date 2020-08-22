@@ -24,7 +24,7 @@ __fileinput__ = ""
 __fileoutput__ = ""
 __tonasm__ = False
 __autorun__ = False
-
+__comp__ = None
 
 def main():
     
@@ -51,11 +51,11 @@ def main():
         print(errors.as_string())
         exit(1)
     
-    #print(tokens)
 
     compiler = Compiler(tokens)
+    __comp__ = compiler
     compiler.fill_info()
-
+    
     asm = top_stub
     asm = asm.replace("&&FDEF&&", compiler._fdef)
     asm = asm.replace("&&TEXT&&", compiler.main) 
@@ -130,5 +130,8 @@ def handleArgs():
     __autorun__=args.r
 if( __name__ == "__main__"):
     handleArgs()
-
-    main()
+    try:
+        main()
+    except Exception:
+        print(Exception)
+        print("An unkown error has occured on token: "+__comp__.current_token)

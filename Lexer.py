@@ -25,6 +25,7 @@ class Lexer:
             if(self.current_char in ' \t'):#ignore whitespace 
                 self.advance()
             elif (ord(self.current_char) == 3):#file counter
+                
                 self.fn+=1
                 self.loc.fn+=1
                 self.loc.ln = 0
@@ -41,6 +42,14 @@ class Lexer:
                 #print(self.current_char)
                 #tokens.append(Token(self.current_char, start=self.loc))
                 tokens.append(self.make_multichar())
+                last_tok = tokens[len(tokens)-1]
+                
+                if(last_tok.tok == "//"):
+                    tokens.pop()
+                    while(self.current_char != "\n"):
+                        self.advance()
+                    self.advance()
+
             elif self.current_char == ";":
                 tokens.append(Token(T_EOL, start=self.loc))
                 self.advance()

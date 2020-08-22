@@ -13,34 +13,17 @@ return 90;
 
 function main(){
 
-   var val = 101;
-   var testn = 2;
-
-
-
-
-
-   var div = val / testn;
-   var mod= val % testn;
-   
-   
-   for(var i = 0; val; i++){
-   
-	   print_string("main for");
-	   div = val / testn;
-	   mod = val % testn;
-	   testmod(mod);
-
-
-   }
-
-
-
-
     var test = 4 % 10;
     print_integer(test);
+    var value;
+    cmp(test, 4){
 
+        != : testmod;
 
+    }->value;
 
-
+    print_integer(value);
+    testmod(test)->value;
+    
+    //beans
 }

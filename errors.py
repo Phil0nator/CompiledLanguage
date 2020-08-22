@@ -85,3 +85,7 @@ class VariableReDeclaration(Error):
 class InvalidStructureDeclaration(Error):
     def __init__(self, start, end, details):
         super().__init__(start,end,"Invalid Structure declaration", details)
+
+class InvalidCMPBlockHeader(Error):
+    def __init__(self, start, end, details):
+        super().__init__(start,end,"Invalid CMP Block Header", details)

@@ -48,9 +48,16 @@ TM_PP = "++"
 
 
 
-TM_ALL = "%&|><=-!+"
-
-
+TM_ALL = "%&|><=-!+/"
+CMP_TOKS = ["==","!=",">=", "<=", "<", ">"]
+CMP_TABLE = {
+    "==" : "je",
+    "!=" : "jne",
+    ">=" : "jge",
+    "<=" : "jle",
+    "<"  : "jl",
+    ">"  : "jg"
+}
 
 #ID
 ID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_."
@@ -75,7 +82,7 @@ ESCAPE_CHARS = {
 
 KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", \
             "null", "nullptr", "return", "new", "__asm", "__c", "#include", "#define", "#ifdef", "#ifndef", "#else", "#endif", \
-            "constructor"]
+            "constructor", "cmp"]
 
 
 

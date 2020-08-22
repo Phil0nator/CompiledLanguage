@@ -189,26 +189,43 @@ class Function:
             
         if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
             self.advance()
-        
-        print(expr)
-       
-        if(len(expr) == 1):
-            if(isinstance(expr[0], Declaration )):
-                self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
-            elif(isinstance(expr[0], int)):
-                self.addline("mov rbx, "+hex(expr[0]))
-            elif (self.compiler.globalExists( expr[0])):
-                self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
             
-            elif (expr[0] == "rdi"):
-                self.addline("mov rbx, rdi")
-            else:
-                print(self.current_token)
-                throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
-            if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
-            elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
-            else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
-            return
+
+        if(reg == None): 
+       
+            if(len(expr) == 1):
+                if(isinstance(expr[0], Declaration )):
+                    self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
+                elif(isinstance(expr[0], int)):
+                    self.addline("mov rbx, "+hex(expr[0]))
+                elif (self.compiler.globalExists( expr[0])):
+                    self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
+                
+                elif (expr[0] == "rdi"):
+                    self.addline("mov rbx, rdi")
+                else:
+                    print(self.current_token)
+                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
+                if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
+                elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
+                else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
+                return
+        else:
+            
+            if(len(expr) == 1):
+
+                if(isinstance(expr[0], Declaration )):
+                    self.addline(("mov %s, QWORD [rbp-"%reg)+hex(expr[0].offset)+"]")
+                elif(isinstance(expr[0], int)):
+                    self.addline(("mov %s, "%reg)+hex(expr[0]))
+                elif (expr[0] == "rdi"):
+                    self.addline("mov %s, rdi"%reg)
+                elif (self.compiler.globalExists( expr[0])):
+                    self.addline("mov %s, %s"%(reg,value_of_global(expr[0], self.compiler  )))
+                else:
+                    print(self.current_token)
+                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
+                return
         
 
         _reg = "rbx"
@@ -361,6 +378,9 @@ class Function:
             throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value))
         self.addline(self.current_token.value)
         self.advance()
+        if(self.current_token.tok != T_CLSCOPE):
+            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value))
+        self.advance()
 
 
     def buildForBlock(self):
@@ -416,7 +436,61 @@ class Function:
         print("POST :%s"%self.current_token)
         self.addline(header)
         
-    
+    def buildCMP(self):
+        if(self.current_token.tok != T_OPENP):
+            throw(InvalidCMPBlockHeader(self.current_token.start,self.current_token.end,self.current_token.value))
+        
+        self.advance()
+
+        self.evaluateExpression(reg="r14")
+        self.evaluateExpression(reg="r15")
+        
+        if(self.current_token.tok != T_OSCOPE):
+            throw(InvalidCMPBlockHeader(self.current_token.start,self.current_token.end,self.current_token.value))
+        endblockname = "__cmpblock__%s__%s"%(self.name,hex(len(self.bodytext)))
+        self.addline("cmp r14, r15")
+        self.addline("push %s"%endblockname)
+        self.advance(   )
+        while self.current_token.tok != None and self.current_token.tok != T_CLSCOPE:
+            if(self.current_token.tok not in CMP_TOKS):
+                throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+            
+            op = CMP_TABLE[self.current_token.tok]
+            self.advance()
+            if(self.current_token.tok != ":"):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+            self.advance()
+            if(self.current_token.tok != T_ID):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+            id = self.current_token.value
+            self.advance()
+            if(self.current_token.tok == T_CLSCOPE):break
+            if(self.current_token.tok != T_EOL):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+            self.addline("%s %s"%(op, id))
+            self.advance()
+
+        self.advance()
+        self.addline("add rsp, 0x8")
+        self.addline("%s:"%endblockname)
+
+        if(self.current_token.tok != "->"): return
+        self.advance()
+
+        if(self.current_token.tok != T_ID):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+
+        id = self.current_token.value
+
+        decl = self.getDeclarationByID(id)
+        
+        self.addline(place_value_from_reg(decl.offset,"r8"))
+        
+        self.advance()
+        
+        if(self.current_token.tok != T_EOL):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+        
+        self.advance()
+
+
+
+
 
 
     def buildKeywordStatement(self):
@@ -432,6 +506,9 @@ class Function:
         elif(self.current_token.value == "for"):
             self.advance()
             self.buildForBlock()
+        elif(self.current_token.value == "cmp"):
+            self.advance()
+            self.buildCMP()
         else:
             self.advance()
 
