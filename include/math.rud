@@ -16,3 +16,22 @@ function sqrtint(number){
     mov r8, r11
     "}
 }
+
+function powint(base, exponent){
+
+
+    __asm{"
+    
+        mov rax, r9
+        dec r10
+        __powint__flp_0x0:
+        mul r9
+        dec r10
+        cmp r10, 0
+        jne __powint__flp_0x0
+        mov r8, rax
+    
+    "}
+
+
+}

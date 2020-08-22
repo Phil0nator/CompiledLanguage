@@ -1513,6 +1513,32 @@ mov QWORD [rbp-0x8], rcx
 leave
 ret
 
+powint:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+
+    
+        mov rax, r9
+        dec r10
+        __powint__flp_0x0:
+        mul r9
+        dec r10
+        cmp r10, 0
+        jne __powint__flp_0x0
+        mov r8, rax
+    
+    
+
+
+leave
+ret
+
 testmod:
 
 push rbp
@@ -1530,7 +1556,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 0x20
 mov rbx, 0x4
 mov rcx, 0xa
 mov QWORD [rbp-0x8], rbx
@@ -1565,6 +1591,17 @@ mov rcx, r8
 mov QWORD [rbp-0x18], rcx
 
 mov r9, QWORD [rbp-0x18]
+call print_integer
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, 0x5
+mov r10, 0x5
+call powint
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x20]
 call print_integer
 
 

@@ -32,7 +32,10 @@ function main(){
     var sqrtedfortynine;
     sqrtint(49)->sqrtedfortynine;
 
-
     print_integer(sqrtedfortynine);
+
+    var powtest;
+    powint(5,5)->powtest;
+    print_integer(powtest);
 
 }
