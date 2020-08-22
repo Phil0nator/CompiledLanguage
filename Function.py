@@ -190,43 +190,26 @@ class Function:
         if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
             self.advance()
         
+        print(expr)
+       
+        if(len(expr) == 1):
+            if(isinstance(expr[0], Declaration )):
+                self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
+            elif(isinstance(expr[0], int)):
+                self.addline("mov rbx, "+hex(expr[0]))
+            elif (self.compiler.globalExists( expr[0])):
+                self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
+            
+            elif (expr[0] == "rdi"):
+                self.addline("mov rbx, rdi")
+            else:
+                print(self.current_token)
+                throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
+            if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
+            elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
+            else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
+            return
         
-        if(reg == None):
-            if(len(expr) == 1):
-                if(isinstance(expr[0], Declaration )):
-                    self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
-                elif(isinstance(expr[0], int)):
-                    self.addline("mov rbx, "+hex(expr[0]))
-                elif (self.compiler.globalExists( expr[0])):
-                    self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
-                
-                elif (expr[0] == "rdi"):
-                    self.addline("mov rbx, rdi")
-                else:
-                    print(self.current_token)
-                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
-                if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
-                elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
-                else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
-                return
-        else:
-            if(len(expr) == 1):
-                if(isinstance(expr[0], Declaration )):
-                    self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
-                elif(isinstance(expr[0], int)):
-                    self.addline("mov rbx, "+hex(expr[0]))
-                elif (self.compiler.globalExists( expr[0])):
-                    self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
-                
-                elif (expr[0] == "rdi"):
-                    self.addline("mov rbx, rdi")
-                else:
-                    print(self.current_token)
-                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
-                if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
-                elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
-                else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
-                return
 
         _reg = "rbx"
         if(str(expr[0]) in "*/"):
@@ -400,7 +383,8 @@ class Function:
         
         self.appendDeclaration("__%s__flp_maxnum%s"%(self.name,hex(decl.offset)))
         maxdecl = self.declarations[len(self.declarations)-1]
-        self.advance()
+        if(self.current_token.tok == ";"):
+            self.advance()
 
         self.evaluateExpression(decl=maxdecl)
         self.addline("; FIRST")
