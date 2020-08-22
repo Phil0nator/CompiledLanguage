@@ -30,6 +30,7 @@ class Compiler:
         #move constant strings to .data
         
         counter = 0
+        fltcnter = 0
         i=0
         while(i < len(self.tokens)):
             tok = self.tokens[i]
@@ -45,9 +46,18 @@ class Compiler:
                 
                 self.globals[1].append({"STRING_CONSTANT_"+str(counter): value})
                 counter += 1
+
+            if(tok.tok == T_FLOAT):
+                tok.tok = T_ID
+                value = tok.value
+                tok.value = "FLT_CONSTANT_"+str(fltcnter)
+                self.globals[1].append({"FLT_CONSTANT_"+str(fltcnter) : value})
+                fltcnter+=1
+
+            
             i+=1
 
-
+        self.globals[1].append({"__FLT_STANDARD_1":1.0})
 
         while self.current_token.tok != T_EOF:
             
@@ -80,7 +90,6 @@ class Compiler:
             throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         
-        print(self.current_token)
         self.advance() #move past '{'
         #BODY
         body = []
@@ -129,7 +138,7 @@ class Compiler:
                     self._data += g+": db `"+glob[g]+"`, 0\n"
                 elif (isinstance(glob[g], float)):
                     #self._data += g+": dq __float32("+str(glob[g])+")__\n"
-                    self._data += g+": dq "+str(glob[g])
+                    self._data += g+": dq __float32__("+str(glob[g])+")\n"
                 else:
                     self._data += g+": dq "+hex(glob[g])+"\n"
         self.main+="call m"

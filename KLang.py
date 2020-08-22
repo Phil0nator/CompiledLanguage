@@ -93,7 +93,8 @@ def main():
     #
     #
     #
-    # Float values will be stored in the heap, and pointed to by vars;
+    # Float values will be stored in the heap, and pointed to by vars
+    # Float math needs to be done through memory anyway, so the performance cost will be small
     #
     #############################################
 

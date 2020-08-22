@@ -35,3 +35,24 @@ function powint(base, exponent){
 
 
 }
+
+function floor(flt){
+
+
+    __asm {"
+
+        cvttss2si r8, xmm0
+    
+    "}
+
+}
+
+function round(flt){
+
+    __asm{"
+    
+        cvtss2si r8, xmm0
+
+    "}
+
+}

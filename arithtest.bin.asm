@@ -1014,8 +1014,10 @@ section .text
 
 section .data
 STRING_CONSTANT_0: db `Memory error encountered`, 0
+FLT_CONSTANT_0: dq __float32__(3.25)
+__FLT_STANDARD_1: dq __float32__(1.0)
 __isincluded__MEMORY_: dq 0x96c6
-funny: dq 3.253
+
 
 
 section .bss
@@ -1539,6 +1541,40 @@ mov QWORD [rbp-0x10], rcx
 leave
 ret
 
+floor:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+
+        cvttss2si r8, xmm0
+    
+    
+
+
+leave
+ret
+
+round:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+    
+        cvtss2si r8, xmm0
+
+    
+
+
+leave
+ret
+
 testmod:
 
 push rbp
@@ -1556,7 +1592,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x20
+sub rsp, 0x28
 mov rbx, 0x4
 mov rcx, 0xa
 mov QWORD [rbp-0x8], rbx
@@ -1603,6 +1639,14 @@ mov QWORD [rbp-0x20], rcx
 
 mov r9, QWORD [rbp-0x20]
 call print_integer
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+mov QWORD [rbp-0x28], FLT_CONSTANT_0
+movsd xmm15, [rbp-0x28]
+mov rcx, 0x1
+mov rbx, 0x3
+mov QWORD [rbp-0x30], rbx
 
 
 leave

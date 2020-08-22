@@ -17,7 +17,7 @@ class Function:
         self.allocator = ""
         self.closer = "\nleave\nret\n"
         self.bodytext = ""
-
+        self.isFast = False
         self.allocationCounter = 8
         self.declarations = []
 
@@ -32,8 +32,8 @@ class Function:
     """
     #add a new variable declaration, and increment stack ptr
     """
-    def appendDeclaration(self, name):
-        self.declarations.append(Declaration(name,self.allocationCounter))
+    def appendDeclaration(self, name, isfloat):
+        self.declarations.append(Declaration(name,self.allocationCounter,isfloat))
         self.allocationCounter+=8
 
 
@@ -156,10 +156,9 @@ class Function:
 
         #determine the contents of the expression:
         """
-        while self.current_token.tok != None and self.current_token.tok != T_EOL and self.current_token.tok != T_CLOSEP:
+        while self.current_token != None and self.current_token.tok != T_EOL and self.current_token.tok != T_CLOSEP:
             if(self.current_token.tok in T_EOL+T_COMMA): break
-            
-            if(self.current_token.tok == T_INT or self.current_token == T_FLOAT or self.current_token.tok == T_BOOLEAN):
+            if(self.current_token.tok == T_INT or self.current_token.tok == T_FLOAT or self.current_token.tok == T_BOOLEAN):
                 expr.append(self.current_token.value)
                 self.advance()
 
@@ -190,10 +189,19 @@ class Function:
         if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
             self.advance()
             
-
+        print(expr)
         if(reg == None): 
        
             if(len(expr) == 1):
+                if(decl != None):
+                    if(decl.isfloat):
+                        if(isinstance(expr[0], float)):
+                            self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], __float32__("+str(expr[0])+")")
+                            return
+                        elif(self.compiler.globalExists( expr[0] )):
+                            self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], "+expr[0])
+                            return
+
                 if(isinstance(expr[0], Declaration )):
                     self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
                 elif(isinstance(expr[0], int)):
@@ -204,7 +212,6 @@ class Function:
                 elif (expr[0] == "rdi"):
                     self.addline("mov rbx, rdi")
                 else:
-                    print(self.current_token)
                     throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
                 if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
                 elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
@@ -212,60 +219,115 @@ class Function:
                 return
         else:
             
-            if(len(expr) == 1):
+            if(reg in flt_parameter_registers):
 
-                if(isinstance(expr[0], Declaration )):
-                    self.addline(("mov %s, QWORD [rbp-"%reg)+hex(expr[0].offset)+"]")
-                elif(isinstance(expr[0], int)):
-                    self.addline(("mov %s, "%reg)+hex(expr[0]))
-                elif (expr[0] == "rdi"):
-                    self.addline("mov %s, rdi"%reg)
-                elif (self.compiler.globalExists( expr[0])):
-                    self.addline("mov %s, %s"%(reg,value_of_global(expr[0], self.compiler  )))
-                else:
-                    print(self.current_token)
-                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
-                return
+
+                if(len(expr) == 1):
+
+                    if(isinstance(expr[0], Declaration )):
+                        self.addline(("movsd %s,  [rbp-"%reg)+hex(expr[0].offset)+"]")
+                    elif(isinstance(expr[0], int)):
+                        self.addline(("movsd %s, "%reg)+"__float32__("+str(expr[0]+")"))
+                    elif (self.compiler.globalExists( expr[0])):
+                        self.addline("movsd %s, %s"%(reg,expr[0]))
+                    else:
+                        print(self.current_token)
+                        throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+                    return
+                
+
+
+            else:
+
+                if(len(expr) == 1):
+
+                    if(isinstance(expr[0], Declaration )):
+                        self.addline(("mov %s, QWORD [rbp-"%reg)+hex(expr[0].offset)+"]")
+                    elif(isinstance(expr[0], int)):
+                        self.addline(("mov %s, "%reg)+hex(expr[0]))
+                    elif (expr[0] == "rdi"):
+                        self.addline("mov %s, rdi"%reg)
+                    elif (self.compiler.globalExists( expr[0])):
+                        self.addline("mov %s, %s"%(reg,value_of_global(expr[0], self.compiler  )))
+                    else:
+                        print(self.current_token)
+                        throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+                    return
         
 
         _reg = "rbx"
         if(str(expr[0]) in "*/"):
             _reg="rax"
-
+        fltinvolved = False
+        
         """
 
         #Create assembly for the move
         """
         if(isinstance(expr[0], Declaration )):
-            self.addline(("mov %s, QWORD [rbp-"+hex(expr[0].offset)+"]")%_reg)
+            if(expr[0].isfloat):
+                self.addline("movsd xmm15, [rbp-"+hex(expr[0].offset)+"]")
+                fltinvolved=True
+            else:
+                self.addline(("mov %s, QWORD [rbp-"+hex(expr[0].offset)+"]")%_reg)
         elif(isinstance(expr[0], int)):
             self.addline(("mov %s, "+hex(expr[0]))%_reg)
+        elif (isinstance(expr[0], float)):
+            self.addline("movsd xmm15, __float32__("+str(expr[0])+")")
+            fltinvolved=True
+
         elif (self.compiler.globalExists( expr[0])):
-            self.addline("mov %s, %s"%(_reg,value_of_global(expr[0], self.compiler)))
+            if("FLT_CONSTANT_" in expr[0]):
+                self.addline("movsd xmm15, "+expr[0])
+                fltinvolved=True
+            else:
+                self.addline("mov %s, %s"%(_reg,value_of_global(expr[0], self.compiler)))
         
         
+        if(not fltinvolved):
 
-        if(len(expr) == 2):
-            if(expr[1] == "++"):
-                self.addline("inc %s"%_reg)
-            elif(expr[1] == "--"):
-                self.addline("dec %s"%_reg)
-            if(_reg != "rbx"):
-                self.addline("mov rbx, %s"%_reg)
-            if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), "rbx"))
-            elif (reg is not None): 
-                self.addline(correct_mov(reg,"rbx"))
-            else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), "rbx"))
-            return
+            if(len(expr) == 2):
+                if(expr[1] == "++"):
+                    self.addline("inc %s"%_reg)
+                elif(expr[1] == "--"):
+                    self.addline("dec %s"%_reg)
+                if(_reg != "rbx"):
+                    self.addline("mov rbx, %s"%_reg)
+                if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), "rbx"))
+                elif (reg is not None): 
+                    self.addline(correct_mov(reg,"rbx"))
+                else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), "rbx"))
+                return
+        else:
 
 
-        #move operand b into rcx reguardless
+            if(len(expr) == 2):
+                if(expr[1] == "++"):
+                    self.addline("movsd xmm14, __FLT_STANDARD_1")
+                    self.addline("addsd xmm15, xmm14")
+                if(expr[1] == "--"):
+                    self.addline("movsd xmm14, __FLT_STANDARD_1")
+                    self.addline("subsd xmm15, xmm14")
+
+
+        opbisfloat = False
+
+
+        #move operand b into rcx / xmm14 reguardless
         if(isinstance(expr[2], Declaration )):
-            self.addline("mov rcx, QWORD [rbp-"+hex(expr[2].offset)+"]")
+            if(expr[2].isfloat):
+                self.addline("mov xmm14, QWORD [rbp-"+hex(expr[2].offset)+"]")
+                opbisfloat=True
+            else:
+                self.addline("mov rcx, QWORD [rbp-"+hex(expr[2].offset)+"]")
         elif(isinstance(expr[2], int)):
             self.addline("mov rcx, "+hex(expr[2]))
         elif (self.compiler.globalExists( expr[2])):
-            self.addline("mov %s, %s"%("rcx",value_of_global(expr[2], self.compiler)))
+            if("FLT_CONSTANT_" in expr[2]):
+                self.addline("mov xmm14, "+expr[2])
+                opbisfloat=True
+            else:
+                self.addline("mov %s, %s"%("rcx",value_of_global(expr[2], self.compiler)))
         
         elif (expr[2] == "rdi"):
             self.addline("mov rcx, rdi")
@@ -288,23 +350,28 @@ class Function:
         #Create assembly for the math, and the re-deposit
         """
         #perform arithmatic, and move result into decl
-        outputreg = "rbx"
-        if(expr[1] == "+"):
-            self.addline("add rbx, rcx")
-        elif(expr[1] == "-"):
-            self.addline("sub rbx, rcx")
-        elif(expr[1] == "*"):
-            self.addline("imul rcx")
-            outputreg = "rax"
-        elif(expr[1] == "/"):
-            self.addline("xor rdx, rdx")
-            self.addline("idiv rcx")
-            outputreg = "rax"
+        if(not opbisfloat and not fltinvolved):
+            outputreg = "rbx"
+            if(expr[1] == "+"):
+                self.addline("add rbx, rcx")
+            elif(expr[1] == "-"):
+                self.addline("sub rbx, rcx")
+            elif(expr[1] == "*"):
+                self.addline("imul rcx")
+                outputreg = "rax"
+            elif(expr[1] == "/"):
+                self.addline("xor rdx, rdx")
+                self.addline("idiv rcx")
+                outputreg = "rax"
 
-        if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
-        elif (reg is not None): 
-            self.addline(correct_mov(reg,outputreg))
-        else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), outputreg))
+            if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
+            elif (reg is not None): 
+                self.addline(correct_mov(reg,outputreg))
+            else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), outputreg))
+        else:
+            if(not opbisfloat and fltinvolved):
+                #second op is int, and first is float
+                pass
 
 
 
@@ -323,6 +390,7 @@ class Function:
 
 
     def buildVariableDeclaration(self):
+        flt = (self.current_token.value == "float")
         self.advance()
         if(self.current_token.tok != T_ID):
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
@@ -332,7 +400,7 @@ class Function:
             throw(VariableReDeclaration(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         self.advance()
         if(self.current_token.tok == T_EOL): #variable declaration without assignment
-            self.appendDeclaration(id)
+            self.appendDeclaration(id,flt)
             
             self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "0x0"))
             #self.advance()
@@ -340,7 +408,7 @@ class Function:
         
         if(self.current_token.tok == "="): #with assignment
             self.advance()
-            self.appendDeclaration(id)
+            self.appendDeclaration(id,flt)
             if(not self.compiler.globalExists(id)):
                 self.evaluateExpression(decl=self.declarations[len(self.declarations)-1])#evaluate expression, and place it into this declaration
             else:
@@ -401,7 +469,7 @@ class Function:
 
         beginidx = len(self.bodytext) #anything added after this point, and before doCompilations will go at the end of the loop's asm
         
-        self.appendDeclaration("__%s__flp_maxnum%s"%(self.name,hex(decl.offset)))
+        self.appendDeclaration("__%s__flp_maxnum%s"%(self.name,hex(decl.offset)),False)
         maxdecl = self.declarations[len(self.declarations)-1]
         if(self.current_token.tok == ";"):
             self.advance()
@@ -453,17 +521,17 @@ class Function:
         self.advance(   )
         while self.current_token.tok != None and self.current_token.tok != T_CLSCOPE:
             if(self.current_token.tok not in CMP_TOKS):
-                throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+                throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
             
             op = CMP_TABLE[self.current_token.tok]
             self.advance()
-            if(self.current_token.tok != ":"):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+            if(self.current_token.tok != ":"):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
             self.advance()
-            if(self.current_token.tok != T_ID):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+            if(self.current_token.tok != T_ID):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
             id = self.current_token.value
             self.advance()
             if(self.current_token.tok == T_CLSCOPE):break
-            if(self.current_token.tok != T_EOL):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+            if(self.current_token.tok != T_EOL):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
             self.addline("%s %s"%(op, id))
             self.advance()
 
@@ -474,7 +542,7 @@ class Function:
         if(self.current_token.tok != "->"): return
         self.advance()
 
-        if(self.current_token.tok != T_ID):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+        if(self.current_token.tok != T_ID):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
 
         id = self.current_token.value
 
@@ -484,7 +552,7 @@ class Function:
         
         self.advance()
         
-        if(self.current_token.tok != T_EOL):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value))
+        if(self.current_token.tok != T_EOL):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
         
         self.advance()
 
@@ -495,7 +563,7 @@ class Function:
 
     def buildKeywordStatement(self):
 
-        if(self.current_token.value == "var"):
+        if(self.current_token.value == "var" or self.current_token.value == "float"):
             self.buildVariableDeclaration()
         elif(self.current_token.value == "return"):
             self.advance()
@@ -521,14 +589,15 @@ class Function:
 
 
     def compile(self):
-        allocationoffset = len(self.params)*8
-        for token in self.tokens:
-            if(token.tok == T_KEYWORD and token.value == "var"):
-                allocationoffset += 8
+        if(not self.isFast): #the fast keyword prevents this paramter storage
+            allocationoffset = len(self.params)*8
+            for token in self.tokens:
+                if(token.tok == T_KEYWORD and token.value == "var"):
+                    allocationoffset += 8
 
         self.allocator = allocate(allocationoffset)
         for i in range(len(self.params)):
-            self.appendDeclaration(self.params[i])
+            self.appendDeclaration(self.params[i], False)
             self.allocator += place_value_from_reg((i+1)*8,parameter_registers[i])
 
             

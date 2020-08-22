@@ -8,7 +8,6 @@ function testmod(mod){
     return 90;
 }
 
-final float funny = 3.253;
 
 function main(){
 
@@ -35,6 +34,13 @@ function main(){
     var powtest;
     powint(5,5)->powtest;
     print_integer(powtest);
+
+    float testf;
+    testf = 3.25;
+    testf = testf-1;
+    
+
+    var testfpost = 3;    
 
 
 }
