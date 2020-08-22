@@ -66,7 +66,7 @@ class Function:
                     self.evaluateExpression(reg=parameter_registers[len(params)])
                     params.append(parameter_registers[len(params)])
                 else:
-                    throw(InvalidParameter(self.current_token.start,self.current_token.end,self.current_token.value))
+                    throw(InvalidParameter(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         #params are filled
         self.addline("call "+fn_name)
@@ -85,7 +85,7 @@ class Function:
         if(self.current_token.tok == "->"): #use return value
             self.advance()
             if(self.current_token.tok != T_ID):
-                throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value))
+                throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
             if(self.compiler.globalExists( self.current_token.value ) ):
                 self.addline("mov %s,r8"% value_of_global(self.current_token.value, self.compiler) )
@@ -122,7 +122,7 @@ class Function:
             self.buildFunctionCall(id)
         else:
             print(self.current_token)
-            throw(InvalidVariableAssignment(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidVariableAssignment(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
 
 
@@ -184,7 +184,7 @@ class Function:
             else:
                 print(self.current_token)
 
-                throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
+                throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             #max expression size
             
         if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
@@ -205,7 +205,7 @@ class Function:
                     self.addline("mov rbx, rdi")
                 else:
                     print(self.current_token)
-                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
+                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
                 if(decl is not None): self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rbx")
                 elif (reg is not None): self.addline(correct_mov(reg,"rbx"))
                 else: self.addline("mov %s, rbx"%value_of_global(glob, self.compiler))
@@ -224,7 +224,7 @@ class Function:
                     self.addline("mov %s, %s"%(reg,value_of_global(expr[0], self.compiler  )))
                 else:
                     print(self.current_token)
-                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
+                    throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
                 return
         
 
@@ -271,7 +271,7 @@ class Function:
             self.addline("mov rcx, rdi")
         else:
 
-            throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
 
 
@@ -325,11 +325,11 @@ class Function:
     def buildVariableDeclaration(self):
         self.advance()
         if(self.current_token.tok != T_ID):
-            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             
         id = self.current_token.value
         if(self.getDeclarationByID(id) != None):
-            throw(VariableReDeclaration(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(VariableReDeclaration(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         self.advance()
         if(self.current_token.tok == T_EOL): #variable declaration without assignment
             self.appendDeclaration(id)
@@ -347,7 +347,7 @@ class Function:
                 self.evaluateExpression(glob=id)
 
         else: #invalid statement
-            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
 
 
@@ -371,25 +371,25 @@ class Function:
 
     def buildAsmBlock(self):
         if(self.current_token.tok != T_OSCOPE):
-            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         self.advance()
         if(self.current_token.tok != T_STRING):
-            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         self.addline(self.current_token.value)
         self.advance()
         if(self.current_token.tok != T_CLSCOPE):
-            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidASMBlock(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         self.advance()
 
 
     def buildForBlock(self):
         if(self.current_token.tok != T_OPENP):
-            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
         self.advance()
         if(self.current_token.tok != T_KEYWORD or self.current_token.value != "var"):
-            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         
         
@@ -418,7 +418,7 @@ class Function:
         self.advance()
 
         if(self.current_token.tok != T_OSCOPE):
-            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         self.advance()#move past {
 
 
@@ -438,7 +438,7 @@ class Function:
         
     def buildCMP(self):
         if(self.current_token.tok != T_OPENP):
-            throw(InvalidCMPBlockHeader(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidCMPBlockHeader(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
         self.advance()
 
@@ -446,7 +446,7 @@ class Function:
         self.evaluateExpression(reg="r15")
         
         if(self.current_token.tok != T_OSCOPE):
-            throw(InvalidCMPBlockHeader(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidCMPBlockHeader(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         endblockname = "__cmpblock__%s__%s"%(self.name,hex(len(self.bodytext)))
         self.addline("cmp r14, r15")
         self.addline("push %s"%endblockname)
@@ -550,7 +550,7 @@ class Function:
             elif(self.current_token.tok == T_ID):
                 self.buildIDStatement()
             else:
-                throw(UnkownStatementInitiator(self.current_token.start,self.current_token.end,self.current_token.value))
+                throw(UnkownStatementInitiator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
     def getFinalText(self):
         return self.header+"\n"+self.bodytext+"\n"+self.closer+"\n"

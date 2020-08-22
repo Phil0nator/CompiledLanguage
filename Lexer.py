@@ -22,13 +22,15 @@ class Lexer:
 
 
         while self.current_char != None:
-            if(self.current_char in ' \t'):#ignore whitespace 
+            if(self.current_char == "\n"):
+                self.advance()
+            elif(self.current_char in ' \t'):#ignore whitespace 
                 self.advance()
             elif (ord(self.current_char) == 3):#file counter
                 
                 self.fn+=1
                 self.loc.fn+=1
-                self.loc.ln = 0
+                self.loc.ln = self.text[0:self.loc.idx].count(chr(3))
                 self.loc.col = 0
                 
                 self.advance()
@@ -51,45 +53,44 @@ class Lexer:
                     self.advance()
 
             elif self.current_char == ";":
-                tokens.append(Token(T_EOL, start=self.loc))
+                tokens.append(Token(T_EOL, start=self.loc.copy()))
                 self.advance()
-            elif self.current_char == "\n":
-                self.advance()
+            
             elif self.current_char == '+':
-                tokens.append(Token(T_PLUS,start=self.loc))
+                tokens.append(Token(T_PLUS,start=self.loc.copy()))
                 self.advance()
             elif self.current_char == "&":
-                tokens.append(Token(T_AMPERSAND, start=self.loc))
+                tokens.append(Token(T_AMPERSAND, start=self.loc.copy()))
                 self.advance()
             elif self.current_char == '*':
-                tokens.append(Token(T_MUL, start=self.loc))
+                tokens.append(Token(T_MUL, start=self.loc.copy()))
                 self.advance()
             elif self.current_char == "/":
-                tokens.append(Token(T_DIV, start=self.loc))
+                tokens.append(Token(T_DIV, start=self.loc.copy()))
                 self.advance()
             elif self.current_char == "(":
-                tokens.append(Token(T_OPENP,start=self.loc))
+                tokens.append(Token(T_OPENP,start=self.loc.copy()))
                 self.advance()
             elif self.current_char == ")":
-                tokens.append(Token(T_CLOSEP, start=self.loc))
+                tokens.append(Token(T_CLOSEP, start=self.loc.copy()))
                 self.advance()
             elif self.current_char== "{":
-                tokens.append(Token(T_OSCOPE, start=self.loc))
+                tokens.append(Token(T_OSCOPE, start=self.loc.copy()))
                 self.advance()
             elif self.current_char == "}":
-                tokens.append(Token(T_CLSCOPE, start=self.loc))
+                tokens.append(Token(T_CLSCOPE, start=self.loc.copy()))
                 self.advance()
             elif self.current_char == "[":
-                tokens.append(Token(T_OPENLINDEX, start=self.loc))
+                tokens.append(Token(T_OPENLINDEX, start=self.loc.copy()))
                 self.advance()
             elif self.current_char == ",":
-                tokens.append(Token(T_COMMA,start=self.loc))
+                tokens.append(Token(T_COMMA,start=self.loc.copy()))
                 self.advance()
             elif self.current_char == "]":
-                tokens.append(Token(T_CLSLINDEX, start=self.loc))
+                tokens.append(Token(T_CLSLINDEX, start=self.loc.copy()))
                 self.advance()
             elif self.current_char == ":":
-                tokens.append(Token(T_COLON, start=self.loc))
+                tokens.append(Token(T_COLON, start=self.loc.copy()))
                 self.advance()
 
 
@@ -101,13 +102,13 @@ class Lexer:
                 start = self.loc.copy()
                 char = self.current_char
                 self.advance()
-                return [], UnexpectedTokenError(start,self.loc,"'%s'"%char)
+                return [], UnexpectedTokenError(start,self.loc,"'%s'"%char, self.current_char)
 
 
 
 
-
-        tokens.append(Token(T_EOF, start=self.loc))      
+            
+        tokens.append(Token(T_EOF, start=self.loc.copy()))      
 
         return tokens, None
     def make_number(self):
@@ -124,9 +125,9 @@ class Lexer:
             self.advance()
 
         if(dots==0):
-            return Token(T_INT, value=int(num), start=start,end=self.loc)
+            return Token(T_INT, value=int(num), start=start,end=self.loc.copy())
         else:
-            return Token(T_FLOAT,value=float(num), start=start,end=self.loc)
+            return Token(T_FLOAT,value=float(num), start=start,end=self.loc.copy())
 
 
     def make_multichar(self):
@@ -138,7 +139,7 @@ class Lexer:
             return Token(out,start=start)
         out+=self.current_char
         self.advance()
-        return Token(out,start=start,end=self.loc)
+        return Token(out,start=start,end=self.loc.copy())
     
 
             
@@ -160,7 +161,7 @@ class Lexer:
             self.advance()
 
         self.advance()
-        return Token(T_STRING,value=out,start=start,end=self.loc)
+        return Token(T_STRING,value=out,start=start,end=self.loc.copy())
 
     def make_identifier(self):
         out = ''
@@ -178,7 +179,7 @@ class Lexer:
         else:
             _type = T_ID
 
-        return Token(_type, value=out,start=start,end=self.loc)
+        return Token(_type, value=out,start=start,end=self.loc.copy())
 
 
 

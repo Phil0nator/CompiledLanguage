@@ -1015,7 +1015,7 @@ section .text
 section .data
 STRING_CONSTANT_0: db `Memory error encountered`, 0
 __isincluded__MEMORY_: dq 0x96c6
-
+funny: dq 3.253
 
 
 section .bss

@@ -54,14 +54,17 @@ class Compiler:
             if(self.current_token.tok == T_EOL):
                 self.advance()
             elif(self.current_token.tok == T_KEYWORD):
-                if self.current_token.value in "final var":
+                if self.current_token.value in ["final", "var", "float"]:
                     self.createGlobal()
                 elif self.current_token.value == "function":
                     self.createFunction()
                 elif self.current_token.value == "struct":
                     self.createStructure()
                 else:
-                    self.advance()
+                    throw(UnexpectedTokenError(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+            else:
+                throw(UnexpectedTokenError(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+
         self.fill_functions()
         self.fill_globals()
 
@@ -69,12 +72,12 @@ class Compiler:
     def createStructure(self):
         self.advance()
         if(self.current_token.tok != T_ID):
-            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         name = self.current_token.value
         self.advance()
         #looking for parameters
         if(self.current_token.tok != T_OSCOPE):
-            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         
         print(self.current_token)
@@ -91,7 +94,7 @@ class Compiler:
             self.advance()
 
         if(len(body) == 0):
-            throw(EmptyFunction(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(EmptyFunction(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
         struct = Struct(name, body)
         self._fdef+=struct.compile()
@@ -115,12 +118,18 @@ class Compiler:
         for glob in self.globals[0] : #bss:
             for g in glob:
                 self._bss+=define_global(g)
-                self.main+="mov QWORD ["+g+"], "+hex(glob[g])+"\n"
+                if(isinstance(glob[g], float)):
+                    self.main+="mov QWORD ["+g+"], "+str(glob[g])+"\n"
+                else:
+                    self.main+="mov QWORD ["+g+"], "+hex(glob[g])+"\n"
         
         for glob in self.globals[1] : #data:
             for g in glob:
                 if(isinstance(glob[g], str)):
                     self._data += g+": db `"+glob[g]+"`, 0\n"
+                elif (isinstance(glob[g], float)):
+                    #self._data += g+": dq __float32("+str(glob[g])+")__\n"
+                    self._data += g+": dq "+str(glob[g])
                 else:
                     self._data += g+": dq "+hex(glob[g])+"\n"
         self.main+="call m"
@@ -132,13 +141,13 @@ class Compiler:
     def createFunction(self):
         self.advance()
         if(self.current_token.tok != T_ID):
-            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
         name = self.current_token.value
         self.advance()
         #looking for parameters
         if(self.current_token.tok != T_OPENP):
-            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         self.advance()
         #closing parenthrsis, or parameters
@@ -152,12 +161,12 @@ class Compiler:
                     params.append(self.current_token.value)
                     self.advance()
                 else:
-                    throw(InvalidFunctionParameterDeclaration(self.current_token.start,self.current_token.end,self.current_token.value))
+                    throw(InvalidFunctionParameterDeclaration(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
 
         self.advance()#move past ')'
         if(self.current_token.tok != T_OSCOPE):
-            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         self.advance() #move past '{'
         #BODY
@@ -172,7 +181,7 @@ class Compiler:
             self.advance()
 
         if(len(body) == 0):
-            throw(EmptyFunction(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(EmptyFunction(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
 
         function = Function(name,params,body,self)
@@ -209,9 +218,12 @@ class Compiler:
         if(self.current_token.value == "final"):
             isFinal = True
             self.advance()
+        flt = False
+        if(self.current_token.value == "float"):
+            flt = True
         self.advance()
         if(self.current_token.tok != T_ID):
-            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         id = self.current_token.value
         self.advance()
         if(self.current_token.tok == T_EOL):
@@ -221,7 +233,7 @@ class Compiler:
             return
 
         if(self.current_token.tok != "="):
-            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         self.advance()
 
@@ -234,7 +246,7 @@ class Compiler:
         #not constant value, other identifier
 
         if(self.current_token.tok != T_ID):
-            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
         for catagory in self.globals:
             for glob in catagory:
@@ -245,7 +257,7 @@ class Compiler:
                         self.advance() #EOL
                         self.advance()
                         return
-        throw(UndefinedVariable(self.current_token.start,self.current_token.end,self.current_token.value))
+        throw(UndefinedVariable(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
 
     """ 

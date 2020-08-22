@@ -126,7 +126,7 @@ class Preprocessor:
     def buildInclude(self):
         self.advance()
         if(self.current_token.tok != T_STRING):
-            throw(EmptyIncludeStatement(self.current_token.start,self.current_token.end,self.current_token.value))
+            throw(EmptyIncludeStatement(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
         file = self.current_token.value
 
@@ -143,7 +143,7 @@ class Preprocessor:
             print("File does not exist: %s"%file)
             exit(1)
         self.data=self.data.replace("\"%s\""%file, "",1)
-        self.data=self.data.replace("#include",chr(3)+newdata, 1)
+        self.data=self.data.replace("#include","\n"+newdata+"\n"+chr(3), 1)
         self.advance()
 
     def buildDefine(self):

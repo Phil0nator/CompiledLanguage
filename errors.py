@@ -1,13 +1,15 @@
 cc = {}
 class Error:
-    def __init__(self, start, end, error, details):
+    def __init__(self, start, end, error, details, tok):
         self.start=start
         self.end=end
         self.error=error
         self.details=details
+        self.tok = tok
     def as_string(self):
-        result = f'{self.error}:{self.details}\n'
+        result = f'{self.error} on token : {self.tok}\nValue Given: {self.details}\n'
         result += f'File : {cc["FILES"][len(cc["FILES"])-1-self.start.fn]}, line : {self.start.ln+1}'
+        result += f"\n"
         return result
 
 def throw(e):
@@ -15,77 +17,77 @@ def throw(e):
     exit(1)
 
 class UnexpectedTokenError(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Unexpected Token", details)
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Unexpected Token", details, tok)
 
 class InvalidVariableDeclarator(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Invalid Variable Declaration", details)
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid Variable Declaration", details, tok)
 
 class UndefinedVariable(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Unkown Reference to Variable", details)
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Unkown Reference to Variable", details, tok)
 
 class InvalidFunctionDeclarator(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Invalid Function Declaration", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Invalid Function Declaration", details, tok)
 
 class InvalidFunctionParameterDeclaration(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Invalid Function Parameter Declaration", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Invalid Function Parameter Declaration", details, tok)
 
 class UnkownStatementInitiator(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Unkown Statement Initiator", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Unkown Statement Initiator", details, tok)
 
 class EmptyFunction(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Empty Function Declaration", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Empty Function Declaration", details, tok)
 
 class InvalidVariableAssignment(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Invalid Variable Assignment", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Invalid Variable Assignment", details, tok)
 
 class ExpressionOverflow(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Expression too long (Use parenthrsis to split up your expression)", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Expression too long (Use parenthrsis to split up your expression)", details, tok)
 
 class InvalidExpressionComponent(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Invalid Expression Component", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Invalid Expression Component", details, tok)
 
 class InvalidParameter(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Invalid Parameter", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Invalid Parameter", details, tok)
 
 class InvalidFunctionReturnDestination(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Invalid Function Return Destination", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Invalid Function Return Destination", details, tok)
 
 class EmptyIncludeStatement(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Empty Include Statement", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Empty Include Statement", details, tok)
 
 class InvalidDefinrdirective(Error):
-    def __init__(self, start, end, details):
-            super().__init__(start,end,"Invalid Define Directive", details)
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Invalid Define Directive", details, tok)
 
 class InvalidASMBlock(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Invalid Assembly Block", details)
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid Assembly Block", details, tok)
 
 class InvalidForBlockInit(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Invalid For Block Header", details)
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid For Block Header", details, tok)
 
 class VariableReDeclaration(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Variable redeclared before leaving scope", details)
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Variable redeclared before leaving scope", details, tok)
 
 class InvalidStructureDeclaration(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Invalid Structure declaration", details)
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid Structure declaration", details, tok)
 
 class InvalidCMPBlockHeader(Error):
-    def __init__(self, start, end, details):
-        super().__init__(start,end,"Invalid CMP Block Header", details)
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid CMP Block Header", details, tok)

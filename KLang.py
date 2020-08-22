@@ -38,13 +38,15 @@ def main():
     cc["DEF"] = []
     cc["GL_VAR"] = []
     cc["FILES"] = [__fileinput__]
-
+    cc["WSPACE"] = []
     
 
     with open(__fileinput__, "rb") as f:
         data = f.read().decode()
 
     data = pre_process(data,cc)
+    
+    
     l = Lexer(0, data)
     tokens, errors = l.make_tokens()
     if(errors != None):
@@ -81,36 +83,17 @@ def main():
     # All tokens -> global variables
     #       define global vars in bss, finals in .data
     # Remaining tokens -> functions
-    #    for each function:
-    #       
-    #       determine the total allocation space for function
-    #       
-    #       lines that start with keyword
-    #           if: cmp
-    #           var: allocator
-    #           while: cmp
-    #           for: cmp
-    #           call: fn
-    #           label: name
-    #           jump: label
-    #
-    #       lines that start with id
-    #           
-    #           variable assignment
     #
     #
-    #       Expressions:    
-    #
-    #           Only two term expressions allowed (excluding function calls)
-    #
-    #       return:
-    #           value returned by the function will be pushed
-    #
-    #       Function parameters will be passed through : r9-r15. 
-    #           Before calling these will be pushed, and after they will be poped
-    #       Functions using a return value will return to the register: r8
     #
     #
+    # Function parameters will be passed through : r9-r15. 
+    #    Before calling these will be pushed, and after they will be poped
+    # Functions using a return value will return to the register: r8
+    #
+    #
+    #
+    # Float values will be stored in the heap, and pointed to by vars;
     #
     #############################################
 

@@ -1,6 +1,3 @@
-
-
-
 #include "include/prints.rud"
 #include "include/entryexit.rud"
 #include "include/memory.rud"
@@ -8,9 +5,10 @@
 #include "include/math.rud"
 
 function testmod(mod){
-return 90;
+    return 90;
 }
 
+final float funny = 3.253;
 
 function main(){
 
@@ -37,5 +35,6 @@ function main(){
     var powtest;
     powint(5,5)->powtest;
     print_integer(powtest);
+
 
 }
