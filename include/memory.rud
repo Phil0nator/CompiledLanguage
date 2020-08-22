@@ -15,13 +15,13 @@ function Array(len){
 
 }
 
-function putValue(array, index, value){
+function fast putValue(array, index, value){
     __asm{"
     mov rax, r11
     mov QWORD [r9+r10], rax  
     "}
 }
-function getValue(array, index){
+function fast getValue(array, index){
 
     __asm{"
     
@@ -33,7 +33,7 @@ function getValue(array, index){
 }
 
 
-function alloc(amt){
+function fast alloc(amt){
 
 __asm{"
 
@@ -65,7 +65,7 @@ function memerror(error){
 
 }
 
-function destroy(ptr){
+function fast destroy(ptr){
 __asm{"
 
     mov rdi, r9
@@ -79,7 +79,7 @@ __asm{"
 
 }
 
-function reallocate(ptr, newsize){
+function fast reallocate(ptr, newsize){
 
     __asm{
         "

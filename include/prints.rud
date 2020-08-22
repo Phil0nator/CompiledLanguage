@@ -1,11 +1,11 @@
 #include "include/memory.rud"
-function print_char(char){
+function fast print_char(char){
     __asm{"
     PRINT_CHAR r9
     NEWLINE
     "}
 }
-function print_string(string){
+function fast print_string(string){
     __asm{"
     PRINT_STRING [r9]
     NEWLINE
@@ -13,13 +13,13 @@ function print_string(string){
 }
 
 
-function print_integer(number){
+function fast print_integer(number){
     __asm{"
     PRINT_DEC 8, r9
     NEWLINE
     "}
 }
-function printformat(value, format){
+function fast printformat(value, format){
 
     __asm{"
     
@@ -40,7 +40,7 @@ function printformat(value, format){
 }
 
 
-function print_two_formats(value, fa, fb){
+function fast print_two_formats(value, fa, fb){
 
 
     __asm{"

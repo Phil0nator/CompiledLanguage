@@ -4,7 +4,7 @@
 #include "include/string.rud"
 #include "include/math.rud"
 
-function testmod(mod){
+function fast testmod(mod){
     return 90;
 }
 

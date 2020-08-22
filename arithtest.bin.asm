@@ -1057,13 +1057,7 @@ putValue:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
-mov rcx, r11
-mov QWORD [rbp-0x18], rcx
+sub rsp, 0x8
 
     mov rax, r11
     mov QWORD [r9+r10], rax  
@@ -1077,11 +1071,7 @@ getValue:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+sub rsp, 0x8
 
     
     mov rax, QWORD [r9+r10]
@@ -1098,8 +1088,6 @@ alloc:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
 
    xor r11, r11
@@ -1143,8 +1131,6 @@ destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
 
     mov rdi, r9
@@ -1164,11 +1150,7 @@ reallocate:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+sub rsp, 0x8
 
         
 
@@ -1197,8 +1179,6 @@ print_char:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
     PRINT_CHAR r9
     NEWLINE
@@ -1213,8 +1193,6 @@ print_string:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
     PRINT_STRING [r9]
     NEWLINE
@@ -1229,8 +1207,6 @@ print_integer:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
     PRINT_DEC 8, r9
     NEWLINE
@@ -1244,11 +1220,7 @@ printformat:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+sub rsp, 0x8
 
     
     push rax
@@ -1273,13 +1245,7 @@ print_two_formats:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
-mov rcx, r11
-mov QWORD [rbp-0x18], rcx
+sub rsp, 0x8
 
     
     push rax
@@ -1361,11 +1327,7 @@ stringcat:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+sub rsp, 0x8
 
     mov rdi, r9 ;reallocated
     mov rsi, r10;strb
@@ -1385,11 +1347,7 @@ strcpy:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+sub rsp, 0x8
 
         
         xor r8, r8
@@ -1415,8 +1373,6 @@ strlen:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
     
     xor r8,r8
@@ -1492,8 +1448,6 @@ sqrtint:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
     mov r8, r9 ; copy initial value
     xor r10, r10; count
@@ -1519,11 +1473,7 @@ powint:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
+sub rsp, 0x8
 
     
         mov rax, r9
@@ -1546,8 +1496,6 @@ floor:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
 
         cvttss2si r8, xmm0
@@ -1563,8 +1511,6 @@ round:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
     
         cvtss2si r8, xmm0
@@ -1580,8 +1526,6 @@ testmod:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 mov r8, 0x5a
 
 

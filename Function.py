@@ -189,7 +189,6 @@ class Function:
         if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
             self.advance()
             
-        print(expr)
         if(reg == None): 
        
             if(len(expr) == 1):
@@ -594,11 +593,17 @@ class Function:
             for token in self.tokens:
                 if(token.tok == T_KEYWORD and token.value == "var"):
                     allocationoffset += 8
+        else:
+            allocationoffset = 8
+            for token in self.tokens:
+                if(token.tok == T_KEYWORD and token.value == "var"):
+                    allocationoffset += 8
 
         self.allocator = allocate(allocationoffset)
-        for i in range(len(self.params)):
-            self.appendDeclaration(self.params[i], False)
-            self.allocator += place_value_from_reg((i+1)*8,parameter_registers[i])
+        if(not self.isFast):
+            for i in range(len(self.params)):
+                self.appendDeclaration(self.params[i], False)
+                self.allocator += place_value_from_reg((i+1)*8,parameter_registers[i])
 
             
         self.bodytext = "%s%s"%(self.allocator,self.bodytext)

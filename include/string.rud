@@ -16,7 +16,7 @@ function string(source){
 
 }
 
-function stringcat(reallocated, strb){
+function fast stringcat(reallocated, strb){
 
 __asm{"
     mov rdi, r9 ;reallocated
@@ -33,7 +33,7 @@ __asm{"
 
 
 
-function strcpy(destination, source){
+function fast strcpy(destination, source){
 
 
     __asm{"
@@ -56,7 +56,7 @@ function strcpy(destination, source){
 
 
 
-function strlen(ptr){
+function fast strlen(ptr){
 
     __asm{"
     

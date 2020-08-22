@@ -149,6 +149,11 @@ class Compiler:
     """
     def createFunction(self):
         self.advance()
+        isFast = False
+        if(self.current_token.tok == T_KEYWORD and self.current_token.value == "fast"):
+            isFast = True
+            self.advance()
+
         if(self.current_token.tok != T_ID):
             throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
@@ -194,6 +199,7 @@ class Compiler:
         
 
         function = Function(name,params,body,self)
+        function.isFast=isFast
         self.advance()
         self.functions.append(function)
         
