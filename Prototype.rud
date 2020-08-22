@@ -2,10 +2,7 @@
 var bruhman = 100;
 final var endl = "\n";
 
-#include "include/prints.rud"
-#include "include/entryexit.rud"
-#include "include/memory.rud"
-#include "include/string.rud"
+
 
 struct Vector{
 

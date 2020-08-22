@@ -1,14 +1,18 @@
 
 
 
-#include "includes/memory.rud"
+#include "include/prints.rud"
+#include "include/entryexit.rud"
+#include "include/memory.rud"
+#include "include/string.rud"
 
 
 
 function main(){
 
 
-    
+    var test = 4 % 10;
+    print_integer(test);
 
 
 
