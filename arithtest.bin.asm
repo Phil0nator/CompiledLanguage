@@ -1485,6 +1485,34 @@ mov r8, QWORD [rbp-0x30]
 leave
 ret
 
+sqrtint:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+    mov r8, r9 ; copy initial value
+    xor r10, r10; count
+    xor r11, r11; sqrt
+    __sqrtint_flp_0x0:
+    sub r8, r10
+    inc r10
+    inc r10
+    inc r11
+    cmp r8, 0
+    js __sqrtint_flp_0x0_end
+    jnz __sqrtint_flp_0x0
+    __sqrtint_flp_0x0_end:
+    dec r11
+    mov r8, r11
+    
+
+
+leave
+ret
+
 testmod:
 
 push rbp
@@ -1502,7 +1530,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
+sub rsp, 0x18
 mov rbx, 0x4
 mov rcx, 0xa
 mov QWORD [rbp-0x8], rbx
@@ -1528,6 +1556,16 @@ call testmod
 mov rcx, r8
 mov QWORD [rbp-0x10], rcx
 
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov r9, 0x31
+call sqrtint
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x18]
+call print_integer
 
 
 leave

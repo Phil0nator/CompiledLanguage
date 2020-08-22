@@ -1,0 +1,18 @@
+function sqrtint(number){
+    __asm{"
+    mov r8, r9 ; copy initial value
+    xor r10, r10; count
+    xor r11, r11; sqrt
+    __sqrtint_flp_0x0:
+    sub r8, r10
+    inc r10
+    inc r10
+    inc r11
+    cmp r8, 0
+    js __sqrtint_flp_0x0_end
+    jnz __sqrtint_flp_0x0
+    __sqrtint_flp_0x0_end:
+    dec r11
+    mov r8, r11
+    "}
+}
