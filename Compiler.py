@@ -44,20 +44,20 @@ class Compiler:
                 value = tok.value
                 tok.value = "STRING_CONSTANT_"+str(counter)
                 
-                self.globals[1].append({"STRING_CONSTANT_"+str(counter): value})
+                self.globals[1].append({"STRING_CONSTANT_"+str(counter): value, "isfloat":False})
                 counter += 1
 
             if(tok.tok == T_FLOAT):
                 tok.tok = T_ID
                 value = tok.value
                 tok.value = "FLT_CONSTANT_"+str(fltcnter)
-                self.globals[1].append({"FLT_CONSTANT_"+str(fltcnter) : value})
+                self.globals[1].append({"FLT_CONSTANT_"+str(fltcnter) : value, "isfloat":True})
                 fltcnter+=1
 
             
             i+=1
 
-        self.globals[1].append({"__FLT_STANDARD_1":1.0})
+        self.globals[1].append({"__FLT_STANDARD_1":1.0, "isfloat":True})
 
         while self.current_token.tok != T_EOF:
             
@@ -126,21 +126,23 @@ class Compiler:
     def fill_globals(self):
         for glob in self.globals[0] : #bss:
             for g in glob:
-                self._bss+=define_global(g)
-                if(isinstance(glob[g], float)):
-                    self.main+="mov QWORD ["+g+"], "+str(glob[g])+"\n"
-                else:
-                    self.main+="mov QWORD ["+g+"], "+hex(glob[g])+"\n"
+                if(g != "isfloat"):
+                    self._bss+=define_global(g)
+                    if(isinstance(glob[g], float)):
+                        self.main+="mov QWORD ["+g+"], "+str(glob[g])+"\n"
+                    else:
+                        self.main+="mov QWORD ["+g+"], "+hex(glob[g])+"\n"
         
         for glob in self.globals[1] : #data:
             for g in glob:
-                if(isinstance(glob[g], str)):
-                    self._data += g+": db `"+glob[g]+"`, 0\n"
-                elif (isinstance(glob[g], float)):
-                    #self._data += g+": dq __float32("+str(glob[g])+")__\n"
-                    self._data += g+": dq __float32__("+str(glob[g])+")\n"
-                else:
-                    self._data += g+": dq "+hex(glob[g])+"\n"
+                if(g != "isfloat"):
+                    if(isinstance(glob[g], str)):
+                        self._data += g+": db `"+glob[g]+"`, 0\n"
+                    elif (isinstance(glob[g], float)):
+                        #self._data += g+": dq __float32("+str(glob[g])+")__\n"
+                        self._data += g+": dq __float32__("+str(glob[g])+")\n"
+                    else:
+                        self._data += g+": dq "+hex(glob[g])+"\n"
         self.main+="call m"
 
 
@@ -166,12 +168,20 @@ class Compiler:
         self.advance()
         #closing parenthrsis, or parameters
         params = []
+        types = []
         if(self.current_token.tok != T_CLOSEP):
             #parameters
             while self.current_token.tok != T_CLOSEP:
                 if(self.current_token.tok == T_COMMA):
                     self.advance()
                 elif (self.current_token.tok == T_ID):
+                    params.append(self.current_token.value)
+                    types.append("var")
+                    self.advance()
+                elif (self.current_token.tok == T_KEYWORD and self.current_token.value == "float"):
+                    types.append("float")
+                    self.advance()
+                    if(self.current_token.tok != T_ID):throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
                     params.append(self.current_token.value)
                     self.advance()
                 else:
@@ -198,7 +208,7 @@ class Compiler:
             throw(EmptyFunction(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
 
-        function = Function(name,params,body,self)
+        function = Function(name,params,body,self,types)
         function.isFast=isFast
         self.advance()
         self.functions.append(function)
@@ -225,6 +235,21 @@ class Compiler:
                         return isinstance( glob[g], str)
         return False
 
+    def globalIsFloat(self, name):
+        for c in self.globals:
+            for glob in c:
+                for g in glob:
+                    
+                    if(g == name):
+                        return glob["isfloat"] 
+        return False
+
+    def getFunctionByName(self, name):
+        for fn in self.functions:
+            if(fn.name == name):
+                return fn
+        return None
+
     """
     #Based on the current position, read the current line and identify a global variable
     """
@@ -243,7 +268,7 @@ class Compiler:
         self.advance()
         if(self.current_token.tok == T_EOL):
             #endline
-            self.globals[int(isFinal)].append( {id:0} )
+            self.globals[int(isFinal)].append( {id:0, "isfloat":flt} )
             self.advance()
             return
 
@@ -254,7 +279,7 @@ class Compiler:
 
         #value
         if(self.current_token.tok == T_INT or self.current_token.tok == T_FLOAT or self.current_token.tok == T_STRING or self.current_token.tok == T_BOOLEAN):
-            self.globals[int(isFinal)].append({id:self.current_token.value})
+            self.globals[int(isFinal)].append({id:self.current_token.value, "isfloat":flt})
             self.advance()
             return
 
@@ -268,7 +293,7 @@ class Compiler:
                 for g in glob:
                     if g == self.current_token.value:
                         
-                        self.globals[int(isFinal)].append({id:glob[g]})
+                        self.globals[int(isFinal)].append({id:glob[g], "isfloat":flt})
                         self.advance() #EOL
                         self.advance()
                         return

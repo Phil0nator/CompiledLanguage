@@ -36,7 +36,7 @@ function fast powint(base, exponent){
 
 }
 
-function fast floor(flt){
+function fast floor(float flt){
 
 
     __asm {"
@@ -47,12 +47,22 @@ function fast floor(flt){
 
 }
 
-function fast round(flt){
+function fast round(float flt){
 
     __asm{"
     
         cvtss2si r8, xmm0
 
+    "}
+
+}
+
+function fast toFloat(integer){
+
+    __asm{"
+    
+        cvtsi2ss xmm8, r9
+    
     "}
 
 }

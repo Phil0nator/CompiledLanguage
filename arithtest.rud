@@ -8,6 +8,7 @@ function fast testmod(mod){
     return 90;
 }
 var globtest;
+float globalfloat;
 
 function main(){
 
@@ -38,11 +39,16 @@ function main(){
     var powtest;
     powint(5,5)->powtest;
     print_integer(powtest);
+    __asm{"; Floating Point arithmetic"}
 
-    float testf;
-    testf = 3.25;
-    testf = testf-1;
+    float testf = 5.5;
+    testf = testf + 3.5;
+    var fprinter;
+    round(testf)->fprinter;
+    print_integer(fprinter);
+
     
+
 
     var testfpost = 3;    
 

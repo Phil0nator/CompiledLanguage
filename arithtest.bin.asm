@@ -1014,7 +1014,8 @@ section .text
 
 section .data
 STRING_CONSTANT_0: db `Memory error encountered`, 0
-FLT_CONSTANT_0: dq __float32__(3.25)
+FLT_CONSTANT_0: dq __float32__(5.5)
+FLT_CONSTANT_1: dq __float32__(3.5)
 __FLT_STANDARD_1: dq __float32__(1.0)
 __isincluded__MEMORY_: dq 0x96c6
 
@@ -1022,6 +1023,7 @@ __isincluded__MEMORY_: dq 0x96c6
 
 section .bss
 globtest: resb 0x8
+globalfloat: resb 0x8
 
 
 
@@ -1522,6 +1524,21 @@ sub rsp, 0x8
 leave
 ret
 
+toFloat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        cvtsi2ss xmm8, r9
+    
+    
+
+
+leave
+ret
+
 testmod:
 
 push rbp
@@ -1537,7 +1554,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x30
 mov rax, 0xa
 mov rcx, 0x4
 xor rdx, rdx
@@ -1593,15 +1610,25 @@ mov QWORD [rbp-0x20], rcx
 
 mov r9, QWORD [rbp-0x20]
 call print_integer
+; Floating Point arithmetic
+movss xmm10, [FLT_CONSTANT_0]
+movss  [rbp-0x28], xmm10
+movss xmm15, [rbp-0x28]
+movss xmm14, [FLT_CONSTANT_1]
+addss xmm15, xmm14
+movss [rbp-0x28], xmm15
 mov rcx, 0x0
-mov QWORD [rbp-0x28], rcx
+mov QWORD [rbp-0x30], rcx
 
-mov QWORD [rbp-0x28], FLT_CONSTANT_0
-movsd xmm15, [rbp-0x28]
-mov rcx, 0x1
-cvtsi2sd 
+movss xmm0,  [rbp-0x28]
+call round
+mov rcx, r8
+mov QWORD [rbp-0x30], rcx
+
+mov r9, QWORD [rbp-0x30]
+call print_integer
 mov rbx, 0x3
-mov QWORD [rbp-0x30], rbx
+mov QWORD [rbp-0x38], rbx
 
 
 leave
@@ -1621,6 +1648,7 @@ xor rax, rax
 mov r9, rsi     ;commandline args
 mov r10, rdi
 mov QWORD [globtest], 0x0
+mov QWORD [globalfloat], 0x0
 call m
 NEWLINE
 ret

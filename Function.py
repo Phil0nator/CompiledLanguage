@@ -4,8 +4,9 @@ from errors import *
 from constants import *
 
 class Function:
-    def __init__(self,name,params,tokens, compiler):
+    def __init__(self,name,params,tokens, compiler, types):
         self.tokens = tokens
+        self.types = types
         self.name = name
         if(name == "main"):
             self.name = "m"
@@ -47,27 +48,45 @@ class Function:
 
         #collect parameters
         params = []
-
+        types = self.compiler.getFunctionByName(id).types
         if(self.current_token.tok == T_CLOSEP): #No parameters
             pass
             
         else:
-            self.evaluateExpression(reg=parameter_registers[len(params)])
-            params.append(parameter_registers[len(params)])
+            t = types[len(params)]
+            if(t == "var"):
+                self.evaluateExpression(reg=parameter_registers[len(params)])
+                params.append(parameter_registers[len(params)])
+            else:
+                self.evaluateExpression(reg=flt_parameter_registers[len(params)])
+                params.append(flt_parameter_registers[len(params)])
             while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->" and self.current_token.tok != T_EOL:
+                
                 if(self.current_token.tok == T_COMMA):
                     self.advance()
-                    self.evaluateExpression(reg=parameter_registers[len(params)])
-                    params.append(parameter_registers[len(params)])
+                    if(t == "var"):
+                        self.evaluateExpression(reg=parameter_registers[len(params)])
+                        params.append(parameter_registers[len(params)])
+                    else:
+                        self.evaluateExpression(reg=flt_parameter_registers[len(params)])
+                        params.append(flt_parameter_registers[len(params)])
+
                 elif(self.current_token.tok == T_ID):
-                    self.evaluateExpression(reg=parameter_registers[len(params)])
-                    params.append(parameter_registers[len(params)])
+                    if(t == "var"):
+                        self.evaluateExpression(reg=parameter_registers[len(params)])
+                        params.append(parameter_registers[len(params)])
+                    else:
+                        self.evaluateExpression(reg=flt_parameter_registers[len(params)])
+                        params.append(flt_parameter_registers[len(params)])
                 elif (self.current_token.tok == T_INT or self.current_token.tok == T_FLOAT):
-                    self.evaluateExpression(reg=parameter_registers[len(params)])
-                    params.append(parameter_registers[len(params)])
+                    if(t == "var"):
+                        self.evaluateExpression(reg=parameter_registers[len(params)])
+                        params.append(parameter_registers[len(params)])
+                    else:
+                        self.evaluateExpression(reg=flt_parameter_registers[len(params)])
+                        params.append(flt_parameter_registers[len(params)])
                 else:
                     throw(InvalidParameter(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
-
         #params are filled
         self.addline("call "+fn_name)
         
@@ -201,8 +220,38 @@ class Function:
                             self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], __float32__("+str(expr[0])+")")
                             return
                         elif(self.compiler.globalExists( expr[0] )):
-                            self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], "+expr[0])
+                            if(self.compiler.globalIsFloat(expr[0])):
+                                self.addline("movss xmm10, [%s]"%expr[0])
+                                self.addline("movss  [rbp-"+hex(decl.offset)+"], xmm10")
+                            else:
+                                self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], [%s]"%expr[0])
                             return
+                        elif(isinstance(expr[0], Declaration)):
+                            if(expr[0].isfloat):
+                                self.addline("movss xmm10,  [rbp-"+hex(expr[0].offset)+"]")
+                                self.addline("movss QWORD [rbp-"+hex(decl.offet)+"], xmm10")
+                            else:
+                                self.addline("cvttss2si rax, QWORD [rbp-"+hex(expr[0].offset)+"]")
+                                self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rax")
+
+                if(glob != None):
+                    if(self.compiler.globalIsFloat(glob)):
+                        if(isinstance(expr[0], float)):
+                            self.addline("mov  ["+glob+"], __float32__("+str(expr[0])+")")
+                            return
+                        elif(self.compiler.globalExists( expr[0] )):
+                            self.addline("mov QWORD ["+glob+"], "+expr[0])
+                            return
+                        elif(isinstance(expr[0], Declaration)):
+                            if(expr[0].isfloat):
+                                self.addline("movss  xmm10, [rbp-"+hex(expr[0].offset)+"]")
+                                self.addline("movss [%s], xmm10"%glob)
+                            else:
+                                self.addline("cvttss2si rax, QWORD [rbp-"+hex(expr[0].offset)+"]")
+                                self.addline("mov QWORD ["+glob+"], rax")
+
+
+
 
                 if(isinstance(expr[0], Declaration )):
                     self.addline("mov rbx, QWORD [rbp-"+hex(expr[0].offset)+"]")
@@ -228,11 +277,11 @@ class Function:
                 if(len(expr) == 1):
 
                     if(isinstance(expr[0], Declaration )):
-                        self.addline(("movsd %s,  [rbp-"%reg)+hex(expr[0].offset)+"]")
+                        self.addline(("movss %s,  [rbp-"%reg)+hex(expr[0].offset)+"]")
                     elif(isinstance(expr[0], int)):
-                        self.addline(("movsd %s, "%reg)+"__float32__("+str(expr[0]+")"))
+                        self.addline(("movss %s, "%reg)+"__float32__("+str(expr[0]+")"))
                     elif (self.compiler.globalExists( expr[0])):
-                        self.addline("movsd %s, %s"%(reg,expr[0]))
+                        self.addline("movss %s, [%s]"%(reg,expr[0]))
                     else:
                         print(self.current_token)
                         throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
@@ -269,19 +318,19 @@ class Function:
         """
         if(isinstance(expr[0], Declaration )):
             if(expr[0].isfloat):
-                self.addline("movsd xmm15, [rbp-"+hex(expr[0].offset)+"]")
+                self.addline("movss xmm15, [rbp-"+hex(expr[0].offset)+"]")
                 fltinvolved=True
             else:
                 self.addline(("mov %s, QWORD [rbp-"+hex(expr[0].offset)+"]")%_reg)
         elif(isinstance(expr[0], int)):
             self.addline(("mov %s, "+hex(expr[0]))%_reg)
         elif (isinstance(expr[0], float)):
-            self.addline("movsd xmm15, __float32__("+str(expr[0])+")")
+            self.addline("movss xmm15, __float32__("+str(expr[0])+")")
             fltinvolved=True
 
         elif (self.compiler.globalExists( expr[0])):
             if("FLT_CONSTANT_" in expr[0]):
-                self.addline("movsd xmm15, "+expr[0])
+                self.addline("movss xmm15, [%s]"%expr[0])
                 fltinvolved=True
             else:
                 self.addline("mov %s, %s"%(_reg,value_of_global(expr[0], self.compiler)))
@@ -306,11 +355,11 @@ class Function:
 
             if(len(expr) == 2):
                 if(expr[1] == "++"):
-                    self.addline("movsd xmm14, __FLT_STANDARD_1")
-                    self.addline("addsd xmm15, xmm14")
+                    self.addline("movss xmm14, __FLT_STANDARD_1")
+                    self.addline("addss xmm15, xmm14")
                 if(expr[1] == "--"):
-                    self.addline("movsd xmm14, __FLT_STANDARD_1")
-                    self.addline("subsd xmm15, xmm14")
+                    self.addline("movss xmm14, __FLT_STANDARD_1")
+                    self.addline("subss xmm15, xmm14")
 
 
         opbisfloat = False
@@ -319,7 +368,7 @@ class Function:
         #move operand b into rcx / xmm14 reguardless
         if(isinstance(expr[2], Declaration )):
             if(expr[2].isfloat):
-                self.addline("mov xmm14, QWORD [rbp-"+hex(expr[2].offset)+"]")
+                self.addline("movss xmm14,  [rbp-"+hex(expr[2].offset)+"]")
                 opbisfloat=True
             else:
                 self.addline("mov rcx, QWORD [rbp-"+hex(expr[2].offset)+"]")
@@ -327,7 +376,7 @@ class Function:
             self.addline("mov rcx, "+hex(expr[2]))
         elif (self.compiler.globalExists( expr[2])):
             if("FLT_CONSTANT_" in expr[2]):
-                self.addline("mov xmm14, "+expr[2])
+                self.addline("movss xmm14, [%s]"%expr[2])
                 opbisfloat=True
             else:
                 self.addline("mov %s, %s"%("rcx",value_of_global(expr[2], self.compiler)))
@@ -375,19 +424,51 @@ class Function:
             elif (reg is not None): 
                 self.addline(correct_mov(reg,outputreg))
             else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), outputreg))
-        else:
-            print(expr)
+        
+        
+        else: #deal with float arithmetic
+
+
             if(opbisfloat and fltinvolved): #both operands are floats
                 pass #no mov needed
             elif (not opbisfloat and fltinvolved): #only first operand is float
-                self.addline("cvtsi2sd ")
+                self.addline("cvtsi2ss xmm14, rcx") #mov second op into xmm14
             elif (opbisfloat and not fltinvolved): #only second operand is float
-                pass
+                self.addline("cvtsi2ss xmm15, %s"%_reg)
             else:
                 pass#nonsense
+            
+            #ops are in xmm15, xmm14
+            if(expr[1] == "+"):
+                self.addline("addss xmm15, xmm14")
+            elif (expr[1] == "-"):
+                self.addline("subss xmm15, xmm14")
+            elif (expr[1] == "*"):
+                self.addline("mulss xmm15, xmm14")
+            elif (expr[1] == "/"):
+                self.addline("divss xmm15, xmm14")
+            
+            if(decl is not None):
+                if(decl.isfloat):
+                    self.addline("movss [rbp-%s], xmm15"%hex(decl.offset))
+                else:
+                    self.addline("cvttss2si rax, xmm15")
+                    self.addline("mov QWORD [rbp-%s], rax"%hex(decl.offset))
+            elif (reg is not None):
+                if("xmm" in reg):
+                    self.addline("mov "+reg+", xmm15")
+                else:
+                    self.addline("cvttss2si "+reg+", xmm15")
+            else:
+                #global                    
+                print(glob)
 
+                if(self.compiler.globalIsFloat(glob)):
+                    self.addline("mov %s, xmm15"%glob)
+                else:
 
-
+                    self.addline("cvss2si rax, xmm15")
+                    self.addline("mov "+glob+", rax")
 
 
 
