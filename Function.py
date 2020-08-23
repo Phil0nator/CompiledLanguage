@@ -255,7 +255,7 @@ class Function:
         
 
         _reg = "rbx"
-        if(str(expr[0]) in "*/"):
+        if(str(expr[1]) in "*/%"):
             _reg="rax"
         fltinvolved = False
         
@@ -362,6 +362,10 @@ class Function:
                 self.addline("xor rdx, rdx")
                 self.addline("idiv rcx")
                 outputreg = "rax"
+            elif(expr[1] == "%"):
+                self.addline("xor rdx, rdx")
+                self.addline("div rcx")
+                outputreg = "rdx"
 
             if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
             elif (reg is not None): 

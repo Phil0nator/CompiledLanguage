@@ -1038,7 +1038,7 @@ mov QWORD [rbp-0x8], rcx
 mov rcx, 0x0
 mov QWORD [rbp-0x10], rcx
 
-mov rbx, QWORD [rbp-0x8]
+mov rax, QWORD [rbp-0x8]
 mov rcx, 0x8
 imul rcx
 mov QWORD [rbp-0x8], rax
@@ -1537,9 +1537,16 @@ m:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
-mov rbx, 0x4
-mov rcx, 0xa
-mov QWORD [rbp-0x8], rbx
+mov rax, 0xa
+mov rcx, 0x4
+xor rdx, rdx
+div rcx
+mov rdi,rdx
+mov rax, 0x4
+mov rcx, rdi
+xor rdx, rdx
+div rcx
+mov QWORD [rbp-0x8], rdx
 mov r9, QWORD [rbp-0x8]
 call print_integer
 mov rcx, 0x0
@@ -1548,10 +1555,10 @@ mov QWORD [rbp-0x10], rcx
 mov r14, QWORD [rbp-0x8]
 mov r15, 0x4
 cmp r14, r15
-push __cmpblock__m__0xd1
+push __cmpblock__m__0x121
 jne testmod
 add rsp, 0x8
-__cmpblock__m__0xd1:
+__cmpblock__m__0x121:
 mov rcx, r8
 mov QWORD [rbp-0x10], rcx
 

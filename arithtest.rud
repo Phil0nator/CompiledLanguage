@@ -11,8 +11,10 @@ function fast testmod(mod){
 
 function main(){
 
-    var test = 4 % 10;
+    var test = 4 % (10 % 4);
+
     print_integer(test);
+    
     var value;
     cmp(test, 4){
 
