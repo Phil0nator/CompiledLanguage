@@ -61,7 +61,8 @@ class Function:
                 self.evaluateExpression(reg=flt_parameter_registers[len(params)])
                 params.append(flt_parameter_registers[len(params)])
             while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->" and self.current_token.tok != T_EOL:
-                
+                t = types[len(params)]
+
                 if(self.current_token.tok == T_COMMA):
                     self.advance()
                     if(t == "var"):

@@ -1243,7 +1243,7 @@ sub rsp, 0x8
 
     pop     rcx                     ; restore caller-save register
     pop     rax                     ; restore caller-save register
-    
+    FFLUSH_STDOUT
     
 
 
@@ -1269,7 +1269,7 @@ sub rsp, 0x8
 
     pop     rcx                     ; restore caller-save register
     pop     rax                     ; restore caller-save register
-    
+    FFLUSH_STDOUT
     
 
 
@@ -1280,21 +1280,21 @@ print_formatfloat:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
+mov rcx, 0x0
+mov QWORD [rbp-0x8], rcx
+
 
     align 16
-    push rax
-    push rcx
+
     mov     rdi, r9                ; set 1st parameter (format)
-    movss xmm0, xmm1
+    cvtps2pd xmm0, xmm1
     mov rax, 1
 
-    ; Stack is already aligned because we pushed three 8 byte registers
     call    printf                  ; printf(format, current_number)
 
-    pop     rcx                     ; restore caller-save register
-    pop     rax                     ; restore caller-save register
-    
+    FFLUSH_STDOUT
+    add rsp, 12
     
 
 
@@ -1305,15 +1305,23 @@ print_floatln:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
+mov rcx, 0x0
+mov QWORD [rbp-0x8], rcx
+
+
 
 
         align 16
-        mov rdi, __PRINTFFLOAT
+
+        mov     rdi, __PRINTFFLOAT                ; set 1st parameter (format)
+        cvtps2pd xmm0, xmm1
         mov rax, 1
-        cvtps2pd xmm0, xmm0
-        call printf
+
+        call    printf                  ; printf(format, current_number)
+
         NEWLINE
+        add rsp, 12
 
     
 
@@ -1325,15 +1333,22 @@ print_float:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
+mov rcx, 0x0
+mov QWORD [rbp-0x8], rcx
+
 
 
         align 16
-        mov rdi, __PRINTFFLOAT
+
+        mov     rdi, __PRINTFFLOAT                ; set 1st parameter (format)
+        cvtps2pd xmm0, xmm1
         mov rax, 1
-        cvtps2pd xmm0, xmm0
-        call printf
-        
+
+        call    printf                  ; printf(format, current_number)
+
+        FFLUSH_STDOUT
+        add rsp, 12
 
     
 
@@ -1718,7 +1733,7 @@ movss xmm0,  [rbp-0x8]
 call sqrtflt
 movss [rbp-40], xmm8
 mov r9, STRING_CONSTANT_5
-mov r10, QWORD [rbp-0x28]
+movss xmm1,  [rbp-0x28]
 call print_formatfloat
 
 
