@@ -105,7 +105,10 @@ class Function:
         self.advance()
         if(self.current_token.tok == "="):
             self.advance()
-            self.evaluateExpression(decl=self.getDeclarationByID(id))
+            if(not self.compiler.globalExists(id)):
+                self.evaluateExpression(decl=self.getDeclarationByID(id))
+            else:
+                self.evaluateExpression(glob=id)
             return
         elif (self.current_token.tok == "++"):
             self.advance()
@@ -206,6 +209,7 @@ class Function:
                 elif(isinstance(expr[0], int)):
                     self.addline("mov rbx, "+hex(expr[0]))
                 elif (self.compiler.globalExists( expr[0])):
+
                     self.addline("mov %s, %s"%("rbx",value_of_global(expr[0], self.compiler  )))
                 
                 elif (expr[0] == "rdi"):
@@ -372,9 +376,15 @@ class Function:
                 self.addline(correct_mov(reg,outputreg))
             else: self.addline("mov %s,%s"%(value_of_global(glob, self.compiler), outputreg))
         else:
-            if(not opbisfloat and fltinvolved):
-                #second op is int, and first is float
+            print(expr)
+            if(opbisfloat and fltinvolved): #both operands are floats
+                pass #no mov needed
+            elif (not opbisfloat and fltinvolved): #only first operand is float
+                self.addline("cvtsi2sd ")
+            elif (opbisfloat and not fltinvolved): #only second operand is float
                 pass
+            else:
+                pass#nonsense
 
 
 

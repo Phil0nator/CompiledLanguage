@@ -7,11 +7,13 @@
 function fast testmod(mod){
     return 90;
 }
-
+var globtest;
 
 function main(){
 
     var test = 4 % (10 % 4);
+
+    globtest = 3;
 
     print_integer(test);
     

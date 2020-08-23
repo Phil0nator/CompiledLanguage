@@ -1021,6 +1021,7 @@ __isincluded__MEMORY_: dq 0x96c6
 
 
 section .bss
+globtest: resb 0x8
 
 
 
@@ -1547,6 +1548,8 @@ mov rcx, rdi
 xor rdx, rdx
 div rcx
 mov QWORD [rbp-0x8], rdx
+mov rbx, 0x3
+mov [globtest], rbx
 mov r9, QWORD [rbp-0x8]
 call print_integer
 mov rcx, 0x0
@@ -1555,10 +1558,10 @@ mov QWORD [rbp-0x10], rcx
 mov r14, QWORD [rbp-0x8]
 mov r15, 0x4
 cmp r14, r15
-push __cmpblock__m__0x121
+push __cmpblock__m__0x142
 jne testmod
 add rsp, 0x8
-__cmpblock__m__0x121:
+__cmpblock__m__0x142:
 mov rcx, r8
 mov QWORD [rbp-0x10], rcx
 
@@ -1596,6 +1599,7 @@ mov QWORD [rbp-0x28], rcx
 mov QWORD [rbp-0x28], FLT_CONSTANT_0
 movsd xmm15, [rbp-0x28]
 mov rcx, 0x1
+cvtsi2sd 
 mov rbx, 0x3
 mov QWORD [rbp-0x30], rbx
 
@@ -1616,6 +1620,7 @@ xor rax, rax
 
 mov r9, rsi     ;commandline args
 mov r10, rdi
+mov QWORD [globtest], 0x0
 call m
 NEWLINE
 ret
