@@ -13,6 +13,19 @@ float globalfloat;
 function main(){
 
 
-    float testerman = 235.3453452;
+    float testerman = 235.2;
+    var floored;
+    var cieled;
+    var rounded;
+    floor(testerman)->floored;
+    printformat("Floored: %u\n", floored);
+    round(testerman)->rounded;
+    printformat("Rounded: %u\n", rounded);
+    ceil(testerman)->cieled;
+    printformat("Ceiled: %u\n", cieled);
+    float sqrted;
+    sqrtflt(testerman)->sqrted; 
+    print_formatfloat("SQRTED: %lf", sqrted);
+
 
 }

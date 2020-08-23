@@ -1014,11 +1014,15 @@ section .text
 
 section .data
 STRING_CONSTANT_0: db `Memory error encountered`, 0
-STRING_CONSTANT_1: db `%f`, 0
-FLT_CONSTANT_0: dq __float32__(235.3453452)
+STRING_CONSTANT_1: db `%fl`, 0
+FLT_CONSTANT_0: dq __float32__(235.2)
+STRING_CONSTANT_2: db `Floored: %u\n`, 0
+STRING_CONSTANT_3: db `Rounded: %u\n`, 0
+STRING_CONSTANT_4: db `Ceiled: %u\n`, 0
+STRING_CONSTANT_5: db `SQRTED: %lf`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __isincluded__MEMORY_: dq 0x96c6
-__PRINTFFLOAT: db `%f`, 0
+__PRINTFFLOAT: db `%fl`, 0
 
 
 
@@ -1272,6 +1276,31 @@ sub rsp, 0x8
 leave
 ret
 
+print_formatfloat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    align 16
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (format)
+    movss xmm0, xmm1
+    mov rax, 1
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    
+    
+
+
+leave
+ret
+
 print_floatln:
 
 push rbp
@@ -1317,8 +1346,6 @@ exit:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
 
     
     
@@ -1600,6 +1627,37 @@ sub rsp, 0x8
 leave
 ret
 
+ceil:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        roundss xmm1, xmm0, 10B
+        cvttss2si r8, xmm1
+
+    
+
+
+leave
+ret
+
+sqrtflt:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        sqrtss xmm8, xmm0
+
+    
+
+
+leave
+ret
+
 testmod:
 
 push rbp
@@ -1617,9 +1675,51 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x0
+sub rsp, 0x18
 movss xmm10, [FLT_CONSTANT_0]
 movss  [rbp-0x8], xmm10
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+movss xmm0,  [rbp-0x8]
+call floor
+mov rcx, r8
+mov QWORD [rbp-0x10], rcx
+
+mov r9, STRING_CONSTANT_2
+mov r10, QWORD [rbp-0x10]
+call printformat
+movss xmm0,  [rbp-0x8]
+call round
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, STRING_CONSTANT_3
+mov r10, QWORD [rbp-0x20]
+call printformat
+movss xmm0,  [rbp-0x8]
+call ceil
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r9, STRING_CONSTANT_4
+mov r10, QWORD [rbp-0x18]
+call printformat
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+movss xmm0,  [rbp-0x8]
+call sqrtflt
+movss [rbp-40], xmm8
+mov r9, STRING_CONSTANT_5
+mov r10, QWORD [rbp-0x28]
+call print_formatfloat
 
 
 leave
@@ -1638,6 +1738,7 @@ xor rax, rax
 
 mov r9, rsi     ;commandline args
 mov r10, rdi
+align 16
 mov QWORD [globtest], 0x0
 mov QWORD [globalfloat], 0x0
 call m

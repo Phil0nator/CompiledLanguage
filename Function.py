@@ -107,9 +107,16 @@ class Function:
                 throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
             if(self.compiler.globalExists( self.current_token.value ) ):
-                self.addline("mov %s,r8"% value_of_global(self.current_token.value, self.compiler) )
+                if(self.compiler.globalIsFloat(self.current_token.value)):
+                    self.addline("movss %s, xmm8"%value_of_global(self.current_token.value, self.compiler).replace("QWORD", ""))
+
+                else:
+                    self.addline("mov %s,r8"% value_of_global(self.current_token.value, self.compiler) )
             else:
-                self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "r8"))
+                if(self.getDeclarationByID(self.current_token.value).isfloat):
+                    self.addline("movss [rbp-%s], xmm8"%self.getDeclarationByID(self.current_token.value).offset)
+                else:
+                    self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "r8"))
         for i in range(len(self.params)):
             pass
             #########self.addline("pop %s"%(parameter_registers[len(self.params)-(i+1)]))

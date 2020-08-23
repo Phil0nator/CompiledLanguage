@@ -66,3 +66,27 @@ function fast toFloat(integer){
     "}
 
 }
+
+function fast ceil(float flt){
+
+
+    __asm{"
+    
+        roundss xmm1, xmm0, 10B
+        cvttss2si r8, xmm1
+
+    "}
+
+}
+
+function fast sqrtflt(float flt){
+
+
+    __asm{"
+    
+        sqrtss xmm8, xmm0
+
+    "}
+
+
+}

@@ -18,7 +18,7 @@ class Compiler:
         self._bss = ""
         self._data = ""
         self._fdef = ""
-        self.main = ""
+        self.main = "align 16\n"
     """
     #main function to be called
     #will call all others
