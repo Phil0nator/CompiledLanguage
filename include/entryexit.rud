@@ -15,4 +15,17 @@ function exit(code){
 
 }
 
+function fast doInterrupt(code, value){
 
+
+
+    __asm{"
+    
+        mov rax, r9;
+        mov rdi, r10;
+        int 0x80
+
+    "}
+
+
+}

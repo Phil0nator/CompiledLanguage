@@ -217,22 +217,22 @@ class Function:
                 if(decl != None):
                     if(decl.isfloat):
                         if(isinstance(expr[0], float)):
-                            self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], __float32__("+str(expr[0])+")")
+                            self.addline("mov  [rbp-"+hex(decl.offset)+"], __float32__("+str(expr[0])+")")
                             return
                         elif(self.compiler.globalExists( expr[0] )):
                             if(self.compiler.globalIsFloat(expr[0])):
                                 self.addline("movss xmm10, [%s]"%expr[0])
                                 self.addline("movss  [rbp-"+hex(decl.offset)+"], xmm10")
                             else:
-                                self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], [%s]"%expr[0])
+                                self.addline("mov  [rbp-"+hex(decl.offset)+"], [%s]"%expr[0])
                             return
                         elif(isinstance(expr[0], Declaration)):
                             if(expr[0].isfloat):
                                 self.addline("movss xmm10,  [rbp-"+hex(expr[0].offset)+"]")
-                                self.addline("movss QWORD [rbp-"+hex(decl.offet)+"], xmm10")
+                                self.addline("movss  [rbp-"+hex(decl.offet)+"], xmm10")
                             else:
-                                self.addline("cvttss2si rax, QWORD [rbp-"+hex(expr[0].offset)+"]")
-                                self.addline("mov QWORD [rbp-"+hex(decl.offset)+"], rax")
+                                self.addline("cvttss2si rax,  [rbp-"+hex(expr[0].offset)+"]")
+                                self.addline("mov [rbp-"+hex(decl.offset)+"], rax")
 
                 if(glob != None):
                     if(self.compiler.globalIsFloat(glob)):
@@ -247,7 +247,7 @@ class Function:
                                 self.addline("movss  xmm10, [rbp-"+hex(expr[0].offset)+"]")
                                 self.addline("movss [%s], xmm10"%glob)
                             else:
-                                self.addline("cvttss2si rax, QWORD [rbp-"+hex(expr[0].offset)+"]")
+                                self.addline("cvttss2si rax,  [rbp-"+hex(expr[0].offset)+"]")
                                 self.addline("mov QWORD ["+glob+"], rax")
 
 
@@ -271,7 +271,7 @@ class Function:
                 return
         else:
             
-            if(reg in flt_parameter_registers):
+            if(isinstance(reg, str) and "xmm" in reg):
 
 
                 if(len(expr) == 1):
@@ -279,7 +279,8 @@ class Function:
                     if(isinstance(expr[0], Declaration )):
                         self.addline(("movss %s,  [rbp-"%reg)+hex(expr[0].offset)+"]")
                     elif(isinstance(expr[0], int)):
-                        self.addline(("movss %s, "%reg)+"__float32__("+str(expr[0]+")"))
+                        self.addline("mov rax, %s"%hex(expr[0]))
+                        self.addline(("cvtsi2ss %s, rax"%reg))
                     elif (self.compiler.globalExists( expr[0])):
                         self.addline("movss %s, [%s]"%(reg,expr[0]))
                     else:
@@ -523,7 +524,8 @@ class Function:
 
     def buildReturnStatement(self):
         #current token will already be the return value
-        self.evaluateExpression(reg="r8")
+        self.evaluateExpression(reg="xmm8")
+        self.addline("cvttss2si r8, xmm8")
         
 
 

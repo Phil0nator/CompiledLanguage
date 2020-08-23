@@ -12,45 +12,7 @@ float globalfloat;
 
 function main(){
 
-    var test = 4 % (10 % 4);
 
-    globtest = 3;
-
-    print_integer(test);
-    
-    var value;
-    cmp(test, 4){
-
-        != : testmod;
-
-    }->value;
-
-    print_integer(value);
-
-    testmod(test)->value;
-    //beans
-
-
-    var sqrtedfortynine;
-    sqrtint(49)->sqrtedfortynine;
-
-    print_integer(sqrtedfortynine);
-
-    var powtest;
-    powint(5,5)->powtest;
-    print_integer(powtest);
-    __asm{"; Floating Point arithmetic"}
-
-    float testf = 5.5;
-    testf = testf + 3.5;
-    var fprinter;
-    round(testf)->fprinter;
-    print_integer(fprinter);
-
-    
-
-
-    var testfpost = 3;    
-
+    float testerman = 235.3453452;
 
 }

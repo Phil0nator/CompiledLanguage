@@ -1,4 +1,7 @@
 #include "include/memory.rud"
+
+final var __PRINTFFLOAT = "%f";
+
 function fast print_char(char){
     __asm{"
     PRINT_CHAR r9
@@ -59,5 +62,37 @@ function fast print_two_formats(value, fa, fb){
     pop     rax                     ; restore caller-save register
     
     "}
+
+}
+function fast print_floatln(float flt){
+
+
+    __asm{"
+
+        align 16
+        mov rdi, __PRINTFFLOAT
+        mov rax, 1
+        cvtps2pd xmm0, xmm0
+        call printf
+        NEWLINE
+
+    "}
+
+
+}
+
+function fast print_float(float flt){
+
+   __asm{"
+
+        align 16
+        mov rdi, __PRINTFFLOAT
+        mov rax, 1
+        cvtps2pd xmm0, xmm0
+        call printf
+        
+
+    "}
+
 
 }

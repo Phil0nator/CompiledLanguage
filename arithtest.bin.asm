@@ -1014,10 +1014,11 @@ section .text
 
 section .data
 STRING_CONSTANT_0: db `Memory error encountered`, 0
-FLT_CONSTANT_0: dq __float32__(5.5)
-FLT_CONSTANT_1: dq __float32__(3.5)
+STRING_CONSTANT_1: db `%f`, 0
+FLT_CONSTANT_0: dq __float32__(235.3453452)
 __FLT_STANDARD_1: dq __float32__(1.0)
 __isincluded__MEMORY_: dq 0x96c6
+__PRINTFFLOAT: db `%f`, 0
 
 
 
@@ -1050,7 +1051,8 @@ call alloc
 mov rcx, r8
 mov QWORD [rbp-0x10], rcx
 
-mov r8, QWORD [rbp-0x10]
+movss xmm8,  [rbp-0x10]
+cvttss2si r8, xmm8
 
 
 leave
@@ -1270,6 +1272,46 @@ sub rsp, 0x8
 leave
 ret
 
+print_floatln:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+
+        align 16
+        mov rdi, __PRINTFFLOAT
+        mov rax, 1
+        cvtps2pd xmm0, xmm0
+        call printf
+        NEWLINE
+
+    
+
+
+leave
+ret
+
+print_float:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+
+        align 16
+        mov rdi, __PRINTFFLOAT
+        mov rax, 1
+        cvtps2pd xmm0, xmm0
+        call printf
+        
+
+    
+
+
+leave
+ret
+
 exit:
 
 push rbp
@@ -1284,6 +1326,23 @@ mov QWORD [rbp-0x8], rcx
     mov rdi, r9 ; r9 = exit code given in parameter
     int 0x80    ; interrupt
     
+    
+
+
+leave
+ret
+
+doInterrupt:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        mov rax, r9;
+        mov rdi, r10;
+        int 0x80
+
     
 
 
@@ -1320,7 +1379,8 @@ mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x10]
 mov r10, QWORD [rbp-0x8]
 call stringcat
-mov r8, QWORD [rbp-0x10]
+movss xmm8,  [rbp-0x10]
+cvttss2si r8, xmm8
 
 
 leave
@@ -1440,7 +1500,8 @@ call stringcat
 mov rcx, r8
 mov QWORD [rbp-0x30], rcx
 
-mov r8, QWORD [rbp-0x30]
+movss xmm8,  [rbp-0x30]
+cvttss2si r8, xmm8
 
 
 leave
@@ -1544,7 +1605,9 @@ testmod:
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
-mov r8, 0x5a
+mov rax, 0x5a
+cvtsi2ss xmm8, rax
+cvttss2si r8, xmm8
 
 
 leave
@@ -1554,81 +1617,9 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x30
-mov rax, 0xa
-mov rcx, 0x4
-xor rdx, rdx
-div rcx
-mov rdi,rdx
-mov rax, 0x4
-mov rcx, rdi
-xor rdx, rdx
-div rcx
-mov QWORD [rbp-0x8], rdx
-mov rbx, 0x3
-mov [globtest], rbx
-mov r9, QWORD [rbp-0x8]
-call print_integer
-mov rcx, 0x0
-mov QWORD [rbp-0x10], rcx
-
-mov r14, QWORD [rbp-0x8]
-mov r15, 0x4
-cmp r14, r15
-push __cmpblock__m__0x142
-jne testmod
-add rsp, 0x8
-__cmpblock__m__0x142:
-mov rcx, r8
-mov QWORD [rbp-0x10], rcx
-
-mov r9, QWORD [rbp-0x10]
-call print_integer
-mov r9, QWORD [rbp-0x8]
-call testmod
-mov rcx, r8
-mov QWORD [rbp-0x10], rcx
-
-mov rcx, 0x0
-mov QWORD [rbp-0x18], rcx
-
-mov r9, 0x31
-call sqrtint
-mov rcx, r8
-mov QWORD [rbp-0x18], rcx
-
-mov r9, QWORD [rbp-0x18]
-call print_integer
-mov rcx, 0x0
-mov QWORD [rbp-0x20], rcx
-
-mov r9, 0x5
-mov r10, 0x5
-call powint
-mov rcx, r8
-mov QWORD [rbp-0x20], rcx
-
-mov r9, QWORD [rbp-0x20]
-call print_integer
-; Floating Point arithmetic
+sub rsp, 0x0
 movss xmm10, [FLT_CONSTANT_0]
-movss  [rbp-0x28], xmm10
-movss xmm15, [rbp-0x28]
-movss xmm14, [FLT_CONSTANT_1]
-addss xmm15, xmm14
-movss [rbp-0x28], xmm15
-mov rcx, 0x0
-mov QWORD [rbp-0x30], rcx
-
-movss xmm0,  [rbp-0x28]
-call round
-mov rcx, r8
-mov QWORD [rbp-0x30], rcx
-
-mov r9, QWORD [rbp-0x30]
-call print_integer
-mov rbx, 0x3
-mov QWORD [rbp-0x38], rbx
+movss  [rbp-0x8], xmm10
 
 
 leave
