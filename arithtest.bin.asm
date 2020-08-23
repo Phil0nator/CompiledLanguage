@@ -1014,15 +1014,18 @@ section .text
 
 section .data
 STRING_CONSTANT_0: db `Memory error encountered`, 0
-STRING_CONSTANT_1: db `%fl`, 0
-FLT_CONSTANT_0: dq __float32__(235.2)
+STRING_CONSTANT_1: db `%f`, 0
+FLT_CONSTANT_0: dq __float32__(0.356)
+FLT_CONSTANT_1: dq __float32__(235.2)
 STRING_CONSTANT_2: db `Floored: %u\n`, 0
 STRING_CONSTANT_3: db `Rounded: %u\n`, 0
 STRING_CONSTANT_4: db `Ceiled: %u\n`, 0
-STRING_CONSTANT_5: db `SQRTED: %lf`, 0
+STRING_CONSTANT_5: db `SQRTED: %lf\n`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __isincluded__MEMORY_: dq 0x96c6
-__PRINTFFLOAT: db `%fl`, 0
+__PRINTFFLOAT: db `%f`, 0
+FLT_STANDARD_ZERO: dq __float32__(0.0)
+isFloat: dq 0x1
 
 
 
@@ -1285,8 +1288,7 @@ mov rcx, 0x0
 mov QWORD [rbp-0x8], rcx
 
 
-    align 16
-
+    ALIGN_STACK
     mov     rdi, r9                ; set 1st parameter (format)
     cvtps2pd xmm0, xmm1
     mov rax, 1
@@ -1294,7 +1296,8 @@ mov QWORD [rbp-0x8], rcx
     call    printf                  ; printf(format, current_number)
 
     FFLUSH_STDOUT
-    add rsp, 12
+    ;add rsp, 12
+    UNALIGN_STACK
     
 
 
@@ -1312,16 +1315,16 @@ mov QWORD [rbp-0x8], rcx
 
 
 
-        align 16
-
+        ALIGN_STACK
         mov     rdi, __PRINTFFLOAT                ; set 1st parameter (format)
-        cvtps2pd xmm0, xmm1
+        cvtps2pd xmm0, xmm0
         mov rax, 1
 
         call    printf                  ; printf(format, current_number)
 
         NEWLINE
-        add rsp, 12
+        ;add rsp, 12
+        UNALIGN_STACK
 
     
 
@@ -1339,17 +1342,16 @@ mov QWORD [rbp-0x8], rcx
 
 
 
-        align 16
-
+        ALIGN_STACK
         mov     rdi, __PRINTFFLOAT                ; set 1st parameter (format)
-        cvtps2pd xmm0, xmm1
+        cvtps2pd xmm0, xmm0
         mov rax, 1
 
         call    printf                  ; printf(format, current_number)
 
         FFLUSH_STDOUT
-        add rsp, 12
-
+        ;add rsp, 12
+        UNALIGN_STACK
     
 
 
@@ -1523,10 +1525,13 @@ mov QWORD [rbp-0x20], rcx
 mov rbx, QWORD [rbp-0x18]
 mov rcx, QWORD [rbp-0x20]
 add rbx, rcx
-mov rdi,rbx
+cvtsi2ss xmm10,rbx
+movss xmm15, xmm10
 mov rcx, 0x1
-add rbx, rcx
-mov QWORD [rbp-0x28], rbx
+cvtsi2ss xmm14, rcx
+addss xmm15, xmm14
+cvttss2si rax, xmm15
+mov QWORD [rbp-0x28], rax
 mov rcx, 0x0
 mov QWORD [rbp-0x30], rcx
 
@@ -1686,12 +1691,39 @@ cvttss2si r8, xmm8
 leave
 ret
 
+fltTest:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+movss [rbp-0x8], xmm0
+movss xmm15, [rbp-0x8]
+mov rcx, 0x3
+cvtsi2ss xmm14, rcx
+mulss xmm15, xmm14
+movss xmm10, xmm15
+movss xmm15, xmm10
+movss xmm14, [FLT_CONSTANT_0]
+addss xmm15, xmm14
+movss xmm10, xmm15
+movss xmm15, xmm10
+mov rcx, 0x2
+cvtsi2ss xmm14, rcx
+divss xmm15, xmm14
+movss [rbp-0x10], xmm15
+movss xmm8,  [rbp-0x10]
+cvttss2si r8, xmm8
+
+
+leave
+ret
+
 m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
-movss xmm10, [FLT_CONSTANT_0]
+sub rsp, 0x30
+movss xmm10, [FLT_CONSTANT_1]
 movss  [rbp-0x8], xmm10
 mov rcx, 0x0
 mov QWORD [rbp-0x10], rcx
@@ -1726,15 +1758,21 @@ mov QWORD [rbp-0x18], rcx
 mov r9, STRING_CONSTANT_4
 mov r10, QWORD [rbp-0x18]
 call printformat
-mov rcx, 0x0
-mov QWORD [rbp-0x28], rcx
-
+movss  xmm10, [FLT_STANDARD_ZERO]
+movss [rbp-0x28], xmm10
 movss xmm0,  [rbp-0x8]
 call sqrtflt
 movss [rbp-40], xmm8
 mov r9, STRING_CONSTANT_5
 movss xmm1,  [rbp-0x28]
 call print_formatfloat
+movss  xmm10, [FLT_STANDARD_ZERO]
+movss [rbp-0x30], xmm10
+movss xmm0,  [rbp-0x28]
+call fltTest
+movss [rbp-48], xmm8
+movss xmm0,  [rbp-0x30]
+call print_floatln
 
 
 leave

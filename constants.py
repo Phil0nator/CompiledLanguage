@@ -197,5 +197,12 @@ mov %s, QWORD [rbp-%s]\n
     """%(reg,hex(ptr))
 
 def correct_mov(regdest, regsource):
-    return "mov %s,%s"%(regdest,regsource)
+    if(not "xmm" in regdest and not "xmm" in regsource):
+        return "mov %s,%s"%(regdest,regsource)
+    elif ("xmm" in regdest and not "xmm" in regsource):
+        return "cvtsi2ss %s,%s"%(regdest,regsource)
+    elif (not "xmm" in regdest and "xmm" in regsource):
+        return "cvttss2si %s, %s"%(regdest,regsource)
+    else:
+        return "movxx %s,%s"%(regdest,regsource)
 

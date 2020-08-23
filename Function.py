@@ -208,8 +208,12 @@ class Function:
                 self.advance()
             elif(self.current_token.tok == T_OPENP):
                 self.advance()
-                self.evaluateExpression(reg="rdi")
-                expr.append("rdi")
+                if(True):
+                    self.evaluateExpression(reg="xmm10")
+                    expr.append("xmm10")
+                else:
+                    self.evaluateExpression(reg="rdi")
+                    expr.append("rdi")
             else:
                 print(self.current_token)
 
@@ -336,6 +340,9 @@ class Function:
         elif (isinstance(expr[0], float)):
             self.addline("movss xmm15, __float32__("+str(expr[0])+")")
             fltinvolved=True
+        elif("xmm" in expr[0]):
+            fltinvolved = True
+            self.addline("movss xmm15, %s"%expr[0])
 
         elif (self.compiler.globalExists( expr[0])):
             if("FLT_CONSTANT_" in expr[0]):
@@ -461,19 +468,21 @@ class Function:
                 if(decl.isfloat):
                     self.addline("movss [rbp-%s], xmm15"%hex(decl.offset))
                 else:
+
+
                     self.addline("cvttss2si rax, xmm15")
                     self.addline("mov QWORD [rbp-%s], rax"%hex(decl.offset))
             elif (reg is not None):
                 if("xmm" in reg):
-                    self.addline("mov "+reg+", xmm15")
+                    self.addline("movss "+reg+", xmm15")
                 else:
+
                     self.addline("cvttss2si "+reg+", xmm15")
             else:
                 #global                    
-                print(glob)
 
                 if(self.compiler.globalIsFloat(glob)):
-                    self.addline("mov %s, xmm15"%glob)
+                    self.addline("movss %s, xmm15"%glob)
                 else:
 
                     self.addline("cvss2si rax, xmm15")
@@ -499,13 +508,17 @@ class Function:
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             
         id = self.current_token.value
+
         if(self.getDeclarationByID(id) != None):
             throw(VariableReDeclaration(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         self.advance()
         if(self.current_token.tok == T_EOL): #variable declaration without assignment
             self.appendDeclaration(id,flt)
-            
-            self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "0x0"))
+            if(not flt):
+                self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "0x0"))
+            else:
+                self.addline("movss  xmm10, [FLT_STANDARD_ZERO]")
+                self.addline("movss [rbp-"+hex(self.declarations[len(self.declarations)-1].offset)+"], xmm10")
             #self.advance()
             return
         
@@ -583,7 +596,6 @@ class Function:
 
         
         #self.evaluateExpression(decl=decl)
-        print(self.current_token)
         self.buildIDStatement()
         
         self.addline("; POST EXPRESSION")
@@ -602,10 +614,8 @@ class Function:
 
         header = self.bodytext[beginidx:]
         self.bodytext = self.bodytext[:beginidx]
-        print("PRE: "+self.current_token.__repr__())
         self.doCompilations(forblock=True)
         self.advance()
-        print("POST :%s"%self.current_token)
         self.addline(header)
         
     def buildCMP(self):
@@ -696,19 +706,24 @@ class Function:
         if(not self.isFast): #the fast keyword prevents this paramter storage
             allocationoffset = len(self.params)*8
             for token in self.tokens:
-                if(token.tok == T_KEYWORD and token.value == "var"):
+                if(token.tok == T_KEYWORD and token.value == "var" or token.value == "float"):
                     allocationoffset += 8
         else:
             allocationoffset = 8
             for token in self.tokens:
-                if(token.tok == T_KEYWORD and token.value == "var"):
+                if(token.tok == T_KEYWORD and token.value == "var" or token.value == "float"):
                     allocationoffset += 8
 
         self.allocator = allocate(allocationoffset)
         if(not self.isFast):
             for i in range(len(self.params)):
-                self.appendDeclaration(self.params[i], False)
-                self.allocator += place_value_from_reg((i+1)*8,parameter_registers[i])
+                if(self.types[i] == "var"):
+                    self.appendDeclaration(self.params[i], False)
+
+                    self.allocator += place_value_from_reg((i+1)*8,parameter_registers[i])
+                else:
+                    self.appendDeclaration(self.params[i], True)
+                    self.allocator += "movss [rbp-"+hex((i+1)*8)+"], "+flt_parameter_registers[i]+"\n"
 
             
         self.bodytext = "%s%s"%(self.allocator,self.bodytext)
@@ -720,7 +735,7 @@ class Function:
     def doCompilations(self, forblock=False):
         opens = 0
         while self.current_token != None and self.current_token.tok != T_EOF and self.current_token.tok != T_CLSCOPE:
-            if(forblock): print(self.current_token)
+            
             if(self.current_token.tok in T_EOL+T_OPENP+T_OSCOPE+T_CLSCOPE+T_COLON):
 
                 self.advance()

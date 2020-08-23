@@ -124,6 +124,7 @@ class Compiler:
     #Generate assembly for global variables
     """
     def fill_globals(self):
+        self.globals[1].append({"FLT_STANDARD_ZERO":0.0, "isFloat":True})
         for glob in self.globals[0] : #bss:
             for g in glob:
                 if(g != "isfloat"):
@@ -187,7 +188,6 @@ class Compiler:
                 else:
                     throw(InvalidFunctionParameterDeclaration(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
-
         self.advance()#move past ')'
         if(self.current_token.tok != T_OSCOPE):
             throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))

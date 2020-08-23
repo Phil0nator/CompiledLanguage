@@ -1,6 +1,6 @@
 #include "include/memory.rud"
 
-final var __PRINTFFLOAT = "%fl";
+final var __PRINTFFLOAT = "%f";
 
 function fast print_char(char){
     __asm{"
@@ -69,8 +69,7 @@ function fast print_two_formats(value, fa, fb){
 function fast print_formatfloat(value, float fa){
     var stackalign;
     __asm{"
-    align 16
-
+    ALIGN_STACK
     mov     rdi, r9                ; set 1st parameter (format)
     cvtps2pd xmm0, xmm1
     mov rax, 1
@@ -78,7 +77,8 @@ function fast print_formatfloat(value, float fa){
     call    printf                  ; printf(format, current_number)
 
     FFLUSH_STDOUT
-    add rsp, 12
+    ;add rsp, 12
+    UNALIGN_STACK
     "}
 
 
@@ -90,16 +90,16 @@ function fast print_floatln(float flt){
     __asm{"
 
 
-        align 16
-
+        ALIGN_STACK
         mov     rdi, __PRINTFFLOAT                ; set 1st parameter (format)
-        cvtps2pd xmm0, xmm1
+        cvtps2pd xmm0, xmm0
         mov rax, 1
 
         call    printf                  ; printf(format, current_number)
 
         NEWLINE
-        add rsp, 12
+        ;add rsp, 12
+        UNALIGN_STACK
 
     "}
 
@@ -110,17 +110,16 @@ function fast print_float(float flt){
     var stackalign;
    __asm{"
 
-        align 16
-
+        ALIGN_STACK
         mov     rdi, __PRINTFFLOAT                ; set 1st parameter (format)
-        cvtps2pd xmm0, xmm1
+        cvtps2pd xmm0, xmm0
         mov rax, 1
 
         call    printf                  ; printf(format, current_number)
 
         FFLUSH_STDOUT
-        add rsp, 12
-
+        ;add rsp, 12
+        UNALIGN_STACK
     "}
 
 

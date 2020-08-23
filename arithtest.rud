@@ -7,6 +7,15 @@
 function fast testmod(mod){
     return 90;
 }
+
+function fltTest(float inp){
+
+    float out = ((inp * 3)+0.356)/2;
+    return out;
+
+}
+
+
 var globtest;
 float globalfloat;
 
@@ -25,7 +34,11 @@ function main(){
     printformat("Ceiled: %u\n", cieled);
     float sqrted;
     sqrtflt(testerman)->sqrted; 
-    print_formatfloat("SQRTED: %lf", sqrted);
+    print_formatfloat("SQRTED: %lf\n", sqrted);
+
+    float weirdFunction;
+    fltTest(sqrted)->weirdFunction;
+    print_floatln(weirdFunction);
 
 
 }

@@ -7,7 +7,7 @@ class Declaration:
         self.offset = offset
         self.isfloat = isfloat
     def __repr__(self):
-        return f"{self.name} : {str(self.offset)}"
+        return f"{self.name} : {str(self.offset)}\t isfloat: {self.isfloat}"
         
 
 
