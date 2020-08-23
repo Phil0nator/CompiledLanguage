@@ -9,6 +9,7 @@ class Compiler:
     def __init__(self, tokens):
         self.tokens = tokens
         self.functions = []
+        self.structs = []
         self.globals = [[],[]] #[0] = bss, [1] = data
         self.constants = []
 
@@ -78,6 +79,11 @@ class Compiler:
         self.fill_functions()
         self.fill_globals()
 
+    def getStructByName(self, name):
+        for struct in self.structs:
+            if(struct.name == name):
+                return struct
+
 
     def createStructure(self):
         self.advance()
@@ -106,6 +112,7 @@ class Compiler:
             throw(EmptyFunction(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
         struct = Struct(name, body)
+        self.structs.append(struct)
         self._fdef+=struct.compile()
         self.advance()
 
@@ -189,6 +196,11 @@ class Compiler:
                     throw(InvalidFunctionParameterDeclaration(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
         self.advance()#move past ')'
+        
+        ret = "var"
+        if(self.current_token.tok == T_KEYWORD and self.current_token.value == "float"):
+            ret = "float"
+            self.advance()
         if(self.current_token.tok != T_OSCOPE):
             throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
@@ -210,6 +222,7 @@ class Compiler:
 
         function = Function(name,params,body,self,types)
         function.isFast=isFast
+        function.ret=ret
         self.advance()
         self.functions.append(function)
         
@@ -248,7 +261,11 @@ class Compiler:
         for fn in self.functions:
             if(fn.name == name):
                 return fn
-        return None
+        structq = self.getStructByName(name)
+        if(structq == None):
+            throw(UndefinedFunction(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+        else:
+            return Function(name,[],[Token(T_EOF)], self, [])
 
     """
     #Based on the current position, read the current line and identify a global variable

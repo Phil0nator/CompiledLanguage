@@ -20,7 +20,7 @@ class Struct:
         allocationspace = 8
         for t in self.tokens:
             if (t.tok == T_KEYWORD):
-                if(t.value == "var"):
+                if(t.value == "var" or t.value == "float"):
                     allocationspace+=8
         #call malloc to create enough space in memory
         self.allocator = """

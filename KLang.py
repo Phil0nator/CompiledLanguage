@@ -28,7 +28,7 @@ __comp__ = None
 
 def main():
     
-    global cc
+    global cc, __comp__
     data = ""
 
     

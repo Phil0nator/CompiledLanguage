@@ -2,6 +2,7 @@ from Declaration import *
 from Token import *
 from errors import *
 from constants import *
+from Struct import *
 
 class Function:
     def __init__(self,name,params,tokens, compiler, types):
@@ -12,7 +13,7 @@ class Function:
             self.name = "m"
         self.params = params
         self.compiler = compiler
-
+        self.ret = "var"
         
         self.header = self.name+":"
         self.allocator = ""
@@ -219,7 +220,6 @@ class Function:
 
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             #max expression size
-            
         if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
             self.advance()
             
@@ -545,8 +545,12 @@ class Function:
 
     def buildReturnStatement(self):
         #current token will already be the return value
-        self.evaluateExpression(reg="xmm8")
-        self.addline("cvttss2si r8, xmm8")
+        if(self.ret == "float"):
+            self.evaluateExpression(reg="xmm8")
+            self.addline("cvttss2si r8, xmm8")
+        else:
+            self.evaluateExpression(reg="r8")
+            self.addline("cvtsi2ss xmm8,r8")
         
 
 

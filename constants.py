@@ -82,7 +82,7 @@ ESCAPE_CHARS = {
 
 KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", \
             "null", "nullptr", "return", "new", "__asm", "__c", "#include", "#define", "#ifdef", "#ifndef", "#else", "#endif", \
-            "constructor", "cmp", "float", "fast"]
+            "constructor", "cmp", "float", "fast", "break", "continue"]
 
 
 
@@ -154,6 +154,8 @@ parameter_registers = ["r9","r10","r11","r12","r13","r14","r15"]
 flt_parameter_registers = ["xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"]
 return_register = "r8"
 flt_return_register = "xmm8"
+transition_register = "rdi"
+flt_transition_register = "xmm10"
 
 int_allocator = 32
 int_allocator_ref = "QWORD"

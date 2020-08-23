@@ -91,3 +91,7 @@ class InvalidStructureDeclaration(Error):
 class InvalidCMPBlockHeader(Error):
     def __init__(self, start, end, details, tok):
         super().__init__(start,end,"Invalid CMP Block Header", details, tok)
+
+class UndefinedFunction(Error):
+    def __init__(self, start, end, details, tok):
+            super().__init__(start,end,"Undefined Function", details, tok)

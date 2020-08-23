@@ -3,12 +3,13 @@
 #include "include/memory.rud"
 #include "include/string.rud"
 #include "include/math.rud"
+#include "include/Vector.rud"
 
 function fast testmod(mod){
     return 90;
 }
 
-function fltTest(float inp){
+function  fltTest(float inp) float{
 
     float out = ((inp * 3)+0.356)/2;
     return out;
@@ -39,6 +40,20 @@ function main(){
     float weirdFunction;
     fltTest(sqrted)->weirdFunction;
     print_floatln(weirdFunction);
+    print_string("======================");
+    print_string("Vector Tests:");
+    print_string("======================");
 
+    var testvec;
+    Vector()->testvec;
+    Vector.init(testvec, 5);
+    Vector.push(testvec, 69);
+    var valtest;
+    Vector.at(testvec, 0)->valtest;
+    for(var i = 0; 500 ; i ++){
+
+        Vector.push(testvec, i);
+
+    }
 
 }
