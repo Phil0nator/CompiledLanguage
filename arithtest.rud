@@ -44,6 +44,8 @@ function main(){
     print_string("Vector Tests:");
     print_string("======================");
 
+    
+
     var testvec;
     Vector()->testvec;
     Vector.init(testvec, 5);
@@ -55,5 +57,11 @@ function main(){
         Vector.push(testvec, i);
 
     }
+    Vector.print(testvec);
+
+
+    
+
+
 
 }

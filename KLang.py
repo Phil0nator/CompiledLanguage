@@ -118,4 +118,5 @@ if( __name__ == "__main__"):
         main()
     except Exception:
         print(Exception)
-        print("An unkown error has occured on token: "+__comp__.current_token)
+        print("An unkown error has occured on token: "+__comp__.current_token.__repr__())
+        print("Location: "+__comp__.current_token.start.__repr__())

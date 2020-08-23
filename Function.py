@@ -17,7 +17,7 @@ class Function:
         
         self.header = self.name+":"
         self.allocator = ""
-        self.closer = "\nleave\nret\n"
+        self.closer = "__%s__leave_ret_:\nleave\nret\n"%self.name
         self.bodytext = ""
         self.isFast = False
         self.allocationCounter = 8
@@ -508,7 +508,7 @@ class Function:
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             
         id = self.current_token.value
-
+        
         if(self.getDeclarationByID(id) != None):
             throw(VariableReDeclaration(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         self.advance()
@@ -529,10 +529,9 @@ class Function:
                 self.evaluateExpression(decl=self.declarations[len(self.declarations)-1])#evaluate expression, and place it into this declaration
             else:
                 self.evaluateExpression(glob=id)
-
+            return
         else: #invalid statement
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
-
 
 
 
@@ -552,7 +551,7 @@ class Function:
             self.evaluateExpression(reg="r8")
             self.addline("cvtsi2ss xmm8,r8")
         
-
+        self.addline("jmp __%s__leave_ret_"%self.name)
 
 
 
@@ -582,9 +581,9 @@ class Function:
 
         
         
-
-
         self.buildVariableDeclaration() #determine incrementor
+        if(self.current_token.tok == T_EOL):
+            self.advance()
         decl = self.declarations[len(self.declarations)-1]
         self.addline("__"+self.name+"__flp"+hex(decl.offset)+":")
 
@@ -595,15 +594,17 @@ class Function:
         if(self.current_token.tok == ";"):
             self.advance()
 
+        self.addline("__"+self.name+"__flp_end_"+hex(decl.offset)+":")
         self.evaluateExpression(decl=maxdecl)
-        self.addline("; FIRST")
 
         
         #self.evaluateExpression(decl=decl)
         self.buildIDStatement()
-        
-        self.addline("; POST EXPRESSION")
         self.advance()
+        
+        if(self.current_token.tok == T_CLOSEP):
+            self.advance()
+
 
         if(self.current_token.tok != T_OSCOPE):
             throw(InvalidForBlockInit(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
@@ -612,7 +613,7 @@ class Function:
 
         self.addline(load_value_toreg(maxdecl.offset,"rdi"))
         self.addline(load_value_toreg(decl.offset,"rsi"))
-
+        
         self.addline("cmp rsi, rdi")
         self.addline("jl %s"%("__"+self.name+"__flp"+hex(decl.offset)))
 
@@ -643,12 +644,28 @@ class Function:
             
             op = CMP_TABLE[self.current_token.tok]
             self.advance()
+            
             if(self.current_token.tok != ":"):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
             self.advance()
+            
+            if(self.current_token.tok == T_KEYWORD and self.current_token.value == "return"):
+                self.addline("%s __%s__leave_ret_"%(op, self.name))
+                self.advance()
+                self.advance()
+                continue
+            elif (self.current_token.tok == T_KEYWORD and self.current_token.value == "continue"):
+                self.addline("%s %s"%(op, endblockname))
+                self.advance()
+                self.advance()
+                continue
+
+
             if(self.current_token.tok != T_ID):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
             id = self.current_token.value
+            
             self.advance()
             if(self.current_token.tok == T_CLSCOPE):break
+            
             if(self.current_token.tok != T_EOL):throw(InvalidCMPBlockHeader(self.current_token.start, self.current_token.end, self.current_token.value, self.current_token.tok))
             self.addline("%s %s"%(op, id))
             self.advance()
@@ -708,9 +725,10 @@ class Function:
 
     def compile(self):
         if(not self.isFast): #the fast keyword prevents this paramter storage
-            allocationoffset = len(self.params)*8
+            allocationoffset = len(self.params)*8+8
             for token in self.tokens:
-                if(token.tok == T_KEYWORD and token.value == "var" or token.value == "float"):
+                
+                if(token.tok == T_KEYWORD and token.value == "var" or token.value == "float" or token.value=="for"): #forloops require extra declarations
                     allocationoffset += 8
         else:
             allocationoffset = 8
@@ -719,6 +737,7 @@ class Function:
                     allocationoffset += 8
 
         self.allocator = allocate(allocationoffset)
+        print(self.allocator, allocationoffset)
         if(not self.isFast):
             for i in range(len(self.params)):
                 if(self.types[i] == "var"):
@@ -749,8 +768,8 @@ class Function:
                 self.buildIDStatement()
             else:
                 throw(UnkownStatementInitiator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
-
     def getFinalText(self):
+
         return self.header+"\n"+self.bodytext+"\n"+self.closer+"\n"
 
     def advance(self):

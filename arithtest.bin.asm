@@ -1015,15 +1015,18 @@ section .text
 section .data
 STRING_CONSTANT_0: db `Memory error encountered`, 0
 STRING_CONSTANT_1: db `%f`, 0
+STRING_CONSTANT_2: db `[ `, 0
+STRING_CONSTANT_3: db `%i, `, 0
+STRING_CONSTANT_4: db `%i ]\n`, 0
 FLT_CONSTANT_0: dq __float32__(0.356)
 FLT_CONSTANT_1: dq __float32__(235.2)
-STRING_CONSTANT_2: db `Floored: %u\n`, 0
-STRING_CONSTANT_3: db `Rounded: %u\n`, 0
-STRING_CONSTANT_4: db `Ceiled: %u\n`, 0
-STRING_CONSTANT_5: db `SQRTED: %lf\n`, 0
-STRING_CONSTANT_6: db `======================`, 0
-STRING_CONSTANT_7: db `Vector Tests:`, 0
-STRING_CONSTANT_8: db `======================`, 0
+STRING_CONSTANT_5: db `Floored: %u\n`, 0
+STRING_CONSTANT_6: db `Rounded: %u\n`, 0
+STRING_CONSTANT_7: db `Ceiled: %u\n`, 0
+STRING_CONSTANT_8: db `SQRTED: %lf\n`, 0
+STRING_CONSTANT_9: db `======================`, 0
+STRING_CONSTANT_10: db `Vector Tests:`, 0
+STRING_CONSTANT_11: db `======================`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __isincluded__MEMORY_: dq 0x96c6
 __PRINTFFLOAT: db `%f`, 0
@@ -1063,7 +1066,7 @@ ret
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
+sub rsp, 0x18
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, 0x0
@@ -1072,16 +1075,16 @@ mov QWORD [rbp-0x10], rcx
 mov rax, QWORD [rbp-0x8]
 mov rcx, 0x8
 imul rcx
-mov QWORD [rbp-0x8], rax
-mov r9, QWORD [rbp-0x8]
+mov r9,rax
 call alloc
 mov rcx, r8
 mov QWORD [rbp-0x10], rcx
 
 mov r8, QWORD [rbp-0x10]
 cvtsi2ss xmm8,r8
+jmp __Array__leave_ret_
 
-
+__Array__leave_ret_:
 leave
 ret
 
@@ -1095,7 +1098,7 @@ sub rsp, 0x8
     mov QWORD [r9+r10], rax  
     
 
-
+__putValue__leave_ret_:
 leave
 ret
 
@@ -1111,7 +1114,7 @@ sub rsp, 0x8
     
     
 
-
+__getValue__leave_ret_:
 leave
 ret
 
@@ -1138,7 +1141,7 @@ sub rsp, 0x8
 
 
 
-
+__alloc__leave_ret_:
 leave
 ret
 
@@ -1146,7 +1149,7 @@ memerror:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov r9, STRING_CONSTANT_0
@@ -1154,7 +1157,7 @@ call print_string
 mov r9, QWORD [rbp-0x8]
 call exit
 
-
+__memerror__leave_ret_:
 leave
 ret
 
@@ -1174,7 +1177,7 @@ sub rsp, 0x8
 
 
 
-
+__destroy__leave_ret_:
 leave
 ret
 
@@ -1202,7 +1205,7 @@ sub rsp, 0x8
         
         
 
-
+__reallocate__leave_ret_:
 leave
 ret
 
@@ -1216,7 +1219,7 @@ sub rsp, 0x8
     NEWLINE
     
 
-
+__print_char__leave_ret_:
 leave
 ret
 
@@ -1230,7 +1233,7 @@ sub rsp, 0x8
     NEWLINE
     
 
-
+__print_string__leave_ret_:
 leave
 ret
 
@@ -1244,7 +1247,7 @@ sub rsp, 0x8
     NEWLINE
     
 
-
+__print_integer__leave_ret_:
 leave
 ret
 
@@ -1269,7 +1272,7 @@ sub rsp, 0x8
     FFLUSH_STDOUT
     
 
-
+__printformat__leave_ret_:
 leave
 ret
 
@@ -1295,7 +1298,7 @@ sub rsp, 0x8
     FFLUSH_STDOUT
     
 
-
+__print_two_formats__leave_ret_:
 leave
 ret
 
@@ -1320,7 +1323,7 @@ mov QWORD [rbp-0x8], rcx
     UNALIGN_STACK
     
 
-
+__print_formatfloat__leave_ret_:
 leave
 ret
 
@@ -1348,7 +1351,7 @@ mov QWORD [rbp-0x8], rcx
 
     
 
-
+__print_floatln__leave_ret_:
 leave
 ret
 
@@ -1374,7 +1377,7 @@ mov QWORD [rbp-0x8], rcx
         UNALIGN_STACK
     
 
-
+__print_float__leave_ret_:
 leave
 ret
 
@@ -1392,7 +1395,7 @@ sub rsp, 0x8
     
     
 
-
+__exit__leave_ret_:
 leave
 ret
 
@@ -1409,7 +1412,7 @@ sub rsp, 0x8
 
     
 
-
+__doInterrupt__leave_ret_:
 leave
 ret
 
@@ -1417,7 +1420,7 @@ string:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 0x20
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, 0x0
@@ -1445,8 +1448,9 @@ mov r10, QWORD [rbp-0x8]
 call stringcat
 mov r8, QWORD [rbp-0x10]
 cvtsi2ss xmm8,r8
+jmp __string__leave_ret_
 
-
+__string__leave_ret_:
 leave
 ret
 
@@ -1466,7 +1470,7 @@ sub rsp, 0x8
     mov r8, rax
     
 
-
+__stringcat__leave_ret_:
 leave
 ret
 
@@ -1491,7 +1495,7 @@ sub rsp, 0x8
     
     
 
-
+__strcpy__leave_ret_:
 leave
 ret
 
@@ -1513,7 +1517,7 @@ sub rsp, 0x8
     _strlen_end_loop:
     
 
-
+__strlen__leave_ret_:
 leave
 ret
 
@@ -1521,7 +1525,7 @@ strAppend:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x30
+sub rsp, 0x38
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1569,8 +1573,9 @@ mov QWORD [rbp-0x30], rcx
 
 mov r8, QWORD [rbp-0x30]
 cvtsi2ss xmm8,r8
+jmp __strAppend__leave_ret_
 
-
+__strAppend__leave_ret_:
 leave
 ret
 
@@ -1596,7 +1601,7 @@ sub rsp, 0x8
     mov r8, r11
     
 
-
+__sqrtint__leave_ret_:
 leave
 ret
 
@@ -1618,7 +1623,7 @@ sub rsp, 0x8
     
     
 
-
+__powint__leave_ret_:
 leave
 ret
 
@@ -1633,7 +1638,7 @@ sub rsp, 0x8
     
     
 
-
+__floor__leave_ret_:
 leave
 ret
 
@@ -1648,7 +1653,7 @@ sub rsp, 0x8
 
     
 
-
+__round__leave_ret_:
 leave
 ret
 
@@ -1663,7 +1668,7 @@ sub rsp, 0x8
     
     
 
-
+__toFloat__leave_ret_:
 leave
 ret
 
@@ -1679,7 +1684,7 @@ sub rsp, 0x8
 
     
 
-
+__ceil__leave_ret_:
 leave
 ret
 
@@ -1694,7 +1699,7 @@ sub rsp, 0x8
 
     
 
-
+__sqrtflt__leave_ret_:
 leave
 ret
 
@@ -1702,7 +1707,7 @@ Vector.init:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 0x20
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1729,8 +1734,9 @@ mov r11, 0x0
 call putValue
 mov r8, QWORD [rbp-0x8]
 cvtsi2ss xmm8,r8
+jmp __Vector.init__leave_ret_
 
-
+__Vector.init__leave_ret_:
 leave
 ret
 
@@ -1738,7 +1744,7 @@ Vector.expand:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x18
+sub rsp, 0x28
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, 0x0
@@ -1751,7 +1757,7 @@ mov rcx, r8
 mov QWORD [rbp-0x10], rcx
 
 mov rbx, QWORD [rbp-0x10]
-mov rcx, 0xa
+mov rcx, 0x1
 add rbx, rcx
 mov QWORD [rbp-0x10], rbx
 mov r9, [currentVector]
@@ -1767,20 +1773,27 @@ call getValue
 mov rcx, r8
 mov QWORD [rbp-0x18], rcx
 
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
 mov r9, QWORD [rbp-0x18]
-mov r10, QWORD [rbp-0x10]
+mov rax, QWORD [rbp-0x10]
+mov rcx, 0x8
+imul rcx
+mov r10,rax
 call reallocate
 mov rcx, r8
-mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-0x20], rcx
 
 mov r9, [currentVector]
 mov r10, 0x0
-mov r11, QWORD [rbp-0x18]
+mov r11, QWORD [rbp-0x20]
 call putValue
 mov r8, QWORD [rbp-0x10]
 cvtsi2ss xmm8,r8
+jmp __Vector.expand__leave_ret_
 
-
+__Vector.expand__leave_ret_:
 leave
 ret
 
@@ -1788,7 +1801,7 @@ Vector.push:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x30
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1829,8 +1842,24 @@ push __cmpblock__Vector.push__0x25e
 jge Vector.expand
 add rsp, 0x8
 __cmpblock__Vector.push__0x25e:
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x8
+mov r11, QWORD [rbp-0x28]
+call putValue
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x0
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
 mov r9, QWORD [rbp-0x18]
-mov r10, QWORD [rbp-0x20]
+mov rax, QWORD [rbp-0x20]
+mov rcx, 0x8
+imul rcx
+mov r10,rax
 mov r11, QWORD [rbp-0x10]
 call putValue
 mov rbx, QWORD [rbp-0x20]
@@ -1843,8 +1872,9 @@ mov r11, QWORD [rbp-0x20]
 call putValue
 mov r8, QWORD [rbp-0x10]
 cvtsi2ss xmm8,r8
+jmp __Vector.push__leave_ret_
 
-
+__Vector.push__leave_ret_:
 leave
 ret
 
@@ -1852,7 +1882,7 @@ Vector.pop:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x20
+sub rsp, 0x28
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rbx, QWORD [rbp-0x8]
@@ -1883,7 +1913,10 @@ mov rcx, 0x0
 mov QWORD [rbp-0x20], rcx
 
 mov r9, QWORD [rbp-0x10]
-mov r10, QWORD [rbp-0x18]
+mov rax, QWORD [rbp-0x18]
+mov rcx, 0x8
+imul rcx
+mov r10,rax
 call getValue
 mov rcx, r8
 mov QWORD [rbp-0x20], rcx
@@ -1894,8 +1927,9 @@ mov r11, QWORD [rbp-0x18]
 call putValue
 mov r8, QWORD [rbp-0x20]
 cvtsi2ss xmm8,r8
+jmp __Vector.pop__leave_ret_
 
-
+__Vector.pop__leave_ret_:
 leave
 ret
 
@@ -1903,7 +1937,7 @@ Vector.at:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x20
+sub rsp, 0x28
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1921,15 +1955,19 @@ mov rcx, 0x0
 mov QWORD [rbp-0x20], rcx
 
 mov r9, QWORD [rbp-0x18]
-mov r10, QWORD [rbp-0x10]
+mov rax, QWORD [rbp-0x10]
+mov rcx, 0x8
+imul rcx
+mov r10,rax
 call getValue
 mov rcx, r8
 mov QWORD [rbp-0x20], rcx
 
 mov r8, QWORD [rbp-0x20]
 cvtsi2ss xmm8,r8
+jmp __Vector.at__leave_ret_
 
-
+__Vector.at__leave_ret_:
 leave
 ret
 
@@ -1937,7 +1975,7 @@ Vector.set:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x20
+sub rsp, 0x28
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1954,11 +1992,129 @@ mov rcx, r8
 mov QWORD [rbp-0x20], rcx
 
 mov r9, QWORD [rbp-0x20]
-mov r10, QWORD [rbp-0x10]
+mov rax, QWORD [rbp-0x10]
+mov rcx, 0x8
+imul rcx
+mov r10,rax
 mov r11, QWORD [rbp-0x18]
 call putValue
 
+__Vector.set__leave_ret_:
+leave
+ret
 
+Vector.print:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x0
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x10], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x8
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r9, STRING_CONSTANT_2
+mov r10, 0x0
+call printformat
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov rbx, 0x0
+mov QWORD [rbp-0x28], rbx
+__Vector.print__flp0x28:
+mov r9, QWORD [rbp-0x10]
+mov rax, QWORD [rbp-0x28]
+mov rcx, 0x8
+imul rcx
+mov r10,rax
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, STRING_CONSTANT_3
+mov r10, QWORD [rbp-0x20]
+call printformat
+__Vector.print__flp_end_0x28:
+mov rbx, QWORD [rbp-0x18]
+mov rcx, 0x1
+sub rbx, rcx
+mov QWORD [rbp-0x30], rbx
+
+mov rax, QWORD [rbp-0x28]
+
+    
+inc rax
+mov rcx, rax
+mov QWORD [rbp-0x28], rcx
+
+
+mov rdi, QWORD [rbp-0x30]
+
+    
+
+mov rsi, QWORD [rbp-0x28]
+
+    
+cmp rsi, rdi
+jl __Vector.print__flp0x28
+
+mov rbx, QWORD [rbp-0x18]
+mov rcx, 0x1
+sub rbx, rcx
+mov QWORD [rbp-0x18], rbx
+mov r9, QWORD [rbp-0x10]
+mov rax, QWORD [rbp-0x18]
+mov rcx, 0x8
+imul rcx
+mov r10,rax
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, STRING_CONSTANT_4
+mov r10, QWORD [rbp-0x20]
+call printformat
+
+__Vector.print__leave_ret_:
+leave
+ret
+
+Vector.size:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x8
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x10], rcx
+
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __Vector.size__leave_ret_
+
+__Vector.size__leave_ret_:
 leave
 ret
 
@@ -1969,8 +2125,9 @@ mov rbp, rsp
 sub rsp, 0x8
 mov r8, 0x5a
 cvtsi2ss xmm8,r8
+jmp __testmod__leave_ret_
 
-
+__testmod__leave_ret_:
 leave
 ret
 
@@ -1978,7 +2135,7 @@ fltTest:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
+sub rsp, 0x18
 movss [rbp-0x8], xmm0
 movss xmm15, [rbp-0x8]
 mov rcx, 0x3
@@ -1996,8 +2153,9 @@ divss xmm15, xmm14
 movss [rbp-0x10], xmm15
 movss xmm8,  [rbp-0x10]
 cvttss2si r8, xmm8
+jmp __fltTest__leave_ret_
 
-
+__fltTest__leave_ret_:
 leave
 ret
 
@@ -2005,7 +2163,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x48
+sub rsp, 0x58
 movss xmm10, [FLT_CONSTANT_1]
 movss  [rbp-0x8], xmm10
 mov rcx, 0x0
@@ -2022,7 +2180,7 @@ call floor
 mov rcx, r8
 mov QWORD [rbp-0x10], rcx
 
-mov r9, STRING_CONSTANT_2
+mov r9, STRING_CONSTANT_5
 mov r10, QWORD [rbp-0x10]
 call printformat
 movss xmm0,  [rbp-0x8]
@@ -2030,7 +2188,7 @@ call round
 mov rcx, r8
 mov QWORD [rbp-0x20], rcx
 
-mov r9, STRING_CONSTANT_3
+mov r9, STRING_CONSTANT_6
 mov r10, QWORD [rbp-0x20]
 call printformat
 movss xmm0,  [rbp-0x8]
@@ -2038,7 +2196,7 @@ call ceil
 mov rcx, r8
 mov QWORD [rbp-0x18], rcx
 
-mov r9, STRING_CONSTANT_4
+mov r9, STRING_CONSTANT_7
 mov r10, QWORD [rbp-0x18]
 call printformat
 movss  xmm10, [FLT_STANDARD_ZERO]
@@ -2046,7 +2204,7 @@ movss [rbp-0x28], xmm10
 movss xmm0,  [rbp-0x8]
 call sqrtflt
 movss [rbp-40], xmm8
-mov r9, STRING_CONSTANT_5
+mov r9, STRING_CONSTANT_8
 movss xmm1,  [rbp-0x28]
 call print_formatfloat
 movss  xmm10, [FLT_STANDARD_ZERO]
@@ -2056,11 +2214,11 @@ call fltTest
 movss [rbp-48], xmm8
 movss xmm0,  [rbp-0x30]
 call print_floatln
-mov r9, STRING_CONSTANT_6
+mov r9, STRING_CONSTANT_9
 call print_string
-mov r9, STRING_CONSTANT_7
+mov r9, STRING_CONSTANT_10
 call print_string
-mov r9, STRING_CONSTANT_8
+mov r9, STRING_CONSTANT_11
 call print_string
 mov rcx, 0x0
 mov QWORD [rbp-0x38], rcx
@@ -2090,9 +2248,9 @@ __m__flp0x48:
 mov r9, QWORD [rbp-0x38]
 mov r10, QWORD [rbp-0x48]
 call Vector.push
+__m__flp_end_0x48:
 mov rbx, 0x1f4
 mov QWORD [rbp-0x50], rbx
-; FIRST
 
 mov rax, QWORD [rbp-0x48]
 
@@ -2101,7 +2259,6 @@ inc rax
 mov rcx, rax
 mov QWORD [rbp-0x48], rcx
 
-; POST EXPRESSION
 
 mov rdi, QWORD [rbp-0x50]
 
@@ -2113,8 +2270,10 @@ mov rsi, QWORD [rbp-0x48]
 cmp rsi, rdi
 jl __m__flp0x48
 
+mov r9, QWORD [rbp-0x38]
+call Vector.print
 
-
+__m__leave_ret_:
 leave
 ret
 

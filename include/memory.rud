@@ -9,8 +9,7 @@ final var __isincluded__MEMORY_ = 38598;
 function Array(len){
 
     var out;
-    len = len * 8;
-    alloc(len)->out;
+    alloc(len*8)->out;
     return out;
 
 }

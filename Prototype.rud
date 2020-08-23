@@ -3,95 +3,12 @@ var bruhman = 100;
 final var endl = "\n";
 
 
-
-struct Vector{
-
-    var arr;
-    var length;
-    var pos;
-
-}
-
-function Vector.init(vec, len){
-    var array;
-    Array(len)->array;
-    putValue(vec, 0, array);
-    putValue(vec, 8, len);
-    putValue(vec, 16, 0);
-}
-function Vector.at(vec, index){
-
-    var array;
-    getValue(vec, 0)-> array;
-    var value;
-    getValue(array, index)->value;
-    return value;
-
-}
-function Vector.set(vec, index, value){
-    var array;
-    getValue(vec, 0)->array;
-    putValue(array,index,value);
-    return 0;
-}
-
-function Vector.destroy(vec){
-    var array;
-    getValue(vec, 0)-> array;
-    destroy(array);
-    destroy(vec);
-    return 0;
-}
-function Vector.size(vec){
-
-    var size;
-    getValue(vec, 8)->size;
-    return size;
-
-}
-
-function Vector.push_back(vec, value){
-
-    
-    var pos;
-    getValue(vec,16)->pos;
-    Vector.set(vec, pos, value);
-    pos = pos + 1;
-    putValue(vec, 16, pos);
-    return pos;
-
-}
-
-
 function main(args, numargs){
 
 
     printformat("The number of commandline arguments is: %u", numargs);
     print_string(endl);
 
-    
-
-    var test = 106;
-    print_integer(test);
-    test = test + 6;
-    print_integer(test);
-    print_string("Hello World");    
-
-    var teststring;
-    string("A string for testing purposes")->teststring;
-
-    var tstwo;
-    string(", and this has been appended.")->tstwo;
-    print_string(tstwo);
-    
-    
-    strAppend(teststring, tstwo)->teststring;
-    print_string(teststring);
-
-    destroy(teststring);
-    print_string("");
-
-    
 
 
     
