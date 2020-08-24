@@ -152,7 +152,9 @@ class Function:
                 if(self.getDeclarationByID(self.current_token.value).isfloat):
                     self.addline("movss [rbp-%s], [rbx+rax]"%self.getDeclarationByID(self.current_token.value).offset)
                 else:
-                    self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "[rbx+rax]"))
+                    #self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "[rbx+rax]"))
+                    self.addline("mov r15,QWORD [rbx+rax]")
+                    self.addline("mov QWORD [rbp-%s], r15"%hex(self.getDeclarationByID(self.current_token.value).offset))
             self.advance()
             return
 

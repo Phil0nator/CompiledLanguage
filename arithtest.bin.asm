@@ -1213,12 +1213,8 @@ sub rsp, 0x8
         xor r10, r10
         xor r11, r11 ;gc
         xor r12, r12
-        PRINT_DEC 8, r9
-        NEWLINE
-        PRINT_DEC 8, rsi
-        NEWLINE
         call realloc
-        
+
         test rax, rax
         xor r10, r10
         xor r11, r11 ;gc
@@ -1850,9 +1846,8 @@ mov rax,rax
 mov rbx, QWORD [rbp-0x10]
 
     
-mov rcx, [rbx+rax]
-mov QWORD [rbp-0x28], rcx
-
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x28], r15
 
 mov rbx, QWORD [rbp-0x8]
 
@@ -1910,9 +1905,8 @@ mov rax,rax
 mov rbx, QWORD [rbp-0x18]
 
     
-mov rcx, [rbx+rax]
-mov QWORD [rbp-0x20], rcx
-
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x20], r15
 mov r8, QWORD [rbp-0x20]
 cvtsi2ss xmm8,r8
 jmp __Vector.at__leave_ret_
@@ -2026,9 +2020,8 @@ mov rax,rax
 mov rbx, QWORD [rbp-0x10]
 
     
-mov rcx, [rbx+rax]
-mov QWORD [rbp-0x28], rcx
-
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x28], r15
 mov r9, STRING_CONSTANT_3
 mov r10, QWORD [rbp-0x28]
 call printformat
@@ -2068,9 +2061,8 @@ mov rax,rax
 mov rbx, QWORD [rbp-0x10]
 
     
-mov rcx, [rbx+rax]
-mov QWORD [rbp-0x28], rcx
-
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x28], r15
 mov r9, STRING_CONSTANT_4
 mov r10, QWORD [rbp-0x28]
 call printformat
@@ -2146,9 +2138,8 @@ mov rax, QWORD [rbp-0x28]
 mov rbx, QWORD [rbp-0x10]
 
     
-mov rcx, [rbx+rax]
-mov QWORD [rbp-0x20], rcx
-
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x20], r15
 mov r9, QWORD [rbp-0x8]
 mov r10, QWORD [rbp-0x20]
 call Vector.push
