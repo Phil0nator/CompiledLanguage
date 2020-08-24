@@ -15,7 +15,12 @@ function String.init(str,initial){
     var len;
     strlen(initial)->len;
     alloc(len)->data;
-    
+    cmp(data, nullptr){
+        ==:memerror
+    }
+    strcpy(data, initial);
+    str:data = data;
+    str:len = len;
 
 }
 

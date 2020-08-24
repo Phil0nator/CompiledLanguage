@@ -17,12 +17,12 @@ struct Vector{
 }
 
 
-function Vector.init(vec, len, size){
+function Vector.init(vec, size){
 
     var arr;
-    alloc(len*size)->arr;
+    alloc(1*size)->arr;
     vec:array = arr;
-    vec:len = len;
+    vec:len = 0;
     vec:pushpos = 0;
     vec:element_size = size;
 
@@ -30,21 +30,51 @@ function Vector.init(vec, len, size){
     return vec;
 }
 
+
+
+function Vector.resize(vec, newsize){
+
+    var arr;
+    vec:array->arr;
+    var newarr;
+    var itemsize;
+    vec:element_size->itemsize;
+    reallocate(arr, newsize*itemsize)->newarr;
+    cmp (newarr, nullptr){
+        ==:memerror
+    }
+
+    vec:array = newarr;
+    vec:len = newsize;
+    return vec;
+
+
+
+
+
+}
+
+
+function expand_current_vector(){
+    
+    Vector.expand(currentVector);
+}
+
 function Vector.expand(vec){
     
 
     var len;
-    currentVector:len->len;
+    vec:len->len;
     len = len + 1;
-    currentVector:len = len;
+    vec:len = len;
     var arr;
-    currentVector:array->arr;
+    vec:array->arr;
     var newarr;
     var size;
-    currentVector:element_size->size;
+    vec:element_size->size;
     reallocate(arr, len*size)->newarr;
     
-    currentVector:array=newarr;
+    vec:array=newarr;
     return len;
 
 
@@ -63,7 +93,7 @@ function Vector.push(vec, item){
 
     cmp(pos, len){
 
-        >=:Vector.expand;
+        >=:expand_current_vector;
 
     }->len;
 

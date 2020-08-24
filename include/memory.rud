@@ -1,7 +1,8 @@
 #include "include/prints.rud"
 #define MAX_INT 9223372036854775807
 #define INFINITY 9223372036854775807
-
+#define NULL 0
+#define nullptr 0
 
 final var __isincluded__MEMORY_ = 38598;
 

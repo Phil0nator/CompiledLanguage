@@ -1563,24 +1563,107 @@ Vector.init:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x20
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
 mov QWORD [rbp-0x10], rcx
-mov rcx, r11
-mov QWORD [rbp-0x18], rcx
 mov rcx, 0x0
-mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x18], rcx
 
-mov rax, QWORD [rbp-0x10]
-mov rcx, QWORD [rbp-0x18]
+mov rax, 0x1
+mov rcx, QWORD [rbp-0x10]
 imul rcx
 mov r9,rax
 call alloc
 mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rax, 0x0
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x28
+mov rax, 0x0
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x30
+mov rax, QWORD [rbp-0x10]
+mov [rbx], rax
+mov r8, QWORD [rbp-0x8]
+cvtsi2ss xmm8,r8
+jmp __Vector.init__leave_ret_
+
+__Vector.init__leave_ret_:
+leave
+ret
+
+Vector.resize:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
 mov QWORD [rbp-0x20], rcx
 
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x30
+mov rcx, [rbx]
+mov QWORD [rbp-0x28], rcx
+
+mov r9, QWORD [rbp-0x18]
+mov rax, QWORD [rbp-0x10]
+mov rcx, QWORD [rbp-0x28]
+imul rcx
+mov r10,rax
+call reallocate
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r14, QWORD [rbp-0x20]
+mov r15, 0x0
+cmp r14, r15
+push __cmpblock__Vector.resize__0x259
+add rsp, 0x8
+__cmpblock__Vector.resize__0x259:
 
 mov rbx, QWORD [rbp-0x8]
 
@@ -1595,25 +1678,23 @@ mov rbx, QWORD [rbp-0x8]
 add rbx, 0x20
 mov rax, QWORD [rbp-0x10]
 mov [rbx], rax
-
-mov rbx, QWORD [rbp-0x8]
-
-    
-add rbx, 0x28
-mov rax, 0x0
-mov [rbx], rax
-
-mov rbx, QWORD [rbp-0x8]
-
-    
-add rbx, 0x30
-mov rax, QWORD [rbp-0x18]
-mov [rbx], rax
 mov r8, QWORD [rbp-0x8]
 cvtsi2ss xmm8,r8
-jmp __Vector.init__leave_ret_
+jmp __Vector.resize__leave_ret_
 
-__Vector.init__leave_ret_:
+__Vector.resize__leave_ret_:
+leave
+ret
+
+expand_current_vector:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov r9, [currentVector]
+call Vector.expand
+
+__expand_current_vector__leave_ret_:
 leave
 ret
 
@@ -1627,7 +1708,10 @@ mov QWORD [rbp-0x8], rcx
 mov rcx, 0x0
 mov QWORD [rbp-0x10], rcx
 
-mov rbx, [currentVector]
+
+mov rbx, QWORD [rbp-0x8]
+
+    
 add rbx, 0x20
 mov rcx, [rbx]
 mov QWORD [rbp-0x10], rcx
@@ -1636,14 +1720,20 @@ mov rbx, QWORD [rbp-0x10]
 mov rcx, 0x1
 add rbx, rcx
 mov QWORD [rbp-0x10], rbx
-mov rbx, [currentVector]
+
+mov rbx, QWORD [rbp-0x8]
+
+    
 add rbx, 0x20
 mov rax, QWORD [rbp-0x10]
 mov [rbx], rax
 mov rcx, 0x0
 mov QWORD [rbp-0x18], rcx
 
-mov rbx, [currentVector]
+
+mov rbx, QWORD [rbp-0x8]
+
+    
 add rbx, 0x18
 mov rcx, [rbx]
 mov QWORD [rbp-0x18], rcx
@@ -1654,7 +1744,10 @@ mov QWORD [rbp-0x20], rcx
 mov rcx, 0x0
 mov QWORD [rbp-0x28], rcx
 
-mov rbx, [currentVector]
+
+mov rbx, QWORD [rbp-0x8]
+
+    
 add rbx, 0x30
 mov rcx, [rbx]
 mov QWORD [rbp-0x28], rcx
@@ -1668,7 +1761,10 @@ call reallocate
 mov rcx, r8
 mov QWORD [rbp-0x20], rcx
 
-mov rbx, [currentVector]
+
+mov rbx, QWORD [rbp-0x8]
+
+    
 add rbx, 0x18
 mov rax, QWORD [rbp-0x20]
 mov [rbx], rax
@@ -1739,7 +1835,7 @@ mov r14, QWORD [rbp-0x20]
 mov r15, QWORD [rbp-0x30]
 cmp r14, r15
 push __cmpblock__Vector.push__0x2d7
-jge Vector.expand
+jge expand_current_vector
 add rsp, 0x8
 __cmpblock__Vector.push__0x2d7:
 mov rcx, r8
@@ -2195,6 +2291,29 @@ call alloc
 mov rcx, r8
 mov QWORD [rbp-0x18], rcx
 
+mov r14, QWORD [rbp-0x18]
+mov r15, 0x0
+cmp r14, r15
+push __cmpblock__String.init__0x17f
+add rsp, 0x8
+__cmpblock__String.init__0x17f:
+mov r9, QWORD [rbp-0x18]
+mov r10, QWORD [rbp-0x10]
+call strcpy
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rax, QWORD [rbp-0x20]
+mov [rbx], rax
 
 __String.init__leave_ret_:
 leave
@@ -2435,8 +2554,7 @@ mov rcx, r8
 mov QWORD [rbp-0x38], rcx
 
 mov r9, QWORD [rbp-0x38]
-mov r10, 0x5
-mov r11, 0x8
+mov r10, 0x8
 call Vector.init
 mov r9, QWORD [rbp-0x38]
 mov r10, 0x45

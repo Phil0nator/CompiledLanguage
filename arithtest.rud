@@ -48,15 +48,15 @@ function main(){
 
     var testvec;
     Vector()->testvec;
-    Vector.init(testvec, 5, 8);
+    Vector.init(testvec, 8);
     Vector.push(testvec, 69);
     var valtest;
     Vector.at(testvec, 0)->valtest;
     for(var i = 0; 500 ; i ++){
 
         Vector.push(testvec, i);
-
     }
+    
     Vector.print(testvec);
 
     print_string("======================");
