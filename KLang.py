@@ -102,7 +102,7 @@ def main():
 
 def handleArgs():
     global __fileinput__,__fileoutput__,__tonasm__,__autorun__
-    parser = arg.ArgumentParser(description='Compile .smpl programs into either nasm assembly, or directly to an executable.')
+    parser = arg.ArgumentParser(description='Compile .rud programs into either nasm assembly, or to an executable.')
     parser.add_argument("-o", "--output", required=True)
     parser.add_argument("-i", "--input", required=True)
     parser.add_argument("-nasm", action="store_true", default=False)
