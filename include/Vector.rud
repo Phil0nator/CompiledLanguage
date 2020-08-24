@@ -12,18 +12,19 @@ struct Vector{
     var array;
     var len;
     var pushpos;
-
+    var element_size;
 
 }
 
 
-function Vector.init(vec, len){
+function Vector.init(vec, len, size){
 
     var arr;
-    Array(len)->arr;
+    alloc(len*size)->arr;
     putValue(vec, 0, arr); //allocate array of len
     putValue(vec, 8, len); //store len
     putValue(vec, 16, 0);  //initialize pushpos to 0
+    putValue(vec, 24, size);
     return vec;
 }
 
@@ -37,7 +38,9 @@ function Vector.expand(vec){
     var arr;
     getValue(currentVector, 0)->arr;
     var newarr;
-    reallocate(arr, len*8)->newarr;
+    var size;
+    getValue(currentVector, 24)->size;
+    reallocate(arr, len*size)->newarr;
     
     putValue(currentVector,0, newarr);
     return len;
@@ -50,6 +53,8 @@ function Vector.push(vec, item){
     var arr;
     getValue(vec, 0)->arr;
     var pos;
+    var size;
+    getValue(vec, 24)->size;
     var len;
     getValue(vec, 16)->pos;
     getValue(vec, 8)->len;
@@ -63,7 +68,7 @@ function Vector.push(vec, item){
     putValue(vec, 8, len);
     
     getValue(vec, 0)->arr;
-    putValue(arr, pos*8, item);
+    putValue(arr, pos*size, item);
     pos = pos + 1;
     putValue(vec, 16, pos);
 
@@ -77,12 +82,16 @@ function Vector.pop(vec){
 
     currentVector = vec;
     var arr;
+
+    var size;
+    getValue(vec, 24)->size;
+
     getValue(vec, 0)->arr;
     var pos;
     getValue(vec, 16)->pos;
     pos = pos-1;
     var out;
-    getValue(arr, pos*8)->out;
+    getValue(arr, pos*size)->out;
     putValue(vec, 16, pos);
     return out;
 
@@ -94,7 +103,9 @@ function Vector.at(vec, index){
     var arr;
     getValue(vec, 0)->arr;
     var item;
-    getValue(arr, index*8)->item;
+    var size;
+    getValue(vec, 24)->size;
+    getValue(arr, index*size)->item;
     return item;
 
 }
@@ -102,26 +113,30 @@ function Vector.at(vec, index){
 function Vector.set(vec, index, value){
 
     var arr;
+    var size;
+    getValue(vec, 24)->size;
     getValue(vec, 0)->arr;
-    putValue(arr, index*8, value);
+    putValue(arr, index*size, value);
 
 }
 
 function Vector.print(vec){
     var arr;
     getValue(vec, 0)->arr;
+    var size;
+    getValue(vec, 24)->size;
     var len;
     getValue(vec, 8)->len;
     printformat("[ ", 0);
     var current_value;
     for(var i=0; len - 1;i++){
 
-        getValue(arr, i*8)->current_value;
+        getValue(arr, i*size)->current_value;
         printformat("%i, ",current_value);
 
     }
     len = len - 1;
-    getValue(arr, len*8 )->current_value;
+    getValue(arr, len*size )->current_value;
     printformat("%i ]\n",current_value);
 
 
@@ -133,5 +148,22 @@ function Vector.size(vec){
     var len;
     getValue(vec, 8)->len;
     return len;
+
+}
+
+function Vector.pushes(vec, newptr, newptr_len){
+
+    
+    var val;
+    var addr;
+    var size;
+    getValue(vec, 24)->size;
+    for(var i; newptr_len; i++ ;){
+        addr= i*size;
+        getValue( newptr, addr)->val;
+        Vector.push(vec,val);
+
+    }
+
 
 }

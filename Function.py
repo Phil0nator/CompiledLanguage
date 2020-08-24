@@ -737,7 +737,6 @@ class Function:
                     allocationoffset += 8
 
         self.allocator = allocate(allocationoffset)
-        print(self.allocator, allocationoffset)
         if(not self.isFast):
             for i in range(len(self.params)):
                 if(self.types[i] == "var"):

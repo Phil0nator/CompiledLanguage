@@ -1,20 +1,24 @@
 #include "include/memory.rud"
+#include "include/Vector.rud"
 
+struct String{
 
-function string(source){
-
-
-    var out;
+    var data;
     var len;
-    
-    strlen(source)->len;
-    len = len + 1;
-    alloc(len)->out;
-    stringcat(out,source);
-    return out;
+
+
+}
+
+function String.init(str,initial){
+
+    var data;
+    var len;
+    strlen(initial)->len;
+    alloc(len)->data;
     
 
 }
+
 
 function fast stringcat(reallocated, strb){
 

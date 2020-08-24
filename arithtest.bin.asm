@@ -1027,6 +1027,11 @@ STRING_CONSTANT_8: db `SQRTED: %lf\n`, 0
 STRING_CONSTANT_9: db `======================`, 0
 STRING_CONSTANT_10: db `Vector Tests:`, 0
 STRING_CONSTANT_11: db `======================`, 0
+STRING_CONSTANT_12: db `======================`, 0
+STRING_CONSTANT_13: db `String Tests:`, 0
+STRING_CONSTANT_14: db `======================`, 0
+STRING_CONSTANT_15: db `This is the beggining of a string object, `, 0
+STRING_CONSTANT_16: db `And this is the ending which has been appended.`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __isincluded__MEMORY_: dq 0x96c6
 __PRINTFFLOAT: db `%f`, 0
@@ -1053,11 +1058,27 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-mov rdi, 0x20
+mov rdi, 0x28
 call malloc
 add rsp, 4
 test rax, rax ; check for error
-mov byte[rax+0x20], 0x0
+mov byte[rax+0x28], 0x0
+mov r8, rax
+leave
+ret
+
+        
+String:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+mov rdi, 0x10
+call malloc
+add rsp, 4
+test rax, rax ; check for error
+mov byte[rax+0x10], 0x0
 mov r8, rax
 leave
 ret
@@ -1416,169 +1437,6 @@ __doInterrupt__leave_ret_:
 leave
 ret
 
-string:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x20
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, 0x0
-mov QWORD [rbp-0x10], rcx
-
-mov rcx, 0x0
-mov QWORD [rbp-0x18], rcx
-
-mov r9, QWORD [rbp-0x8]
-call strlen
-mov rcx, r8
-mov QWORD [rbp-0x18], rcx
-
-mov rbx, QWORD [rbp-0x18]
-mov rcx, 0x1
-add rbx, rcx
-mov QWORD [rbp-0x18], rbx
-mov r9, QWORD [rbp-0x18]
-call alloc
-mov rcx, r8
-mov QWORD [rbp-0x10], rcx
-
-mov r9, QWORD [rbp-0x10]
-mov r10, QWORD [rbp-0x8]
-call stringcat
-mov r8, QWORD [rbp-0x10]
-cvtsi2ss xmm8,r8
-jmp __string__leave_ret_
-
-__string__leave_ret_:
-leave
-ret
-
-stringcat:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-    mov rdi, r9 ;reallocated
-    mov rsi, r10;strb
-    call strcat 
-    xor r10, r10
-    xor r11, r11 ;gc
-    xor r12, r12
-    add rsp, 4
-    mov r8, rax
-    
-
-__stringcat__leave_ret_:
-leave
-ret
-
-strcpy:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-        
-        xor r8, r8
-        xor rax, rax
-        _strcpy_top_loop:
-        mov ax, word [r10 + r8]
-        cmp ax, 0
-        je _strcpy_end_loop
-        mov word [r9+r8],ax
-        inc r8
-        jmp _strcpy_top_loop
-        _strcpy_end_loop  :
-    
-    
-    
-
-__strcpy__leave_ret_:
-leave
-ret
-
-strlen:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-    
-    xor r8,r8
-    _strlen_top_loop:
-    mov ax, word[r9+r8]
-    cmp ax,0
-    je _strlen_end_loop
-    inc r8
-    jmp _strlen_top_loop
-    
-    _strlen_end_loop:
-    
-
-__strlen__leave_ret_:
-leave
-ret
-
-strAppend:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x38
-mov rcx, r9
-mov QWORD [rbp-0x8], rcx
-mov rcx, r10
-mov QWORD [rbp-0x10], rcx
-mov rcx, 0x0
-mov QWORD [rbp-0x18], rcx
-
-mov rcx, 0x0
-mov QWORD [rbp-0x20], rcx
-
-mov r9, QWORD [rbp-0x8]
-call strlen
-mov rcx, r8
-mov QWORD [rbp-0x18], rcx
-
-mov r9, QWORD [rbp-0x10]
-call strlen
-mov rcx, r8
-mov QWORD [rbp-0x20], rcx
-
-mov rbx, QWORD [rbp-0x18]
-mov rcx, QWORD [rbp-0x20]
-add rbx, rcx
-cvtsi2ss xmm10,rbx
-movss xmm15, xmm10
-mov rcx, 0x1
-cvtsi2ss xmm14, rcx
-addss xmm15, xmm14
-cvttss2si rax, xmm15
-mov QWORD [rbp-0x28], rax
-mov rcx, 0x0
-mov QWORD [rbp-0x30], rcx
-
-mov r9, QWORD [rbp-0x8]
-mov r10, QWORD [rbp-0x28]
-call reallocate
-mov rcx, r8
-mov QWORD [rbp-0x30], rcx
-
-mov r9, QWORD [rbp-0x30]
-mov r10, QWORD [rbp-0x10]
-call stringcat
-mov rcx, r8
-mov QWORD [rbp-0x30], rcx
-
-mov r8, QWORD [rbp-0x30]
-cvtsi2ss xmm8,r8
-jmp __strAppend__leave_ret_
-
-__strAppend__leave_ret_:
-leave
-ret
-
 sqrtint:
 
 push rbp
@@ -1707,22 +1565,27 @@ Vector.init:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x20
+sub rsp, 0x28
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
 mov QWORD [rbp-0x10], rcx
+mov rcx, r11
+mov QWORD [rbp-0x18], rcx
 mov rcx, 0x0
-mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-0x20], rcx
 
-mov r9, QWORD [rbp-0x10]
-call Array
+mov rax, QWORD [rbp-0x10]
+mov rcx, QWORD [rbp-0x18]
+imul rcx
+mov r9,rax
+call alloc
 mov rcx, r8
-mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-0x20], rcx
 
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x0
-mov r11, QWORD [rbp-0x18]
+mov r11, QWORD [rbp-0x20]
 call putValue
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x8
@@ -1731,6 +1594,10 @@ call putValue
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x10
 mov r11, 0x0
+call putValue
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x18
+mov r11, QWORD [rbp-0x18]
 call putValue
 mov r8, QWORD [rbp-0x8]
 cvtsi2ss xmm8,r8
@@ -1744,7 +1611,7 @@ Vector.expand:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x30
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, 0x0
@@ -1776,9 +1643,18 @@ mov QWORD [rbp-0x18], rcx
 mov rcx, 0x0
 mov QWORD [rbp-0x20], rcx
 
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+mov r9, [currentVector]
+mov r10, 0x18
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
 mov r9, QWORD [rbp-0x18]
 mov rax, QWORD [rbp-0x10]
-mov rcx, 0x8
+mov rcx, QWORD [rbp-0x28]
 imul rcx
 mov r10,rax
 call reallocate
@@ -1801,7 +1677,7 @@ Vector.push:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x30
+sub rsp, 0x38
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1824,6 +1700,15 @@ mov rcx, 0x0
 mov QWORD [rbp-0x28], rcx
 
 mov r9, QWORD [rbp-0x8]
+mov r10, 0x18
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x30], rcx
+
+mov r9, QWORD [rbp-0x8]
 mov r10, 0x10
 call getValue
 mov rcx, r8
@@ -1833,21 +1718,21 @@ mov r9, QWORD [rbp-0x8]
 mov r10, 0x8
 call getValue
 mov rcx, r8
-mov QWORD [rbp-0x28], rcx
+mov QWORD [rbp-0x30], rcx
 
 mov r14, QWORD [rbp-0x20]
-mov r15, QWORD [rbp-0x28]
+mov r15, QWORD [rbp-0x30]
 cmp r14, r15
-push __cmpblock__Vector.push__0x25e
+push __cmpblock__Vector.push__0x2e1
 jge Vector.expand
 add rsp, 0x8
-__cmpblock__Vector.push__0x25e:
+__cmpblock__Vector.push__0x2e1:
 mov rcx, r8
-mov QWORD [rbp-0x28], rcx
+mov QWORD [rbp-0x30], rcx
 
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x8
-mov r11, QWORD [rbp-0x28]
+mov r11, QWORD [rbp-0x30]
 call putValue
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x0
@@ -1857,7 +1742,7 @@ mov QWORD [rbp-0x18], rcx
 
 mov r9, QWORD [rbp-0x18]
 mov rax, QWORD [rbp-0x20]
-mov rcx, 0x8
+mov rcx, QWORD [rbp-0x28]
 imul rcx
 mov r10,rax
 mov r11, QWORD [rbp-0x10]
@@ -1882,13 +1767,22 @@ Vector.pop:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x30
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rbx, QWORD [rbp-0x8]
 mov [currentVector], rbx
 mov rcx, 0x0
 mov QWORD [rbp-0x10], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x18
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
 
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x0
@@ -1897,35 +1791,35 @@ mov rcx, r8
 mov QWORD [rbp-0x10], rcx
 
 mov rcx, 0x0
-mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-0x20], rcx
 
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x10
 call getValue
 mov rcx, r8
-mov QWORD [rbp-0x18], rcx
-
-mov rbx, QWORD [rbp-0x18]
-mov rcx, 0x1
-sub rbx, rcx
-mov QWORD [rbp-0x18], rbx
-mov rcx, 0x0
 mov QWORD [rbp-0x20], rcx
 
+mov rbx, QWORD [rbp-0x20]
+mov rcx, 0x1
+sub rbx, rcx
+mov QWORD [rbp-0x20], rbx
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
 mov r9, QWORD [rbp-0x10]
-mov rax, QWORD [rbp-0x18]
-mov rcx, 0x8
+mov rax, QWORD [rbp-0x20]
+mov rcx, QWORD [rbp-0x18]
 imul rcx
 mov r10,rax
 call getValue
 mov rcx, r8
-mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], rcx
 
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x10
-mov r11, QWORD [rbp-0x18]
+mov r11, QWORD [rbp-0x20]
 call putValue
-mov r8, QWORD [rbp-0x20]
+mov r8, QWORD [rbp-0x28]
 cvtsi2ss xmm8,r8
 jmp __Vector.pop__leave_ret_
 
@@ -1937,7 +1831,7 @@ Vector.at:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x30
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1954,9 +1848,18 @@ mov QWORD [rbp-0x18], rcx
 mov rcx, 0x0
 mov QWORD [rbp-0x20], rcx
 
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x18
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
 mov r9, QWORD [rbp-0x18]
 mov rax, QWORD [rbp-0x10]
-mov rcx, 0x8
+mov rcx, QWORD [rbp-0x28]
 imul rcx
 mov r10,rax
 call getValue
@@ -1975,7 +1878,7 @@ Vector.set:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x30
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
@@ -1985,6 +1888,15 @@ mov QWORD [rbp-0x18], rcx
 mov rcx, 0x0
 mov QWORD [rbp-0x20], rcx
 
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x18
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
 mov r9, QWORD [rbp-0x8]
 mov r10, 0x0
 call getValue
@@ -1993,7 +1905,7 @@ mov QWORD [rbp-0x20], rcx
 
 mov r9, QWORD [rbp-0x20]
 mov rax, QWORD [rbp-0x10]
-mov rcx, 0x8
+mov rcx, QWORD [rbp-0x28]
 imul rcx
 mov r10,rax
 mov r11, QWORD [rbp-0x18]
@@ -2007,7 +1919,7 @@ Vector.print:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x38
+sub rsp, 0x40
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, 0x0
@@ -2023,71 +1935,80 @@ mov rcx, 0x0
 mov QWORD [rbp-0x18], rcx
 
 mov r9, QWORD [rbp-0x8]
-mov r10, 0x8
+mov r10, 0x18
 call getValue
 mov rcx, r8
 mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x8
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
 
 mov r9, STRING_CONSTANT_2
 mov r10, 0x0
 call printformat
 mov rcx, 0x0
-mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], rcx
 
 mov rbx, 0x0
-mov QWORD [rbp-0x28], rbx
-__Vector.print__flp0x28:
+mov QWORD [rbp-0x30], rbx
+__Vector.print__flp0x30:
 mov r9, QWORD [rbp-0x10]
-mov rax, QWORD [rbp-0x28]
-mov rcx, 0x8
+mov rax, QWORD [rbp-0x30]
+mov rcx, QWORD [rbp-0x18]
 imul rcx
 mov r10,rax
 call getValue
 mov rcx, r8
-mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], rcx
 
 mov r9, STRING_CONSTANT_3
-mov r10, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x28]
 call printformat
-__Vector.print__flp_end_0x28:
-mov rbx, QWORD [rbp-0x18]
+__Vector.print__flp_end_0x30:
+mov rbx, QWORD [rbp-0x20]
 mov rcx, 0x1
 sub rbx, rcx
-mov QWORD [rbp-0x30], rbx
+mov QWORD [rbp-0x38], rbx
 
-mov rax, QWORD [rbp-0x28]
+mov rax, QWORD [rbp-0x30]
 
     
 inc rax
 mov rcx, rax
-mov QWORD [rbp-0x28], rcx
+mov QWORD [rbp-0x30], rcx
 
 
-mov rdi, QWORD [rbp-0x30]
+mov rdi, QWORD [rbp-0x38]
 
     
 
-mov rsi, QWORD [rbp-0x28]
+mov rsi, QWORD [rbp-0x30]
 
     
 cmp rsi, rdi
-jl __Vector.print__flp0x28
+jl __Vector.print__flp0x30
 
-mov rbx, QWORD [rbp-0x18]
+mov rbx, QWORD [rbp-0x20]
 mov rcx, 0x1
 sub rbx, rcx
-mov QWORD [rbp-0x18], rbx
+mov QWORD [rbp-0x20], rbx
 mov r9, QWORD [rbp-0x10]
-mov rax, QWORD [rbp-0x18]
-mov rcx, 0x8
+mov rax, QWORD [rbp-0x20]
+mov rcx, QWORD [rbp-0x18]
 imul rcx
 mov r10,rax
 call getValue
 mov rcx, r8
-mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], rcx
 
 mov r9, STRING_CONSTANT_4
-mov r10, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x28]
 call printformat
 
 __Vector.print__leave_ret_:
@@ -2115,6 +2036,352 @@ cvtsi2ss xmm8,r8
 jmp __Vector.size__leave_ret_
 
 __Vector.size__leave_ret_:
+leave
+ret
+
+Vector.pushes:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x48
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, r11
+mov QWORD [rbp-0x18], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x30], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x18
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x30], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x38], rcx
+
+__Vector.pushes__flp0x38:
+mov rax, QWORD [rbp-0x38]
+mov rcx, QWORD [rbp-0x30]
+imul rcx
+mov QWORD [rbp-0x28], rax
+mov r9, QWORD [rbp-0x10]
+mov r10, QWORD [rbp-0x28]
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, QWORD [rbp-0x20]
+call Vector.push
+__Vector.pushes__flp_end_0x38:
+mov rbx, QWORD [rbp-0x18]
+mov QWORD [rbp-0x40], rbx
+
+mov rax, QWORD [rbp-0x38]
+
+    
+inc rax
+mov rcx, rax
+mov QWORD [rbp-0x38], rcx
+
+
+mov rdi, QWORD [rbp-0x40]
+
+    
+
+mov rsi, QWORD [rbp-0x38]
+
+    
+cmp rsi, rdi
+jl __Vector.pushes__flp0x38
+
+
+__Vector.pushes__leave_ret_:
+leave
+ret
+
+String.init:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x10]
+call strlen
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x0
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+call Vector
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x20]
+mov r10, 0x1
+mov r11, 0x1
+call Vector.init
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x10]
+mov r11, QWORD [rbp-0x18]
+call Vector.pushes
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x0
+mov r11, QWORD [rbp-0x20]
+call putValue
+mov r8, QWORD [rbp-0x8]
+cvtsi2ss xmm8,r8
+jmp __String.init__leave_ret_
+
+__String.init__leave_ret_:
+leave
+ret
+
+String.at:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x0
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x10]
+call Vector.at
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __String.at__leave_ret_
+
+__String.at__leave_ret_:
+leave
+ret
+
+String.length:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x0
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x10], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x10]
+call Vector.size
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __String.length__leave_ret_
+
+__String.length__leave_ret_:
+leave
+ret
+
+String.append_string:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x0
+call getValue
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x10]
+call String.length
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+
+__String.append_string__leave_ret_:
+leave
+ret
+
+stringcat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    mov rdi, r9 ;reallocated
+    mov rsi, r10;strb
+    call strcat 
+    xor r10, r10
+    xor r11, r11 ;gc
+    xor r12, r12
+    add rsp, 4
+    mov r8, rax
+    
+
+__stringcat__leave_ret_:
+leave
+ret
+
+strcpy:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+        
+        xor r8, r8
+        xor rax, rax
+        _strcpy_top_loop:
+        mov ax, word [r10 + r8]
+        cmp ax, 0
+        je _strcpy_end_loop
+        mov word [r9+r8],ax
+        inc r8
+        jmp _strcpy_top_loop
+        _strcpy_end_loop  :
+    
+    
+    
+
+__strcpy__leave_ret_:
+leave
+ret
+
+strlen:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    xor r8,r8
+    _strlen_top_loop:
+    mov ax, word[r9+r8]
+    cmp ax,0
+    je _strlen_end_loop
+    inc r8
+    jmp _strlen_top_loop
+    
+    _strlen_end_loop:
+    
+
+__strlen__leave_ret_:
+leave
+ret
+
+strAppend:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x8]
+call strlen
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x10]
+call strlen
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov rbx, QWORD [rbp-0x18]
+mov rcx, QWORD [rbp-0x20]
+add rbx, rcx
+cvtsi2ss xmm10,rbx
+movss xmm15, xmm10
+mov rcx, 0x1
+cvtsi2ss xmm14, rcx
+addss xmm15, xmm14
+cvttss2si rax, xmm15
+mov QWORD [rbp-0x28], rax
+mov rcx, 0x0
+mov QWORD [rbp-0x30], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, QWORD [rbp-0x28]
+call reallocate
+mov rcx, r8
+mov QWORD [rbp-0x30], rcx
+
+mov r9, QWORD [rbp-0x30]
+mov r10, QWORD [rbp-0x10]
+call stringcat
+mov rcx, r8
+mov QWORD [rbp-0x30], rcx
+
+mov r8, QWORD [rbp-0x30]
+cvtsi2ss xmm8,r8
+jmp __strAppend__leave_ret_
+
+__strAppend__leave_ret_:
 leave
 ret
 
@@ -2163,7 +2430,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x58
+sub rsp, 0x70
 movss xmm10, [FLT_CONSTANT_1]
 movss  [rbp-0x8], xmm10
 mov rcx, 0x0
@@ -2229,6 +2496,7 @@ mov QWORD [rbp-0x38], rcx
 
 mov r9, QWORD [rbp-0x38]
 mov r10, 0x5
+mov r11, 0x8
 call Vector.init
 mov r9, QWORD [rbp-0x38]
 mov r10, 0x45
@@ -2272,6 +2540,46 @@ jl __m__flp0x48
 
 mov r9, QWORD [rbp-0x38]
 call Vector.print
+mov r9, STRING_CONSTANT_12
+call print_string
+mov r9, STRING_CONSTANT_13
+call print_string
+mov r9, STRING_CONSTANT_14
+call print_string
+mov rcx, 0x0
+mov QWORD [rbp-0x58], rcx
+
+call String
+mov rcx, r8
+mov QWORD [rbp-0x58], rcx
+
+mov r9, QWORD [rbp-0x58]
+mov r10, STRING_CONSTANT_15
+call String.init
+mov rcx, 0x0
+mov QWORD [rbp-0x60], rcx
+
+mov r9, QWORD [rbp-0x58]
+mov r10, 0x1
+call String.at
+mov rcx, r8
+mov QWORD [rbp-0x60], rcx
+
+mov r9, QWORD [rbp-0x60]
+call print_char
+mov rcx, 0x0
+mov QWORD [rbp-0x68], rcx
+
+call String
+mov rcx, r8
+mov QWORD [rbp-0x68], rcx
+
+mov r9, QWORD [rbp-0x68]
+mov r10, STRING_CONSTANT_16
+call String.init
+mov r9, QWORD [rbp-0x58]
+mov r10, QWORD [rbp-0x68]
+call String.append_string
 
 __m__leave_ret_:
 leave
