@@ -95,3 +95,7 @@ class InvalidCMPBlockHeader(Error):
 class UndefinedFunction(Error):
     def __init__(self, start, end, details, tok):
             super().__init__(start,end,"Undefined Function", details, tok)
+
+class InvalidMemberAccess(Error):
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid Member Access", details, tok)

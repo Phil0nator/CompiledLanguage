@@ -1,7 +1,7 @@
 from constants import *
 from errors import *
 from Token import *
-
+from Declaration import *
 
 
 
@@ -13,15 +13,33 @@ class Struct:
         self.current_token = self.tokens[0]
         self.ct_idx = 0
         self.allocator = "  "
-        
+        self.declarations = []
+    
+    def getOffsetByMemberName(self, name):
+
+        for d in self.declarations:
+            if d.name == name:
+                return d.offset
     
     
     def compile(self):
-        allocationspace = 8
+        allocationspace = 16
+        prevwaskey = False
+        prevflt = False
         for t in self.tokens:
+            if(prevwaskey):
+                self.declarations.append(Declaration(t.value,allocationspace,prevflt))
+                prevwaskey=False
+                prevflt=False
             if (t.tok == T_KEYWORD):
                 if(t.value == "var" or t.value == "float"):
                     allocationspace+=8
+                    prevwaskey=True
+                    if(t.value == "float"):
+                        prevflt=True
+                    continue
+            
+            
         #call malloc to create enough space in memory
         self.allocator = """
 %s

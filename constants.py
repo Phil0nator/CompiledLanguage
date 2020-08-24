@@ -33,6 +33,8 @@ T_COLON = ":"
 T_EOL = "EOL"
 T_EQUALS = "="
 
+T_PROPOF = ":"
+
 #MULTICHAR
 
 TM_AND = "&&"

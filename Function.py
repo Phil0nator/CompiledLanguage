@@ -125,11 +125,107 @@ class Function:
         
         self.advance() # end the line
 
+
+
+    def buildPointerAssignment(self, id):
+        self.evaluateExpression(reg="rax") #store index in rax
+        self.addline(load_value_toreg(self.getDeclarationByID(id).offset, "rbx")) #store origin in rbx
+        self.advance()
+        
+
+
+
+        if(self.current_token.tok == "->"):
+            self.advance()
+
+
+            if(self.current_token.tok != T_ID):
+                throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+
+            if(self.compiler.globalExists( self.current_token.value ) ):
+                if(self.compiler.globalIsFloat(self.current_token.value)):
+                    self.addline("movss %s, [rbx+rax]"%value_of_global(self.current_token.value, self.compiler).replace("QWORD", ""))
+
+                else:
+                    self.addline("mov %s,[rbx+rax]"% value_of_global(self.current_token.value, self.compiler) )
+            else:
+                if(self.getDeclarationByID(self.current_token.value).isfloat):
+                    self.addline("movss [rbp-%s], [rbx+rax]"%self.getDeclarationByID(self.current_token.value).offset)
+                else:
+                    self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "[rbx+rax]"))
+            self.advance()
+            return
+
+
+
+
+        if(self.current_token.tok != T_EQUALS):
+            throw(InvalidVariableAssignment(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+
+        self.advance()
+        if(self.current_token.tok == T_KEYWORD and self.current_token.value == "float"):
+            self.advance()
+            self.evaluateExpression(reg="xmm10")
+            self.addline("movss [rbx+rax], xmm10")
+            return
+        
+        self.evaluateExpression(reg="r15")
+        self.addline("mov QWORD [rbx+rax], r15")
+
+
+
+
+    def buildPropertyAssignment(self, id):
+        if(not "." in self.name): throw(InvalidMemberAccess(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+        structname = self.name.split(".")[0]
+        struct = self.compiler.getStructByName(structname)
+        if(struct == None):throw(InvalidMemberAccess(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+        
+        if(self.current_token.tok != T_ID):throw(InvalidMemberAccess(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+        addr = struct.getOffsetByMemberName(self.current_token.value)
+        
+        if(self.compiler.globalExists(id)):
+            self.addline("mov rbx, ["+id+"]")
+        else:
+            self.addline(load_value_toreg(self.getDeclarationByID(id).offset, "rbx")) #store origin in rbx
+        
+        self.addline("add rbx, "+hex(int(addr))) # add offset
+        
+
+        self.advance()
+        if(self.current_token.tok == "->"):
+            self.advance()
+
+
+            if(self.current_token.tok != T_ID):
+                throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+
+            if(self.compiler.globalExists( self.current_token.value ) ):
+                if(self.compiler.globalIsFloat(self.current_token.value)):
+                    self.addline("movss %s, [rbx]"%value_of_global(self.current_token.value, self.compiler).replace("QWORD", ""))
+
+                else:
+                    self.addline("mov %s,[rbx]"% value_of_global(self.current_token.value, self.compiler) )
+            else:
+                if(self.getDeclarationByID(self.current_token.value).isfloat):
+                    self.addline("movss [rbp-%s], [rbx]"%self.getDeclarationByID(self.current_token.value).offset)
+                else:
+                    self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "[rbx]"))
+            self.advance()
+            return
+
+        if(self.current_token.tok != T_EQUALS):throw(InvalidMemberAccess(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+        self.advance()
+        self.evaluateExpression(reg="rax") #store new value in rax
+        self.addline("mov [rbx], rax")
+
     """
     #Construct a statement that starts with a T_ID (based on current position)
     """
+
     def buildIDStatement(self):
         id = self.current_token.value
+
         self.advance()
         if(self.current_token.tok == "="):
             self.advance()
@@ -138,6 +234,15 @@ class Function:
             else:
                 self.evaluateExpression(glob=id)
             return
+        elif(self.current_token.tok == "["):
+            self.advance()
+            self.buildPointerAssignment(id)
+
+        elif(self.current_token.tok == T_PROPOF):
+            
+
+            self.advance()
+            self.buildPropertyAssignment(id)
         elif (self.current_token.tok == "++"):
             self.advance()
             self.addline(load_value_toreg(self.getDeclarationByID(id).offset,"rax"))
@@ -187,7 +292,7 @@ class Function:
 
         #determine the contents of the expression:
         """
-        while self.current_token != None and self.current_token.tok != T_EOL and self.current_token.tok != T_CLOSEP:
+        while self.current_token != None and self.current_token.tok != T_EOL and self.current_token.tok != T_CLOSEP and self.current_token.tok != T_CLSLINDEX:
             if(self.current_token.tok in T_EOL+T_COMMA): break
             if(self.current_token.tok == T_INT or self.current_token.tok == T_FLOAT or self.current_token.tok == T_BOOLEAN):
                 expr.append(self.current_token.value)
