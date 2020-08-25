@@ -1013,15 +1013,39 @@ section .text
 
 
 section .data
+FLT_CONSTANT_0: dq __float32__(1.192092896e-32)
+FLT_CONSTANT_1: dq __float32__(3.141592653589793)
+FLT_CONSTANT_2: dq __float32__(2.718281828459045)
+FLT_CONSTANT_3: dq __float32__(1.4426950408889634)
+FLT_CONSTANT_4: dq __float32__(0.4342944819032518)
+FLT_CONSTANT_5: dq __float32__(0.6931471805599453)
+FLT_CONSTANT_6: dq __float32__(1.5707963267948966)
+FLT_CONSTANT_7: dq __float32__(0.7853981633974483)
+FLT_CONSTANT_8: dq __float32__(0.3183098861837907)
+FLT_CONSTANT_9: dq __float32__(0.6366197723675814)
+FLT_CONSTANT_10: dq __float32__(1.1283791670955126)
+FLT_CONSTANT_11: dq __float32__(1.4142135623730951)
+FLT_CONSTANT_12: dq __float32__(0.7071067811865476)
 STRING_CONSTANT_0: db `Memory error encountered`, 0
-STRING_CONSTANT_1: db `%f`, 0
-FLT_CONSTANT_0: dq __float32__(1.4e-08)
-FLT_CONSTANT_1: dq __float32__(120.0)
-FLT_CONSTANT_2: dq __float32__(200.0)
+STRING_CONSTANT_1: db `%g`, 0
+FLT_CONSTANT_13: dq __float32__(5.0)
+FLT_CONSTANT_14: dq __float32__(10.0)
 __FLT_STANDARD_1: dq __float32__(1.0)
+EPSILON: dq __float32__(1.192092896e-32)
+M_PI: dq __float32__(3.141592653589793)
+M_E: dq __float32__(2.718281828459045)
+M_LOG2E: dq __float32__(1.4426950408889634)
+M_LOG10E: dq __float32__(0.4342944819032518)
+M_LN2: dq __float32__(0.6931471805599453)
+M_PI_2: dq __float32__(1.5707963267948966)
+M_PI_4: dq __float32__(0.7853981633974483)
+M_1_PI: dq __float32__(0.3183098861837907)
+M_2_PI: dq __float32__(0.6366197723675814)
+M_2_SQRTPI: dq __float32__(1.1283791670955126)
+M_SQRT2: dq __float32__(1.4142135623730951)
+M_SQRT1_2: dq __float32__(0.7071067811865476)
 __isincluded__MEMORY_: dq 0x96c6
-__PRINTFFLOAT: db `%f`, 0
-EPSILON: dq __float32__(1.4e-08)
+__PRINTFFLOAT: db `%g`, 0
 FLT_STANDARD_ZERO: dq __float32__(0.0)
 isFloat: dq 0x1
 
@@ -1034,6 +1058,166 @@ section .bss
 section .text
 global CMAIN
 
+
+sqrtint:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    mov r8, r9 ; copy initial value
+    xor r10, r10; count
+    xor r11, r11; sqrt
+    __sqrtint_flp_0x0:
+    sub r8, r10
+    inc r10
+    inc r10
+    inc r11
+    cmp r8, 0
+    js __sqrtint_flp_0x0_end
+    jnz __sqrtint_flp_0x0
+    __sqrtint_flp_0x0_end:
+    dec r11
+    mov r8, r11
+    
+
+__sqrtint__leave_ret_:
+leave
+ret
+
+powint:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        mov rax, r9
+        dec r10
+        __powint__flp_0x0:
+        mul r9
+        dec r10
+        cmp r10, 0
+        jne __powint__flp_0x0
+        mov r8, rax
+    
+    
+
+__powint__leave_ret_:
+leave
+ret
+
+floor:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+
+        cvttss2si r8, xmm0
+    
+    
+
+__floor__leave_ret_:
+leave
+ret
+
+round:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        cvtss2si r8, xmm0
+
+    
+
+__round__leave_ret_:
+leave
+ret
+
+toFloat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        cvtsi2ss xmm8, r9
+    
+    
+
+__toFloat__leave_ret_:
+leave
+ret
+
+ceil:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        roundss xmm1, xmm0, 10B
+        cvttss2si r8, xmm1
+
+    
+
+__ceil__leave_ret_:
+leave
+ret
+
+sqrtflt:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        sqrtss xmm8, xmm0
+
+    
+
+__sqrtflt__leave_ret_:
+leave
+ret
+
+fmod:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+movss [rbp-0x8], xmm0
+movss [rbp-0x10], xmm1
+movss xmm15, [rbp-0x8]
+movss xmm14,  [rbp-0x10]
+divss xmm15, xmm14
+movss [rbp-0x18], xmm15
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+movss xmm0,  [rbp-0x18]
+call floor
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov rax, QWORD [rbp-0x20]
+movss xmm14,  [rbp-0x10]
+cvtsi2ss xmm15, rax
+mulss xmm15, xmm14
+movss xmm10, xmm15
+movss xmm15, [rbp-0x8]
+movss xmm14, xmm10
+subss xmm15, xmm14
+movss [rbp-0x28], xmm15
+movss xmm8,  [rbp-0x28]
+cvttss2si r8, xmm8
+jmp __fmod__leave_ret_
+
+__fmod__leave_ret_:
+leave
+ret
 
 exit:
 
@@ -1389,150 +1573,16 @@ __print_float__leave_ret_:
 leave
 ret
 
-sqrtint:
+newline:
 
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-    mov r8, r9 ; copy initial value
-    xor r10, r10; count
-    xor r11, r11; sqrt
-    __sqrtint_flp_0x0:
-    sub r8, r10
-    inc r10
-    inc r10
-    inc r11
-    cmp r8, 0
-    js __sqrtint_flp_0x0_end
-    jnz __sqrtint_flp_0x0
-    __sqrtint_flp_0x0_end:
-    dec r11
-    mov r8, r11
+    NEWLINE
     
 
-__sqrtint__leave_ret_:
-leave
-ret
-
-powint:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-    
-        mov rax, r9
-        dec r10
-        __powint__flp_0x0:
-        mul r9
-        dec r10
-        cmp r10, 0
-        jne __powint__flp_0x0
-        mov r8, rax
-    
-    
-
-__powint__leave_ret_:
-leave
-ret
-
-floor:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-
-        cvttss2si r8, xmm0
-    
-    
-
-__floor__leave_ret_:
-leave
-ret
-
-round:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-    
-        cvtss2si r8, xmm0
-
-    
-
-__round__leave_ret_:
-leave
-ret
-
-toFloat:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-    
-        cvtsi2ss xmm8, r9
-    
-    
-
-__toFloat__leave_ret_:
-leave
-ret
-
-ceil:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-    
-        roundss xmm1, xmm0, 10B
-        cvttss2si r8, xmm1
-
-    
-
-__ceil__leave_ret_:
-leave
-ret
-
-sqrtflt:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-    
-        sqrtss xmm8, xmm0
-
-    
-
-__sqrtflt__leave_ret_:
-leave
-ret
-
-fmod:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-    movss xmm13, xmm0
-    movss xmm12, xmm1
-    divss xmm0, xmm1
-    cvttss2si rax, xmm0
-    cvtsi2ss xmm1, rax
-    subss xmm0, xmm1
-    mulss xmm0, xmm12
-    subss xmm13, xmm0
-    movss xmm8, xmm13
-    
-    
-    
-
-__fmod__leave_ret_:
+__newline__leave_ret_:
 leave
 ret
 
@@ -1547,11 +1597,13 @@ mov rcx, r10
 mov QWORD [rbp-0x10], rcx
 movss  xmm10, [FLT_STANDARD_ZERO]
 movss [rbp-0x18], xmm10
-movss xmm0, [FLT_CONSTANT_1]
-movss xmm1, [FLT_CONSTANT_2]
+movss xmm0, [FLT_CONSTANT_13]
+movss xmm1, [FLT_CONSTANT_14]
 call fmod
 movss [rbp-24], xmm8
 movss xmm0,  [rbp-0x18]
+call print_floatln
+movss xmm0, [EPSILON]
 call print_float
 
 __m__leave_ret_:

@@ -115,7 +115,7 @@ class Lexer:
         num = ''
         dots = 0
         start=self.loc.copy()
-        while self.current_char != None and self.current_char in T_NUMBERS + '.':
+        while self.current_char != None and self.current_char in T_NUMBERS + '.'+"e-":
             if self.current_char == ".":
                 if dots == 1: break #two decimals in one number??
                 dots+=1
@@ -166,7 +166,7 @@ class Lexer:
     def make_identifier(self):
         out = ''
         start = self.loc.copy()
-        while self.current_char !=None and self.current_char in ID_CHARS:
+        while self.current_char !=None and self.current_char in ID_CHARS+T_NUMBERS:
             out+=self.current_char
             
             self.advance()

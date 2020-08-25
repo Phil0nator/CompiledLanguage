@@ -271,7 +271,11 @@ class Function:
         for decl in self.declarations:
             if decl.name == name : return decl
         for p in self.params:
-            if p == name : return parameter_registers[self.params.index(p)]
+            if p == name : 
+                if(self.types[self.params.index(p)] == "var"):
+                    return parameter_registers[self.params.index(p)]
+                else:
+                    return flt_parameter_registers[self.params.index(p)]
         return None
 
 
@@ -322,7 +326,6 @@ class Function:
                     self.evaluateExpression(reg="rdi")
                     expr.append("rdi")
             else:
-                print(self.current_token)
 
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             #max expression size
@@ -505,8 +508,11 @@ class Function:
         
         elif (expr[2] == "rdi"):
             self.addline("mov rcx, rdi")
+        elif("xmm" in expr[2]):
+            self.addline("movss xmm14, "+expr[2])
+            opbisfloat=True
         else:
-
+            print(expr)
             throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
 
 

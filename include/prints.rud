@@ -1,6 +1,6 @@
 #include "include:memory.rud"
 
-final var __PRINTFFLOAT = "%f";
+final var __PRINTFFLOAT = "%g";
 
 
 function fast print_char(char){
@@ -124,4 +124,10 @@ function fast print_float(float flt){
     "}
 
 
+}
+
+function fast newline(){
+    __asm{"
+    NEWLINE
+    "}
 }

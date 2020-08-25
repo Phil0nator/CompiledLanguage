@@ -100,8 +100,7 @@ function fast reallocate(ptr, newsize){
         mov r8, rax
         
         
-        "
-    }
+        "}
 
 
 }

@@ -1,14 +1,13 @@
-#include "include:prints.rud"
 #include "include:math.rud"
-
-
+#include "include:prints.rud"
 
 
 function main(args, numargs){
     
     
     float t;
-    fmod(120.0, 200.0)->t;
-    print_float(t);
-
+    fmod(5.0,10.0)->t;
+    print_floatln(t);
+    
+    print_float(EPSILON);
 }
