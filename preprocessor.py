@@ -136,12 +136,18 @@ class Preprocessor:
             return
 
         self.cc["FILES"].append(file)
-        try:
-            with open(file, "rb") as f:
+        if("include:" in file):
+            with open("include/"+file.replace("include:",""), "rb") as f:
                 newdata = pre_process(f.read().decode(),self.cc)
-        except:
-            print("File does not exist: %s"%file)
-            exit(1)
+        else:
+            try:
+                with open(file, "rb") as f:
+                    newdata = pre_process(f.read().decode(),self.cc)
+            except:
+                
+
+                print("File does not exist: %s"%file)
+                exit(1)
         self.data=self.data.replace("\"%s\""%file, "",1)
         self.data=self.data.replace("#include","\n"+newdata+"\n"+chr(3), 1)
         self.advance()

@@ -1,0 +1,14 @@
+#include "include:prints.rud"
+#include "include:math.rud"
+
+
+
+
+function main(args, numargs){
+    
+    
+    float t;
+    fmod(120.0, 200.0)->t;
+    print_float(t);
+
+}

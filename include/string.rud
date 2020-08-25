@@ -1,5 +1,4 @@
-#include "include/memory.rud"
-#include "include/Vector.rud"
+#include "include:memory.rud"
 
 struct String{
 
@@ -14,14 +13,65 @@ function String.init(str,initial){
     var data;
     var len;
     strlen(initial)->len;
+    
     alloc(len)->data;
+
     cmp(data, nullptr){
-        ==:memerror
+        == : memerror;
     }
+
     strcpy(data, initial);
     str:data = data;
     str:len = len;
 
+}
+function String.charAt(str, index){
+
+    var data;
+    str:data->data;
+    var ch;
+    data[index]->ch;
+    return ch;
+
+
+}
+function String.printable(str){
+
+    var data;
+    str:data->data;
+    return data;
+
+}
+function String.append_string(str, strb){
+
+    var data;
+    str:data->data;
+    var second_data;
+    strb:data->second_data;
+    strAppend(data, second_data)->data;
+    str:data = data;
+    return data;
+
+
+}
+
+function String.append_chars(str, chars){
+
+    var data;
+    str:data->data;
+    strAppend(data, chars)->data;
+    str:data=data;
+    return data;
+
+
+}
+
+function String.destroy(str){
+    var data;
+    str:data->data;
+    destroy(data);
+    destroy(str);
+    return 0;
 }
 
 
@@ -39,6 +89,7 @@ __asm{"
     "}
 
 }
+
 
 
 
@@ -94,6 +145,9 @@ function strAppend(stra, strb){
     var newlen = (lena+lenb)+1;
     var out;
     reallocate(stra, newlen)->out;
+    cmp(out, nullptr){
+        ==:memerror;
+    }
     stringcat(out, strb)->out;
     return out;
 

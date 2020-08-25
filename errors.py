@@ -14,6 +14,8 @@ class Error:
 
 def throw(e):
     print(e.as_string())
+    
+
     exit(1)
 
 class UnexpectedTokenError(Error):

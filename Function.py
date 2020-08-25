@@ -242,7 +242,6 @@ class Function:
 
         elif(self.current_token.tok == T_PROPOF):
             
-
             self.advance()
             self.buildPropertyAssignment(id)
         elif (self.current_token.tok == "++"):
@@ -866,7 +865,6 @@ class Function:
         while self.current_token != None and self.current_token.tok != T_EOF and self.current_token.tok != T_CLSCOPE:
             
             if(self.current_token.tok in T_EOL+T_OPENP+T_OSCOPE+T_CLSCOPE+T_COLON):
-
                 self.advance()
             elif(self.current_token.tok == T_KEYWORD):
                 self.buildKeywordStatement()

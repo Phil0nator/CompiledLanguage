@@ -1,8 +1,8 @@
-#include "include/memory.rud"
-#include "include/math.rud"
-#include "include/prints.rud"
-#include "include/string.rud"
-#include "include/entryexit.rud"
+#include "include:memory.rud"
+#include "include:math.rud"
+#include "include:prints.rud"
+#include "include:string.rud"
+#include "include:entryexit.rud"
 
 
 var currentVector;
@@ -41,7 +41,7 @@ function Vector.resize(vec, newsize){
     vec:element_size->itemsize;
     reallocate(arr, newsize*itemsize)->newarr;
     cmp (newarr, nullptr){
-        ==:memerror
+        ==:memerror;
     }
 
     vec:array = newarr;
@@ -196,6 +196,17 @@ function Vector.pushes(vec, newptr, newptr_len){
         Vector.push(vec,val);
 
     }
+
+
+}
+
+function Vector.destroy(vec){
+
+    var array;
+    vec:array->array;
+    destroy(array);
+    destroy(vec);
+    return 0;
 
 
 }

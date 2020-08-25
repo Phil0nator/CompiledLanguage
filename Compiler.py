@@ -72,6 +72,9 @@ class Compiler:
                 elif self.current_token.value == "struct":
                     self.createStructure()
                 else:
+                    print("THIS")
+                    print(self.functions.pop())
+                    print(self.tokens)
                     throw(UnexpectedTokenError(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             else:
                 throw(UnexpectedTokenError(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
@@ -219,7 +222,7 @@ class Compiler:
         if(len(body) == 0):
             throw(EmptyFunction(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
-
+        body.append(Token(T_EOF,value=T_EOF))
         function = Function(name,params,body,self,types)
         function.isFast=isFast
         function.ret=ret
@@ -263,6 +266,8 @@ class Compiler:
                 return fn
         structq = self.getStructByName(name)
         if(structq == None):
+            print("THIS")
+            print(name)
             throw(UndefinedFunction(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
         else:
             return Function(name,[],[Token(T_EOF)], self, [])

@@ -1,6 +1,7 @@
-#include "include/memory.rud"
+#include "include:memory.rud"
 
 final var __PRINTFFLOAT = "%f";
+
 
 function fast print_char(char){
     __asm{"
