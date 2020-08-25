@@ -1032,10 +1032,7 @@ FLT_CONSTANT_14: dq __float32__(0.7071067811865476)
 FLT_CONSTANT_15: dq __float32__(2147483646.0)
 STRING_CONSTANT_0: db `Memory error encountered`, 0
 STRING_CONSTANT_1: db `%g`, 0
-FLT_CONSTANT_16: dq __float32__(32767.0)
-FLT_CONSTANT_17: dq __float32__(1.0)
-FLT_CONSTANT_18: dq __float32__(10.0)
-FLT_CONSTANT_19: dq __float32__(251.234)
+STRING_CONSTANT_2: db `TIME: %lu\r`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 INF: dq 0x7fffffffffffffff
 FLT_NEGATIVE1: dq __float32__(-1.0)
@@ -1057,7 +1054,7 @@ FLT_MAX: dq __float32__(2147483646.0)
 INTMAX: dq 0x7fffffffffffffff
 __isincluded__MEMORY_: dq 0x96c6
 __PRINTFFLOAT: db `%g`, 0
-RAND_MAX: dq __float32__(32767.0)
+CLOCK_MONOTONIC: dq 0x1
 FLT_STANDARD_ZERO: dq __float32__(0.0)
 isFloat: dq 0x1
 
@@ -1386,7 +1383,7 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-
+   ALIGN_STACK
    xor r11, r11
    xor r12, r12
    mov rdi, r9
@@ -1396,10 +1393,10 @@ sub rsp, 0x8
    add rsp, 4
    test rax, rax ; check for error
 
-   mov byte[rax+r9], 0x0
+   mov byte[rax+rdi], 0x0
 
    mov r8, rax
-
+   UNALIGN_STACK
 
 
 
@@ -1510,6 +1507,20 @@ sub rsp, 0x8
     
 
 __print_integer__leave_ret_:
+leave
+ret
+
+print_uint:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    PRINT_UDEC 8, r9
+    NEWLINE
+    
+
+__print_uint__leave_ret_:
 leave
 ret
 
@@ -1656,92 +1667,107 @@ __newline__leave_ret_:
 leave
 ret
 
-randint:
+systime:
 
 push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-        rdrand r8
+    
+        mov rax, 201 ;sys_time
+        xor rdi, rdi
+        syscall
+        mov r8, rax
+
+    
     
 
-__randint__leave_ret_:
+__systime__leave_ret_:
 leave
 ret
 
-randrange:
+epochmillis:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x10
+mov rcx, 0x0
+mov QWORD [rbp-0x8], rcx
 
+mov r9, 0x10
+call alloc
+mov rcx, r8
+mov QWORD [rbp-0x8], rcx
+
+
+    xor r8, r8
+    mov rax, 201
+    mov rdi, 1
+    mov rsi, [rbp-16]
+    syscall
     
-    rdrand rax
-    ;range:
-    sub r10, r9
-    ;r10 = range, r9 = min
-    xor rdx, rdx
-    idiv r10 ; rand() % range
-    add rdx, r9
-    mov r8, rdx
+mov r8, QWORD [rbp-0x8]
+cvtsi2ss xmm8,r8
+jmp __epochmillis__leave_ret_
 
-    
-
-__randrange__leave_ret_:
+__epochmillis__leave_ret_:
 leave
 ret
 
-randflt:
+delay:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x8
+sub rsp, 0x30
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+call systime
+mov rcx, r8
+mov QWORD [rbp-0x10], rcx
+
+mov rbx, QWORD [rbp-0x10]
+mov rcx, QWORD [rbp-0x8]
+add rbx, rcx
+mov QWORD [rbp-0x10], rbx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+__delay__flp0x20:
+call systime
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r14, QWORD [rbp-0x18]
+mov r15, QWORD [rbp-0x10]
+cmp r14, r15
+push __cmpblock__delay__0x1ca
+jge __delay__leave_ret_
+add rsp, 0x8
+__cmpblock__delay__0x1ca:
+__delay__flp_end_0x20:
+mov rbx, 0x1
+mov QWORD [rbp-0x28], rbx
+mov rbx, 0x0
+mov QWORD [rbp-0x20], rbx
+
+mov rdi, QWORD [rbp-0x28]
 
     
-        rdrand rax
-        cvtsi2ss xmm8, rax
-        rdrand rax
-        cvtsi2ss xmm9, rax
-        divss xmm8, xmm9
-        mulss xmm8, [RAND_MAX]
-        
-    
-    
 
-__randflt__leave_ret_:
-leave
-ret
-
-randflt_range:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
+mov rsi, QWORD [rbp-0x20]
 
     
-        
-        rdrand rax
-        cvtsi2ss xmm8, rax
-        rdrand rax
-        cvtsi2ss xmm9, rax
-        divss xmm8, xmm9
-        mulss xmm8, [RAND_MAX]
+cmp rsi, rdi
+jl __delay__flp0x20
 
-        subss xmm1, xmm0
-        
-        movss xmm0, xmm8
-        
-        call fmod
-        movss xmm0, xmm8
-        call fabs
 
-        
-
-        
-    
-    
-
-__randflt_range__leave_ret_:
+__delay__leave_ret_:
 leave
 ret
 
@@ -1749,26 +1775,44 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x30
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
 mov QWORD [rbp-0x10], rcx
-movss  xmm10, [FLT_STANDARD_ZERO]
-movss [rbp-0x18], xmm10
-movss xmm0, [FLT_CONSTANT_17]
-movss xmm1, [FLT_CONSTANT_18]
-call randflt_range
-movss [rbp-24], xmm8
-movss xmm0,  [rbp-0x18]
-call print_floatln
-movss  xmm10, [FLT_STANDARD_ZERO]
-movss [rbp-0x20], xmm10
-movss xmm0, [FLT_CONSTANT_19]
-call fabs
-movss [rbp-32], xmm8
-movss xmm0,  [rbp-0x20]
-call print_floatln
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+call epochmillis
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov rbx, 0x0
+mov QWORD [rbp-0x20], rbx
+__m__flp0x20:
+call epochmillis
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r9, STRING_CONSTANT_2
+mov r10, QWORD [rbp-0x18]
+call printformat
+__m__flp_end_0x20:
+mov rbx, 0x1
+mov QWORD [rbp-0x28], rbx
+mov rbx, 0x0
+mov QWORD [rbp-0x20], rbx
+
+mov rdi, QWORD [rbp-0x28]
+
+    
+
+mov rsi, QWORD [rbp-0x20]
+
+    
+cmp rsi, rdi
+jl __m__flp0x20
+
 
 __m__leave_ret_:
 leave

@@ -23,6 +23,14 @@ function fast print_integer(number){
     NEWLINE
     "}
 }
+
+function fast print_uint(number){
+    __asm{"
+    PRINT_UDEC 8, r9
+    NEWLINE
+    "}
+}
+
 function fast printformat(value, format){
 
     __asm{"

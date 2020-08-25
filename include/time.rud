@@ -1,0 +1,53 @@
+final var CLOCK_MONOTONIC = 1;
+#include "include:memory.rud"
+
+
+function fast systime(){
+
+    __asm{"
+    
+        mov rax, 201 ;sys_time
+        xor rdi, rdi
+        syscall
+        mov r8, rax
+
+    
+    "}
+
+
+}
+
+
+function epochmillis(){
+    
+
+    var time;
+    alloc(16)->time;
+    __asm{"
+    xor r8, r8
+    mov rax, 201
+    mov rdi, 1
+    mov rsi, [rbp-16]
+    syscall
+    "}
+    return time;
+}
+
+
+function delay(seconds){
+
+    var time;
+    systime()->time;
+    time = time+seconds;
+    var c;
+    for(var i; 1; i=0;){
+
+        systime()->c;
+
+        cmp(c,time){
+            >=: return;
+        }
+
+    }
+
+}

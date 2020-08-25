@@ -5,6 +5,16 @@
 function main(args, numargs){
     
     
+    var t;
+    epochmillis()->t;
+    
+    for(var i=0; 1; i=0; ){
+
+        epochmillis()->t;
+        
+        printformat("TIME: %lu\r", t);
+
+    }
 
 
 }

@@ -39,7 +39,7 @@ function fast getValue(array, index){
 function fast alloc(amt){
 
 __asm{"
-
+   ALIGN_STACK
    xor r11, r11
    xor r12, r12
    mov rdi, r9
@@ -49,10 +49,10 @@ __asm{"
    add rsp, 4
    test rax, rax ; check for error
 
-   mov byte[rax+r9], 0x0
+   mov byte[rax+rdi], 0x0
 
    mov r8, rax
-
+   UNALIGN_STACK
 
 "}
 
