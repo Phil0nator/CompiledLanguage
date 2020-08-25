@@ -52,6 +52,7 @@ CEXTERN realloc
 CEXTERN calloc
 CEXTERN free
 
+CEXTERN fabsf
 
 ; Make stack be 16 bytes aligned
 %macro ALIGN_STACK 0.nolist
@@ -1013,24 +1014,32 @@ section .text
 
 
 section .data
-FLT_CONSTANT_0: dq __float32__(1.192092896e-32)
-FLT_CONSTANT_1: dq __float32__(3.141592653589793)
-FLT_CONSTANT_2: dq __float32__(2.718281828459045)
-FLT_CONSTANT_3: dq __float32__(1.4426950408889634)
-FLT_CONSTANT_4: dq __float32__(0.4342944819032518)
-FLT_CONSTANT_5: dq __float32__(0.6931471805599453)
-FLT_CONSTANT_6: dq __float32__(1.5707963267948966)
-FLT_CONSTANT_7: dq __float32__(0.7853981633974483)
-FLT_CONSTANT_8: dq __float32__(0.3183098861837907)
-FLT_CONSTANT_9: dq __float32__(0.6366197723675814)
-FLT_CONSTANT_10: dq __float32__(1.1283791670955126)
-FLT_CONSTANT_11: dq __float32__(1.4142135623730951)
-FLT_CONSTANT_12: dq __float32__(0.7071067811865476)
+FLT_CONSTANT_0: dq __float32__(-1.0)
+FLT_CONSTANT_1: dq __float32__(1.0)
+FLT_CONSTANT_2: dq __float32__(1.192092896e-32)
+FLT_CONSTANT_3: dq __float32__(3.141592653589793)
+FLT_CONSTANT_4: dq __float32__(2.718281828459045)
+FLT_CONSTANT_5: dq __float32__(1.4426950408889634)
+FLT_CONSTANT_6: dq __float32__(0.4342944819032518)
+FLT_CONSTANT_7: dq __float32__(0.6931471805599453)
+FLT_CONSTANT_8: dq __float32__(1.5707963267948966)
+FLT_CONSTANT_9: dq __float32__(0.7853981633974483)
+FLT_CONSTANT_10: dq __float32__(0.3183098861837907)
+FLT_CONSTANT_11: dq __float32__(0.6366197723675814)
+FLT_CONSTANT_12: dq __float32__(1.1283791670955126)
+FLT_CONSTANT_13: dq __float32__(1.4142135623730951)
+FLT_CONSTANT_14: dq __float32__(0.7071067811865476)
+FLT_CONSTANT_15: dq __float32__(2147483646.0)
 STRING_CONSTANT_0: db `Memory error encountered`, 0
 STRING_CONSTANT_1: db `%g`, 0
-FLT_CONSTANT_13: dq __float32__(5.0)
-FLT_CONSTANT_14: dq __float32__(10.0)
+FLT_CONSTANT_16: dq __float32__(32767.0)
+FLT_CONSTANT_17: dq __float32__(1.0)
+FLT_CONSTANT_18: dq __float32__(10.0)
+FLT_CONSTANT_19: dq __float32__(251.234)
 __FLT_STANDARD_1: dq __float32__(1.0)
+INF: dq 0x7fffffffffffffff
+FLT_NEGATIVE1: dq __float32__(-1.0)
+FLT_ONE: dq __float32__(1.0)
 EPSILON: dq __float32__(1.192092896e-32)
 M_PI: dq __float32__(3.141592653589793)
 M_E: dq __float32__(2.718281828459045)
@@ -1044,8 +1053,11 @@ M_2_PI: dq __float32__(0.6366197723675814)
 M_2_SQRTPI: dq __float32__(1.1283791670955126)
 M_SQRT2: dq __float32__(1.4142135623730951)
 M_SQRT1_2: dq __float32__(0.7071067811865476)
+FLT_MAX: dq __float32__(2147483646.0)
+INTMAX: dq 0x7fffffffffffffff
 __isincluded__MEMORY_: dq 0x96c6
 __PRINTFFLOAT: db `%g`, 0
+RAND_MAX: dq __float32__(32767.0)
 FLT_STANDARD_ZERO: dq __float32__(0.0)
 isFloat: dq 0x1
 
@@ -1183,7 +1195,7 @@ __sqrtflt__leave_ret_:
 leave
 ret
 
-fmod:
+__fmod:
 
 push rbp
 mov rbp, rsp
@@ -1213,9 +1225,67 @@ subss xmm15, xmm14
 movss [rbp-0x28], xmm15
 movss xmm8,  [rbp-0x28]
 cvttss2si r8, xmm8
-jmp __fmod__leave_ret_
+jmp ____fmod__leave_ret_
+
+____fmod__leave_ret_:
+leave
+ret
+
+fmod:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    movss xmm15, xmm0
+    divss xmm15, xmm1
+    cvttss2si rax, xmm15
+    cvtsi2ss xmm15, rax
+    mulss xmm15, xmm1
+    subss xmm0, xmm15
+    movss xmm8, xmm0
+
+    
+    
 
 __fmod__leave_ret_:
+leave
+ret
+
+absint:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+        mov rax, r9
+        sar rax, 63
+        xor r9, rax
+        sub r9, rax
+        mov r8, r9
+
+       
+    
+
+__absint__leave_ret_:
+leave
+ret
+
+fabs:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    mov rax, 1
+    call fabsf
+    movss xmm8, xmm0
+    
+    
+
+__fabs__leave_ret_:
 leave
 ret
 
@@ -1586,25 +1656,119 @@ __newline__leave_ret_:
 leave
 ret
 
+randint:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+        rdrand r8
+    
+
+__randint__leave_ret_:
+leave
+ret
+
+randrange:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    rdrand rax
+    ;range:
+    sub r10, r9
+    ;r10 = range, r9 = min
+    xor rdx, rdx
+    idiv r10 ; rand() % range
+    add rdx, r9
+    mov r8, rdx
+
+    
+
+__randrange__leave_ret_:
+leave
+ret
+
+randflt:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        rdrand rax
+        cvtsi2ss xmm8, rax
+        rdrand rax
+        cvtsi2ss xmm9, rax
+        divss xmm8, xmm9
+        mulss xmm8, [RAND_MAX]
+        
+    
+    
+
+__randflt__leave_ret_:
+leave
+ret
+
+randflt_range:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        
+        rdrand rax
+        cvtsi2ss xmm8, rax
+        rdrand rax
+        cvtsi2ss xmm9, rax
+        divss xmm8, xmm9
+        mulss xmm8, [RAND_MAX]
+
+        subss xmm1, xmm0
+        
+        movss xmm0, xmm8
+        
+        call fmod
+        movss xmm0, xmm8
+        call fabs
+
+        
+
+        
+    
+    
+
+__randflt_range__leave_ret_:
+leave
+ret
+
 m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x20
+sub rsp, 0x28
 mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
 mov QWORD [rbp-0x10], rcx
 movss  xmm10, [FLT_STANDARD_ZERO]
 movss [rbp-0x18], xmm10
-movss xmm0, [FLT_CONSTANT_13]
-movss xmm1, [FLT_CONSTANT_14]
-call fmod
+movss xmm0, [FLT_CONSTANT_17]
+movss xmm1, [FLT_CONSTANT_18]
+call randflt_range
 movss [rbp-24], xmm8
 movss xmm0,  [rbp-0x18]
 call print_floatln
-movss xmm0, [EPSILON]
-call print_float
+movss  xmm10, [FLT_STANDARD_ZERO]
+movss [rbp-0x20], xmm10
+movss xmm0, [FLT_CONSTANT_19]
+call fabs
+movss [rbp-32], xmm8
+movss xmm0,  [rbp-0x20]
+call print_floatln
 
 __m__leave_ret_:
 leave

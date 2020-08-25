@@ -17,6 +17,9 @@ class Lexer:
         self.loc.advance(self.current_char)
         self.current_char = self.text[self.loc.idx] if self.loc.idx < len(self.text) else None
 
+    def nextChar(self):
+        return self.text[self.loc.idx+1]
+
     def make_tokens(self):
         tokens = []
 
@@ -26,6 +29,14 @@ class Lexer:
                 self.advance()
             elif(self.current_char in ' \t'):#ignore whitespace 
                 self.advance()
+            elif (self.current_char == "-"):
+
+                if(self.nextChar() in T_NUMBERS):
+                    tokens.append(self.make_number())
+                else:
+                    tokens.append(self.make_multichar())
+
+
             elif (ord(self.current_char) == 3):#file counter
                 
                 self.fn+=1

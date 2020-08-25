@@ -1,6 +1,6 @@
 #include "include:memory.rud"
-final float FLT_MAX = 2147483646.0;
-final var INTMAX = MAX_INT;
+#include "include:math.rud"
+
 final float RAND_MAX = 32767.0;
 
 function fast randint(){
@@ -52,6 +52,18 @@ function fast randflt_range(float min, float max) float {
         cvtsi2ss xmm9, rax
         divss xmm8, xmm9
         mulss xmm8, [RAND_MAX]
+
+        subss xmm1, xmm0
+        
+        movss xmm0, xmm8
+        
+        call fmod
+        movss xmm0, xmm8
+        call fabs
+
+        
+
+        
     
     "}
 

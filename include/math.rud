@@ -1,3 +1,10 @@
+#define INFINITY 9223372036854775807
+final var INF = 9223372036854775807;
+
+final float FLT_NEGATIVE1 = -1.0;
+final float FLT_ONE = 1.0;
+
+
 final float EPSILON = 1.192092896e-32;
 //pi
 final float M_PI = 3.14159265358979323846;
@@ -24,6 +31,10 @@ final float M_SQRT2 = 1.41421356237309504880;
 // 1 / sqrt(2)
 final float M_SQRT1_2 = 0.707106781186547524401;
 
+
+
+final float FLT_MAX = 2147483646.0;
+final var INTMAX = MAX_INT;
 
 function fast sqrtint(number){
     __asm{"
@@ -119,12 +130,56 @@ function fast sqrtflt(float flt){
 
 }
 
-function fmod(float f, float mod) float {
+function __fmod(float f, float mod) float {
 
     float divided = f / mod;
     var trunced;
     floor(divided)->trunced;
     float out = f - (trunced * mod) ;
     return out;
+
+}
+
+function fast fmod(float f, float mod) float{
+
+    __asm{"
+    
+    movss xmm15, xmm0
+    divss xmm15, xmm1
+    cvttss2si rax, xmm15
+    cvtsi2ss xmm15, rax
+    mulss xmm15, xmm1
+    subss xmm0, xmm15
+    movss xmm8, xmm0
+
+    
+    "}
+
+
+}
+
+
+function fast absint(x){
+    __asm{"
+        mov rax, r9
+        sar rax, 63
+        xor r9, rax
+        sub r9, rax
+        mov r8, r9
+
+       
+    "}
+
+
+}
+
+function fast fabs(float x) float {
+    __asm{"
+    
+    mov rax, 1
+    call fabsf
+    movss xmm8, xmm0
+    
+    "}
 
 }

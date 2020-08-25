@@ -1,13 +1,10 @@
 #include "include:math.rud"
 #include "include:prints.rud"
-
+#include "include:time.rud"
 
 function main(args, numargs){
     
     
-    float t;
-    fmod(5.0,10.0)->t;
-    print_floatln(t);
-    
-    print_float(EPSILON);
+
+
 }
