@@ -43,6 +43,7 @@ function String.init(str,initial){
     return str;
 
 }
+
 function String.charAt(str, index){
 
     var data;

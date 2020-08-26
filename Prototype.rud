@@ -5,7 +5,6 @@ final var endl = "\n";
 
 function main(args, numargs){
 
-
     printformat("The number of commandline arguments is: %u\n", numargs);
     var t = true || false;
     print_bool(t);
