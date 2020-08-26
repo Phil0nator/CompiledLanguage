@@ -32,7 +32,7 @@ T_EOF = "EOF"
 T_COLON = ":"
 T_EOL = "EOL"
 T_EQUALS = "="
-
+T_XOR = "^"
 T_PROPOF = ":"
 
 #MULTICHAR
@@ -192,9 +192,8 @@ def place_value(ptr, value):
     return """mov QWORD [rbp-"""+hex(ptr)+"""], """+hex(value)
 
 def place_value_from_reg(ptr, reg):
-    if(reg.startswith("e")):
-        return """mov QWORD [rbp-"""+hex(ptr)+"""], %s\n"""%reg
-    return ("""mov rcx, %s"""%reg)+"\nmov QWORD [rbp-"+hex(ptr)+"], rcx\n"
+    return "mov QWORD [rbp-"+hex(ptr)+"], %s\n"%reg
+    
 
 def load_value_toreg(ptr,reg):
     return """

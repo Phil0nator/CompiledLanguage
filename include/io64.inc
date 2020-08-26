@@ -52,6 +52,8 @@ CEXTERN calloc
 CEXTERN free
 
 CEXTERN fabsf
+CEXTERN atoi
+
 
 ; Make stack be 16 bytes aligned
 %macro ALIGN_STACK 0.nolist

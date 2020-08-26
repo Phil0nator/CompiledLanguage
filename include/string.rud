@@ -8,6 +8,23 @@ struct String{
 
 }
 
+
+function fast toInt(str){
+
+    __asm{"
+    ALIGN_STACK
+    mov rdi, r9
+    call atoi
+    mov r8, rax
+    UNALIGN_STACK
+    
+    "}
+
+
+}
+
+
+
 function String.init(str,initial){
 
     var data;

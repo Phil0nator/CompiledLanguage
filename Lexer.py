@@ -38,7 +38,6 @@ class Lexer:
 
 
             elif (ord(self.current_char) == 3):#file counter
-                print(cc["FILES"][self.fn])
                 self.fn+=1
                 self.loc.fn+=1
                 self.loc.ln = self.text[0:self.loc.idx].count(chr(3))
@@ -103,7 +102,9 @@ class Lexer:
             elif self.current_char == ":":
                 tokens.append(Token(T_COLON, start=self.loc.copy()))
                 self.advance()
-
+            elif self.current_char == T_XOR:
+                tokens.append(Token(T_XOR, value=T_XOR, start=self.loc.copy()))
+                self.advance()
 
             
 
@@ -150,7 +151,7 @@ class Lexer:
             return Token(out,start=start)
         out+=self.current_char
         self.advance()
-        return Token(out,start=start,end=self.loc.copy())
+        return Token(out,value=out, start=start,end=self.loc.copy())
     
 
             
@@ -186,7 +187,10 @@ class Lexer:
             _type = T_KEYWORD
             if(out == "true" or out == "false"):
                 _type = T_BOOLEAN
-                out = -int(out=="true")
+                if(out == "true"):
+                    out = -1
+                else:
+                    out = 0
         else:
             _type = T_ID
 

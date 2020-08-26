@@ -1,7 +1,25 @@
 #include "include:memory.rud"
 
 final var __PRINTFFLOAT = "%g";
+final var __PRINTTRUE = "True";
+final var __PRINTFALSE = "False";
 
+function fast print_bool(b){
+
+    __asm{"
+    cmp r9, -1
+    je __pb_istrue
+    PRINT_STRING __PRINTFALSE
+    leave
+    ret
+    __pb_istrue:
+    PRINT_STRING __PRINTTRUE
+    leave
+    ret
+
+    "}
+
+}
 
 function fast print_char(char){
     __asm{"

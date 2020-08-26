@@ -211,8 +211,9 @@ class Function:
             else:
                 if(self.getDeclarationByID(self.current_token.value).isfloat):
                     self.addline("movss [rbp-%s], [rbx]"%self.getDeclarationByID(self.current_token.value).offset)
-                else:
-                    self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "[rbx]"))
+                else:         
+                    self.addline("mov rcx, [rbx]")
+                    self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "rcx"))
             self.advance()
             return
 
@@ -313,20 +314,19 @@ class Function:
                     expr.append(self.current_token.value)
                     self.advance()
 
-            elif(self.current_token.tok in "++--/*&!|%"):
+            elif(self.current_token.tok in "^++--/*&&!!||%>><<"):
 
                 expr.append(self.current_token.tok)
                 self.advance()
             elif(self.current_token.tok == T_OPENP):
                 self.advance()
-                if(True):
+                if((isinstance(reg, str) and "xmm" in reg ) or (decl != None and decl.isfloat) or (glob != None and self.compiler.globalIsFloat(glob))):
                     self.evaluateExpression(reg="xmm10")
                     expr.append("xmm10")
                 else:
                     self.evaluateExpression(reg="rdi")
                     expr.append("rdi")
             else:
-
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             #max expression size
         if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
@@ -459,7 +459,8 @@ class Function:
                 fltinvolved=True
             else:
                 self.addline("mov %s, %s"%(_reg,value_of_global(expr[0], self.compiler)))
-        
+        if(expr[1] == "!"):
+            expr.append(0)
         
         if(not fltinvolved):
 
@@ -468,8 +469,15 @@ class Function:
                     self.addline("inc %s"%_reg)
                 elif(expr[1] == "--"):
                     self.addline("dec %s"%_reg)
+                
+                    
+
+
+
                 if(_reg != "rbx"):
                     self.addline("mov rbx, %s"%_reg)
+                
+
                 if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), "rbx"))
                 elif (reg is not None): 
                     self.addline(correct_mov(reg,"rbx"))
@@ -485,6 +493,7 @@ class Function:
                 if(expr[1] == "--"):
                     self.addline("movss xmm14, __FLT_STANDARD_1")
                     self.addline("subss xmm15, xmm14")
+                
 
 
         opbisfloat = False
@@ -547,6 +556,14 @@ class Function:
                 self.addline("xor rdx, rdx")
                 self.addline("div rcx")
                 outputreg = "rdx"
+            elif(expr[1] == "&&"):
+                self.addline("and bl, cl")
+            elif (expr[1] == "||"):
+                self.addline("or bl, cl")
+            elif (expr[1] == "!"):
+                self.addline("not bl")
+            elif (expr[1] == "^"):
+                self.addline("xor bl, cl")
 
             if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
             elif (reg is not None): 

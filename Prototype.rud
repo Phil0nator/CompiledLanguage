@@ -1,4 +1,4 @@
-
+#include "include:all.rud"
 var bruhman = 100;
 final var endl = "\n";
 
@@ -6,12 +6,9 @@ final var endl = "\n";
 function main(args, numargs){
 
 
-    printformat("The number of commandline arguments is: %u", numargs);
-    print_string(endl);
-
-
-
-    
+    printformat("The number of commandline arguments is: %u\n", numargs);
+    var t = true || false;
+    print_bool(t);
 
 
 }

@@ -3,6 +3,15 @@
 final var O_RDONLY = 0;
 final var O_WRONLY = 1;
 final var O_RDWR = 2;
+final var O_USRPERM = 420;
+
+final var WMODE_WRITE = 0;
+final var WMODE_APPEND = 1024;
+final var WMODE_WPLUS = 65;
+final var WMODE_WPLUSA = 1089;
+
+final var O_CREATE = 64;
+final var SEEK_CUR = 1;
 
 var current_filereader;
 
@@ -15,6 +24,79 @@ struct FileReader{
     var len;
 
 }
+
+
+function fast rename(name, newname){
+
+    __asm{"
+        mov rax, 82
+        mov rdi, r9
+        mov rsi, r10
+        syscall
+        mov r8, rax
+        "}
+
+
+}
+
+
+function fast mkdir(name){
+
+    __asm{"
+    
+    mov rax, 83
+    mov rdi, r9
+    mov rsi, 420
+    syscall
+    mov r8, rax
+    
+    "}
+
+}
+
+
+function fast mkfile(name){
+    __asm{"
+    
+    mov rax, 85
+    mov rdi, r9
+    mov rsi, 420
+    syscall
+    mov r8, rax
+    
+    
+    "}
+}
+
+
+function fast rmdir(name){
+
+    __asm{"
+    
+        mov rax, 84
+        mov rdi, r9
+        syscall
+        mov r8, rax
+    
+    "}
+
+}
+
+function fast chdir(name){
+
+    __asm{"
+    
+        mov rax, 80
+        mov rdi, r9
+        syscall
+        mov r8, rax
+
+    "}
+
+}
+
+
+
 
 function fast openFile(filename, mode, flags){
     __asm{"
@@ -178,19 +260,11 @@ struct FileWriter{
 
 }
 
-final var WMODE_WRITE = 0;
-final var WMODE_APPEND = 1024;
-final var WMODE_WPLUS = 65;
-final var WMODE_WPLUSA = 1089;
-
-final var O_CREATE = 64;
-final var SEEK_CUR = 1;
-
 function FileWriter.init(this, filename, mode){
 
     FileWriter()->this;
     var file;
-    openFile(filename , 420, WMODE_WPLUSA)->file;
+    openFile(filename , O_USRPERM, WMODE_WPLUSA)->file;
     this:file = file;
     var buf;
     String()->buf;

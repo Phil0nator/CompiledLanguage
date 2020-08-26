@@ -27,8 +27,9 @@ __autorun__ = False
 __comp__ = None
 
 def main():
-    
     global cc, __comp__
+    start=time.time()
+
     data = ""
 
     
@@ -47,7 +48,6 @@ def main():
     data = pre_process(data,cc)
     
     
-    print(data)
 
     l = Lexer(0, data)
     tokens, errors = l.make_tokens()
@@ -77,6 +77,9 @@ def main():
 
     if(not __tonasm__):
         os.remove("%s.asm"%__fileoutput__)
+
+    end = time.time()
+    print("Compiled and linked all symbols in %s ms\n"%str(end-start))
 
 
     if(__autorun__):
@@ -119,6 +122,7 @@ if( __name__ == "__main__"):
     handleArgs()
     try:
         main()
+        
     except Exception:
         print(Exception.with_traceback())
         print("An unkown error has occured on token: "+__comp__.current_token.__repr__())
