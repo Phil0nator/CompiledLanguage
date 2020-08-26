@@ -47,6 +47,8 @@ def main():
     data = pre_process(data,cc)
     
     
+    print(data)
+
     l = Lexer(0, data)
     tokens, errors = l.make_tokens()
     if(errors != None):

@@ -131,7 +131,7 @@ class Preprocessor:
         file = self.current_token.value
 
         if(self.fileExists(file)):
-            self.data=self.data.replace("#include \""+file+"\"", "",1)
+            self.data=self.data.replace("#include \""+file+"\"", "\n",1)
             self.advance()
             return
 
@@ -148,14 +148,14 @@ class Preprocessor:
 
                 print("File does not exist: %s"%file)
                 exit(1)
-        self.data=self.data.replace("\"%s\""%file, "",1)
+        self.data=self.data.replace("\"%s\""%file, "\n",1)
         self.data=self.data.replace("#include","\n"+newdata+"\n"+chr(3), 1)
         self.advance()
 
     def buildDefine(self):
         self.advance()
         if(self.current_token.tok != T_ID):
-            throw(InvalidDefinrdirective(self.current_token.start.idx,self.current_token.end,self.current_token.value))
+            throw(InvalidDefinrdirective(self.current_token.start.idx,self.current_token.end,self.current_token.value, self.current_token.tok))
         id = self.current_token.value
         self.advance()
         if(self.current_token.tok in T_INT+T_FLOAT+T_STRING+T_BOOLEAN):

@@ -1032,7 +1032,9 @@ FLT_CONSTANT_14: dq __float32__(0.7071067811865476)
 FLT_CONSTANT_15: dq __float32__(2147483646.0)
 STRING_CONSTANT_0: db `Memory error encountered`, 0
 STRING_CONSTANT_1: db `%g`, 0
-STRING_CONSTANT_2: db `TIME: %lu\r`, 0
+STRING_CONSTANT_2: db ``, 0
+STRING_CONSTANT_3: db `logic.txt`, 0
+STRING_CONSTANT_4: db `This is an extra line that has been written!\n`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 INF: dq 0x7fffffffffffffff
 FLT_NEGATIVE1: dq __float32__(-1.0)
@@ -1055,12 +1057,22 @@ INTMAX: dq 0x7fffffffffffffff
 __isincluded__MEMORY_: dq 0x96c6
 __PRINTFFLOAT: db `%g`, 0
 CLOCK_MONOTONIC: dq 0x1
+O_RDONLY: dq 0x0
+O_WRONLY: dq 0x1
+O_RDWR: dq 0x2
+WMODE_WRITE: dq 0x0
+WMODE_APPEND: dq 0x400
+WMODE_WPLUS: dq 0x41
+WMODE_WPLUSA: dq 0x441
+O_CREATE: dq 0x40
+SEEK_CUR: dq 0x1
 FLT_STANDARD_ZERO: dq __float32__(0.0)
 isFloat: dq 0x1
 
 
 
 section .bss
+current_filereader: resb 0x8
 
 
 
@@ -1068,7 +1080,55 @@ section .text
 global CMAIN
 
 
-sqrtint:
+
+String:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+mov rdi, 0x20
+call malloc
+add rsp, 4
+test rax, rax ; check for error
+mov byte[rax+0x20], 0x0
+mov r8, rax
+leave
+ret
+
+        
+FileReader:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+mov rdi, 0x38
+call malloc
+add rsp, 4
+test rax, rax ; check for error
+mov byte[rax+0x38], 0x0
+mov r8, rax
+leave
+ret
+
+        
+FileWriter:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+mov rdi, 0x20
+call malloc
+add rsp, 4
+test rax, rax ; check for error
+mov byte[rax+0x20], 0x0
+mov r8, rax
+leave
+ret
+
+        sqrtint:
 
 push rbp
 mov rbp, rsp
@@ -1690,25 +1750,8 @@ epochmillis:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x10
-mov rcx, 0x0
-mov QWORD [rbp-0x8], rcx
+sub rsp, 0x8
 
-mov r9, 0x10
-call alloc
-mov rcx, r8
-mov QWORD [rbp-0x8], rcx
-
-
-    xor r8, r8
-    mov rax, 201
-    mov rdi, 1
-    mov rsi, [rbp-16]
-    syscall
-    
-mov r8, QWORD [rbp-0x8]
-cvtsi2ss xmm8,r8
-jmp __epochmillis__leave_ret_
 
 __epochmillis__leave_ret_:
 leave
@@ -1771,7 +1814,779 @@ __delay__leave_ret_:
 leave
 ret
 
-m:
+String.init:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x10]
+call strlen
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x20]
+call alloc
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r14, QWORD [rbp-0x18]
+mov r15, 0x0
+cmp r14, r15
+push __cmpblock__String.init__0x17f
+je memerror
+add rsp, 0x8
+__cmpblock__String.init__0x17f:
+mov r9, QWORD [rbp-0x18]
+mov r10, QWORD [rbp-0x10]
+call strcpy
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rax, QWORD [rbp-0x20]
+mov [rbx], rax
+mov r8, QWORD [rbp-0x8]
+cvtsi2ss xmm8,r8
+jmp __String.init__leave_ret_
+
+__String.init__leave_ret_:
+leave
+ret
+
+String.charAt:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov rax, QWORD [rbp-0x10]
+
+mov rbx, QWORD [rbp-0x18]
+
+    
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x20], r15
+mov r8, QWORD [rbp-0x20]
+cvtsi2ss xmm8,r8
+jmp __String.charAt__leave_ret_
+
+__String.charAt__leave_ret_:
+leave
+ret
+
+String.printable:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __String.printable__leave_ret_
+
+__String.printable__leave_ret_:
+leave
+ret
+
+String.append_string:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+
+mov rbx, QWORD [rbp-0x10]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x18]
+mov r10, QWORD [rbp-0x20]
+call strAppend
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __String.append_string__leave_ret_
+
+__String.append_string__leave_ret_:
+leave
+ret
+
+String.append_chars:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x18]
+mov r10, QWORD [rbp-0x10]
+call strAppend
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __String.append_chars__leave_ret_
+
+__String.append_chars__leave_ret_:
+leave
+ret
+
+String.destroy:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+
+mov r9, QWORD [rbp-0x10]
+call destroy
+mov r9, QWORD [rbp-0x8]
+call destroy
+mov r8, 0x0
+cvtsi2ss xmm8,r8
+jmp __String.destroy__leave_ret_
+
+__String.destroy__leave_ret_:
+leave
+ret
+
+String.length:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __String.length__leave_ret_
+
+__String.length__leave_ret_:
+leave
+ret
+
+stringcat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    mov rdi, r9 ;reallocated
+    mov rsi, r10;strb
+    call strcat 
+    xor r10, r10
+    xor r11, r11 ;gc
+    xor r12, r12
+    add rsp, 4
+    mov r8, rax
+    
+
+__stringcat__leave_ret_:
+leave
+ret
+
+strcpy:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+        
+        xor r8, r8
+        xor rax, rax
+        _strcpy_top_loop:
+        mov ax, word [r10 + r8]
+        cmp ax, 0
+        je _strcpy_end_loop
+        mov word [r9+r8],ax
+        inc r8
+        jmp _strcpy_top_loop
+        _strcpy_end_loop  :
+    
+    
+    
+
+__strcpy__leave_ret_:
+leave
+ret
+
+strlen:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    xor r8,r8
+    _strlen_top_loop:
+    mov ax, word[r9+r8]
+    cmp ax,0
+    je _strlen_end_loop
+    inc r8
+    jmp _strlen_top_loop
+    
+    _strlen_end_loop:
+    
+
+__strlen__leave_ret_:
+leave
+ret
+
+strAppend:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x8]
+call strlen
+mov rcx, r8
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x10]
+call strlen
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov rbx, QWORD [rbp-0x18]
+mov rcx, QWORD [rbp-0x20]
+add rbx, rcx
+cvtsi2ss xmm10,rbx
+movss xmm15, xmm10
+mov rcx, 0x1
+cvtsi2ss xmm14, rcx
+addss xmm15, xmm14
+cvttss2si rax, xmm15
+mov QWORD [rbp-0x28], rax
+mov rcx, 0x0
+mov QWORD [rbp-0x30], rcx
+
+mov r9, QWORD [rbp-0x8]
+mov r10, QWORD [rbp-0x28]
+call reallocate
+mov rcx, r8
+mov QWORD [rbp-0x30], rcx
+
+mov r14, QWORD [rbp-0x30]
+mov r15, 0x0
+cmp r14, r15
+push __cmpblock__strAppend__0x2da
+je memerror
+add rsp, 0x8
+__cmpblock__strAppend__0x2da:
+mov r9, QWORD [rbp-0x30]
+mov r10, QWORD [rbp-0x10]
+call stringcat
+mov rcx, r8
+mov QWORD [rbp-0x30], rcx
+
+mov r8, QWORD [rbp-0x30]
+cvtsi2ss xmm8,r8
+jmp __strAppend__leave_ret_
+
+__strAppend__leave_ret_:
+leave
+ret
+
+openFile:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    mov rax, 2
+    mov rdi, r9
+    mov rsi, r11
+    mov rdx, r10
+    or rdx, 64
+    syscall
+    mov r8, rax
+    
+    
+
+__openFile__leave_ret_:
+leave
+ret
+
+readFile:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+
+    xor rax, rax
+    mov rdi, r9
+    mov rsi, r10
+    mov rdx, r11
+    syscall
+    mov r8, rax
+
+
+    
+
+__readFile__leave_ret_:
+leave
+ret
+
+writeFile:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    mov rax, 1
+    mov rdi, r9
+    mov rsi, r10
+    mov rdx, r11
+    syscall
+    mov r8, rax
+    
+
+__writeFile__leave_ret_:
+leave
+ret
+
+closeFile:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    mov rax, 3
+    mov rdi, r9
+    syscall
+    
+
+__closeFile__leave_ret_:
+leave
+ret
+
+lseek:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, r11
+mov QWORD [rbp-0x18], rcx
+
+    
+    mov rax, 8
+    mov rdi, r9
+    mov rsi, r10
+    mov rdx, r11
+    syscall
+    mov r8, r9
+    
+    
+    
+
+__lseek__leave_ret_:
+leave
+ret
+
+FileReader.init:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, r11
+mov QWORD [rbp-0x18], rcx
+call FileReader
+mov rcx, r8
+mov QWORD [rbp-0x8], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x10]
+mov r10, [O_RDONLY]
+mov r11, 0x0
+call openFile
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+mov r9, QWORD [rbp-0x18]
+call alloc
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x28]
+mov rbx, QWORD [rbp-0x18]
+mov r11,rbx
+call readFile
+mov rcx, 0x0
+mov QWORD [rbp-0x30], rcx
+
+mov r9, QWORD [rbp-0x28]
+call strlen
+mov rcx, r8
+mov QWORD [rbp-0x30], rcx
+
+mov r9, QWORD [rbp-0x28]
+mov r10, QWORD [rbp-0x30]
+call reallocate
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x30
+mov rax, QWORD [rbp-0x20]
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rax, QWORD [rbp-0x28]
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x28
+mov rax, 0x0
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rax, 0x0
+mov [rbx], rax
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x38
+mov rax, QWORD [rbp-0x30]
+mov [rbx], rax
+mov r8, QWORD [rbp-0x8]
+cvtsi2ss xmm8,r8
+jmp __FileReader.init__leave_ret_
+
+__FileReader.init__leave_ret_:
+leave
+ret
+
+FileReader.destroy:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x30
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+
+mov r9, QWORD [rbp-0x10]
+call closeFile
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x18]
+call destroy
+mov r9, QWORD [rbp-0x8]
+call destroy
+mov r8, 0x0
+cvtsi2ss xmm8,r8
+jmp __FileReader.destroy__leave_ret_
+
+__FileReader.destroy__leave_ret_:
+leave
+ret
+
+FileReader.incline:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov rcx, 0x0
+mov QWORD [rbp-0x8], rcx
+
+mov rbx, [current_filereader]
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x8], rcx
+
+mov rbx, QWORD [rbp-0x8]
+mov rcx, 0x1
+add rbx, rcx
+mov QWORD [rbp-0x8], rbx
+mov rbx, [current_filereader]
+add rbx, 0x20
+mov rax, QWORD [rbp-0x8]
+mov [rbx], rax
+
+__FileReader.incline__leave_ret_:
+leave
+ret
+
+FileReader.nextChar:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rbx, QWORD [rbp-0x8]
+mov [current_filereader], rbx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x28
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov rax, QWORD [rbp-0x10]
+
+mov rbx, QWORD [rbp-0x18]
+
+    
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x20], r15
+mov rbx, QWORD [rbp-0x10]
+mov rcx, 0x1
+add rbx, rcx
+mov QWORD [rbp-0x10], rbx
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x28
+mov rax, QWORD [rbp-0x10]
+mov [rbx], rax
+mov r14, QWORD [rbp-0x20]
+mov r15, 0xa
+cmp r14, r15
+push __cmpblock__FileReader.nextChar__0x2e2
+je FileReader.incline
+add rsp, 0x8
+__cmpblock__FileReader.nextChar__0x2e2:
+mov r8, QWORD [rbp-0x20]
+cvtsi2ss xmm8,r8
+jmp __FileReader.nextChar__leave_ret_
+
+__FileReader.nextChar__leave_ret_:
+leave
+ret
+
+FileReader.asString:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+call String
+mov rcx, r8
+mov QWORD [rbp-0x10], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x10]
+mov r10, QWORD [rbp-0x18]
+call String.init
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __FileReader.asString__leave_ret_
+
+__FileReader.asString__leave_ret_:
+leave
+ret
+
+FileWriter.init:
 
 push rbp
 mov rbp, rsp
@@ -1780,39 +2595,255 @@ mov rcx, r9
 mov QWORD [rbp-0x8], rcx
 mov rcx, r10
 mov QWORD [rbp-0x10], rcx
+mov rcx, r11
+mov QWORD [rbp-0x18], rcx
+call FileWriter
+mov rcx, r8
+mov QWORD [rbp-0x8], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x10]
+mov r10, 0x1a4
+mov r11, [WMODE_WPLUSA]
+call openFile
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rax, QWORD [rbp-0x20]
+mov [rbx], rax
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+call String
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
+mov r9, QWORD [rbp-0x28]
+mov r10, STRING_CONSTANT_2
+call String.init
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rax, QWORD [rbp-0x28]
+mov [rbx], rax
+mov r8, QWORD [rbp-0x8]
+cvtsi2ss xmm8,r8
+jmp __FileWriter.init__leave_ret_
+
+__FileWriter.init__leave_ret_:
+leave
+ret
+
+FileWriter.write:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
 mov rcx, 0x0
 mov QWORD [rbp-0x18], rcx
 
-call epochmillis
-mov rcx, r8
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
 mov QWORD [rbp-0x18], rcx
 
-mov rbx, 0x0
-mov QWORD [rbp-0x20], rbx
-__m__flp0x20:
-call epochmillis
+mov r9, QWORD [rbp-0x10]
+call strlen
 mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x18]
+mov r10, QWORD [rbp-0x10]
+mov r11, QWORD [rbp-0x20]
+call writeFile
+
+__FileWriter.write__leave_ret_:
+leave
+ret
+
+FileWriter.destroy:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x10], rcx
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+
+mov r9, QWORD [rbp-0x10]
+call String.destroy
+mov rcx, 0x0
 mov QWORD [rbp-0x18], rcx
 
-mov r9, STRING_CONSTANT_2
-mov r10, QWORD [rbp-0x18]
-call printformat
-__m__flp_end_0x20:
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov r9, QWORD [rbp-0x18]
+call closeFile
+mov r9, QWORD [rbp-0x8]
+call destroy
+mov r8, 0x0
+cvtsi2ss xmm8,r8
+jmp __FileWriter.destroy__leave_ret_
+
+__FileWriter.destroy__leave_ret_:
+leave
+ret
+
+getChar:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    GET_CHAR r8
+    
+
+__getChar__leave_ret_:
+leave
+ret
+
+getInt:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    GET_DEC 8, r8
+    
+
+__getInt__leave_ret_:
+leave
+ret
+
+getString:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+    call alloc
+    GET_STRING [r8], r9
+    
+
+__getString__leave_ret_:
+leave
+ret
+
+input_int:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+
+    PRINT_STRING [r9]
+    GET_DEC 8, r8
+    NEWLINE
+    
+
+__input_int__leave_ret_:
+leave
+ret
+
+m:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x40
+mov rcx, r9
+mov QWORD [rbp-0x8], rcx
+mov rcx, r10
+mov QWORD [rbp-0x10], rcx
+mov rcx, 0x0
+mov QWORD [rbp-0x18], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x20]
+mov r10, STRING_CONSTANT_3
+mov r11, [WMODE_APPEND]
+call FileWriter.init
+mov rcx, r8
+mov QWORD [rbp-0x20], rcx
+
+mov r9, QWORD [rbp-0x20]
+mov r10, STRING_CONSTANT_4
+call FileWriter.write
+mov rcx, 0x0
+mov QWORD [rbp-0x28], rcx
+
+mov rcx, 0x0
+mov QWORD [rbp-0x30], rcx
+
+__m__flp0x30:
+mov r9, 0x3e8
+call getString
+mov rcx, r8
+mov QWORD [rbp-0x28], rcx
+
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x28]
+call FileWriter.write
+call newline
+__m__flp_end_0x30:
 mov rbx, 0x1
-mov QWORD [rbp-0x28], rbx
-mov rbx, 0x0
-mov QWORD [rbp-0x20], rbx
+mov QWORD [rbp-0x38], rbx
+mov rbx, QWORD [rbp-0x30]
+mov QWORD [rbp-0x30], rbx
 
-mov rdi, QWORD [rbp-0x28]
+mov rdi, QWORD [rbp-0x38]
 
     
 
-mov rsi, QWORD [rbp-0x20]
+mov rsi, QWORD [rbp-0x30]
 
     
 cmp rsi, rdi
-jl __m__flp0x20
+jl __m__flp0x30
 
+mov r9, QWORD [rbp-0x20]
+call FileWriter.destroy
 
 __m__leave_ret_:
 leave
@@ -1832,6 +2863,7 @@ xor rax, rax
 mov r9, rsi     ;commandline args
 mov r10, rdi
 align 16
+mov QWORD [current_filereader], 0x0
 call m
 NEWLINE
 ret

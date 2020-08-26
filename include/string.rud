@@ -23,6 +23,7 @@ function String.init(str,initial){
     strcpy(data, initial);
     str:data = data;
     str:len = len;
+    return str;
 
 }
 function String.charAt(str, index){
@@ -74,6 +75,12 @@ function String.destroy(str){
     return 0;
 }
 
+function String.length(this){
+    var len;
+    this:len->len;
+    return len;
+
+}
 
 function fast stringcat(reallocated, strb){
 

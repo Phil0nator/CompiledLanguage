@@ -21,16 +21,8 @@ function fast systime(){
 function epochmillis(){
     
 
-    var time;
-    alloc(16)->time;
-    __asm{"
-    xor r8, r8
-    mov rax, 201
-    mov rdi, 1
-    mov rsi, [rbp-16]
-    syscall
-    "}
-    return time;
+    __asm{""}
+
 }
 
 

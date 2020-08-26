@@ -38,7 +38,7 @@ class Lexer:
 
 
             elif (ord(self.current_char) == 3):#file counter
-                
+                print(cc["FILES"][self.fn])
                 self.fn+=1
                 self.loc.fn+=1
                 self.loc.ln = self.text[0:self.loc.idx].count(chr(3))

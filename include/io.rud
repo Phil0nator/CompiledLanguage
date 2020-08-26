@@ -1,0 +1,270 @@
+#include "include:memory.rud"
+#include "include:string.rud"
+final var O_RDONLY = 0;
+final var O_WRONLY = 1;
+final var O_RDWR = 2;
+
+var current_filereader;
+
+struct FileReader{
+
+    var data;
+    var line;
+    var idx;
+    var file;
+    var len;
+
+}
+
+function fast openFile(filename, mode, flags){
+    __asm{"
+    
+    mov rax, 2
+    mov rdi, r9
+    mov rsi, r11
+    mov rdx, r10
+    or rdx, 64
+    syscall
+    mov r8, rax
+    
+    "}
+}
+
+function fast readFile(fd, buffer, amt){
+    
+    __asm{"
+
+    xor rax, rax
+    mov rdi, r9
+    mov rsi, r10
+    mov rdx, r11
+    syscall
+    mov r8, rax
+
+
+    "}
+
+}
+
+
+
+
+function fast writeFile(fd, buffer, amt){
+    __asm{"
+    
+    mov rax, 1
+    mov rdi, r9
+    mov rsi, r10
+    mov rdx, r11
+    syscall
+    mov r8, rax
+    "}
+}
+
+
+function fast closeFile(fd){
+
+    __asm{"
+    mov rax, 3
+    mov rdi, r9
+    syscall
+    "}
+
+}
+
+function lseek(fd, offset, whence){
+    __asm{"
+    
+    mov rax, 8
+    mov rdi, r9
+    mov rsi, r10
+    mov rdx, r11
+    syscall
+    mov r8, r9
+    
+    
+    "}
+
+}
+
+
+function FileReader.init(ptr, filename, buffersize){
+
+    FileReader()->ptr;
+    var file;
+    openFile(filename, O_RDONLY, 0)->file;
+    var buffer;
+    alloc(buffersize)->buffer;
+    readFile(file, buffer, buffersize-1);
+    var len;
+    strlen(buffer)->len;
+    reallocate(buffer, len)->buffer;
+    
+
+    ptr:file = file;
+    ptr:data = buffer;
+    ptr:idx = 0;
+    ptr:line = 0;
+    ptr:len = len;
+    return ptr;
+
+}
+
+function FileReader.destroy(ptr){
+
+    var f;
+    ptr:file->f;
+    closeFile(f);
+    var buf;
+    ptr:data->buf;
+    destroy(buf);
+    destroy(ptr);
+    return 0;
+
+
+}
+
+function FileReader.incline(){
+
+    var line;
+    current_filereader:line->line;
+    line = line + 1;
+    current_filereader:line = line;
+
+
+}
+
+function FileReader.nextChar(ptr){
+    current_filereader = ptr;
+    var idx;
+    ptr:idx->idx;
+    var buf;
+    ptr:data->buf;
+    var ch;
+    buf[idx]->ch;
+    idx = idx + 1;
+    ptr:idx = idx;
+
+    cmp(ch, 10){
+        ==: FileReader.incline;
+    }
+
+    return ch;
+
+}
+
+function FileReader.asString(ptr){
+    var str;
+    String()->str;
+    var initial;
+    ptr:data->initial;
+    String.init(str, initial);
+    return str;
+
+
+}
+
+
+
+
+
+
+
+struct FileWriter{
+
+    var file;
+    var buffer;
+
+
+}
+
+final var WMODE_WRITE = 0;
+final var WMODE_APPEND = 1024;
+final var WMODE_WPLUS = 65;
+final var WMODE_WPLUSA = 1089;
+
+final var O_CREATE = 64;
+final var SEEK_CUR = 1;
+
+function FileWriter.init(this, filename, mode){
+
+    FileWriter()->this;
+    var file;
+    openFile(filename , 420, WMODE_WPLUSA)->file;
+    this:file = file;
+    var buf;
+    String()->buf;
+    String.init(buf, "")->buf;
+    this:buffer = buf;
+    return this;
+
+}
+
+function FileWriter.write(this, string){
+
+    var file;
+    var len;
+    this:file->file;
+    strlen(string)->len;
+    writeFile(file,string,len);
+    
+}
+
+
+function FileWriter.destroy(this){
+
+    var str;
+    this:buffer->str;
+    String.destroy(str);
+    var f;
+    this:file->f;
+    closeFile(f);
+    destroy(this);
+    return 0;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function fast getChar(){
+    __asm{"
+    GET_CHAR r8
+    "}
+}
+function fast getInt(){
+    __asm{"
+    GET_DEC 8, r8
+    "}
+}
+
+function getString(maxlen){
+    
+    __asm{"
+    call alloc
+    GET_STRING [r8], r9
+    "}
+
+}
+
+function input_int(msg){
+
+    __asm{"
+    PRINT_STRING [r9]
+    GET_DEC 8, r8
+    NEWLINE
+    "}
+
+}
+
