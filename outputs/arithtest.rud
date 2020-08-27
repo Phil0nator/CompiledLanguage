@@ -52,7 +52,7 @@ function main(){
     Vector.push(testvec, 69);
     var valtest;
     Vector.at(testvec, 0)->valtest;
-    for(var i = 0; 500; i ++){
+    for(var i = 0; i < 500; i ++){
 
         Vector.push(testvec, i);
         printformat("I: %i\r", i);

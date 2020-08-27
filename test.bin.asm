@@ -1043,6 +1043,7 @@ STRING_CONSTANT_6: db `%i, `, 0
 STRING_CONSTANT_7: db `%i ]\n`, 0
 STRING_CONSTANT_8: db `\n`, 0
 STRING_CONSTANT_9: db `The number of commandline arguments is: %u\n`, 0
+STRING_CONSTANT_10: db `\t THIS IS ALSO DIVISIBLE BY 10 because x % 2 == x % 5 == 0!`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __BOOL_STANDARD_TRUE: dq -0x1
 __BOOL_STANDARD_FALSE: dq 0x0
@@ -3292,7 +3293,13 @@ jge __delay__leave_ret_
 add rsp, 0x8
 __cmpblock__delay__0x17c:
 __delay__flp_end_0x20:
-mov rbx, 0x1
+mov rbx, QWORD [rbp-0x20]
+mov rcx, 0x1
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_delay_0x0
+mov rbx, -1
+__blncmpncnd_delay_0x0:
 mov QWORD [rbp-0x28], rbx
 mov rbx, 0x0
 mov QWORD [rbp-0x20], rbx
@@ -3300,12 +3307,9 @@ mov QWORD [rbp-0x20], rbx
 mov rdi, QWORD [rbp-0x28]
 
     
-
-mov rsi, QWORD [rbp-0x20]
-
-    
-cmp rsi, rdi
-jl __delay__flp0x20
+mov rsi, -1
+cmp rdi, rsi
+je __delay__flp0x20
 
 
 __delay__leave_ret_:
@@ -3834,6 +3838,14 @@ __Vector.print__flp_end_0x30:
 mov rbx, QWORD [rbp-0x20]
 mov rcx, 0x1
 sub rbx, rcx
+mov [__expstack_int1],rbx
+mov rbx, QWORD [rbp-0x30]
+mov rcx, [__expstack_int1]
+cmp rbx, rcx
+mov rbx, 0
+jg __blncmpncnd_Vector.print_0x0
+mov rbx, -1
+__blncmpncnd_Vector.print_0x0:
 mov QWORD [rbp-0x38], rbx
 
 mov rax, QWORD [rbp-0x30]
@@ -3846,12 +3858,9 @@ mov QWORD [rbp-0x30], rax
 mov rdi, QWORD [rbp-0x38]
 
     
-
-mov rsi, QWORD [rbp-0x30]
-
-    
-cmp rsi, rdi
-jl __Vector.print__flp0x30
+mov rsi, -1
+cmp rdi, rsi
+je __Vector.print__flp0x30
 
 mov rbx, QWORD [rbp-0x20]
 mov rcx, 0x1
@@ -3939,7 +3948,13 @@ mov r9, QWORD [rbp-0x8]
 mov r10, QWORD [rbp-0x20]
 call Vector.push
 __Vector.pushes__flp_end_0x38:
-mov rbx, QWORD [rbp-0x18]
+mov rbx, QWORD [rbp-0x38]
+mov rcx, QWORD [rbp-0x18]
+cmp rbx, rcx
+mov rbx, 0
+jg __blncmpncnd_Vector.pushes_0x0
+mov rbx, -1
+__blncmpncnd_Vector.pushes_0x0:
 mov QWORD [rbp-0x40], rbx
 
 mov rax, QWORD [rbp-0x38]
@@ -3952,12 +3967,9 @@ mov QWORD [rbp-0x38], rax
 mov rdi, QWORD [rbp-0x40]
 
     
-
-mov rsi, QWORD [rbp-0x38]
-
-    
-cmp rsi, rdi
-jl __Vector.pushes__flp0x38
+mov rsi, -1
+cmp rdi, rsi
+je __Vector.pushes__flp0x38
 
 
 __Vector.pushes__leave_ret_:
@@ -3996,7 +4008,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x38
+sub rsp, 0x30
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov r9, STRING_CONSTANT_9
@@ -4010,42 +4022,119 @@ mov r9, QWORD [rbp-0x18]
 call print_bool
 mov r9, 0xa
 call print_char
+mov rbx, -0x1
+mov rcx, 0x0
+and bl, cl
+mov [__expstack_int1],rbx
+mov rbx, -0x1
+mov rcx, 0x0
+or bl, cl
+mov [__expstack_int2],rbx
+mov rbx, [__expstack_int1]
+mov rcx, [__expstack_int2]
+or bl, cl
+mov r9,rbx
+call print_bool
 mov rbx, 0x64
-mov QWORD [rbp-0x20], rbx
-mov rbx, 0x3fc
-mov QWORD [rbp-0x28], rbx
-mov rbx, QWORD [rbp-0x20]
 mov rcx, 0x64
-test rbx, rcx
-cmovne rbx, [__BOOL_STANDARD_TRUE]
-cmove rbx, [__BOOL_STANDARD_FALSE]
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_m_0x0
+mov rbx, -1
+__blncmpncnd_m_0x0:
+mov [__expstack_int2],rbx
+mov rbx, 0x1e
+mov rcx, 0x24
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_m_0x1
+mov rbx, -1
+__blncmpncnd_m_0x1:
 mov [__expstack_int3],rbx
-mov rbx, QWORD [rbp-0x28]
-mov rcx, 0x3fc
-test rbx, rcx
-cmovne rbx, [__BOOL_STANDARD_TRUE]
-cmove rbx, [__BOOL_STANDARD_FALSE]
+mov rbx, [__expstack_int2]
+mov rcx, [__expstack_int3]
+and bl, cl
+mov [__expstack_int1],rbx
+mov rbx, 0x12c
+mov rcx, 0x12d
+cmp rbx, rcx
+mov rbx, 0
+jg __blncmpncnd_m_0x2
+mov rbx, -1
+__blncmpncnd_m_0x2:
 mov [__expstack_int4],rbx
 mov rbx, [__expstack_int3]
 mov rcx, [__expstack_int4]
 and bl, cl
-mov [__expstack_int2],rbx
-mov rbx, [__expstack_int4]
-mov rcx, 0x0
-test rbx, rcx
-cmovne rbx, [__BOOL_STANDARD_TRUE]
-cmove rbx, [__BOOL_STANDARD_FALSE]
-mov [__expstack_int1],rbx
-mov rbx, 0x0
-mov rcx, -0x1
-and bl, cl
-mov [__expstack_int5],rbx
-mov rbx, [__expstack_int4]
-mov rcx, [__expstack_int5]
-and bl, cl
-mov QWORD [rbp-0x30], rbx
-mov r9, QWORD [rbp-0x30]
+mov r9,rbx
 call print_bool
+mov QWORD [rbp-0x20], 0x0
+
+__m__flp0x20:
+mov rax, QWORD [rbp-0x20]
+mov rcx, 0x2
+xor rdx, rdx
+div rcx
+mov [__expstack_int1],rdx
+mov rbx, [__expstack_int1]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_m_0x4
+mov rbx, -1
+__blncmpncnd_m_0x4:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_m_0x1
+mov r9, QWORD [rbp-0x20]
+call print_integer
+mov r9, 0x1
+call delay
+mov rax, QWORD [rbp-0x20]
+mov rcx, 0x5
+xor rdx, rdx
+div rcx
+mov [__expstack_int1],rdx
+mov rbx, [__expstack_int1]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_m_0x5
+mov rbx, -1
+__blncmpncnd_m_0x5:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_m_0x2
+mov r9, STRING_CONSTANT_10
+call print_string
+__ifntrue_m_0x2:
+__ifntrue_m_0x1:
+__m__flp_end_0x20:
+mov rbx, QWORD [rbp-0x20]
+mov rcx, 0x64
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_m_0x3
+mov rbx, -1
+__blncmpncnd_m_0x3:
+mov QWORD [rbp-0x28], rbx
+
+mov rax, QWORD [rbp-0x20]
+
+    
+inc rax
+mov QWORD [rbp-0x20], rax
+
+
+mov rdi, QWORD [rbp-0x28]
+
+    
+mov rsi, -1
+cmp rdi, rsi
+je __m__flp0x20
+
 
 __m__leave_ret_:
 leave

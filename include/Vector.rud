@@ -161,7 +161,7 @@ function Vector.print(vec){
     vec:len->len;
     printformat("[ ", 0);
     var current_value;
-    for(var i=0; len - 1;i++){
+    for(var i=0; i <= (len - 1);i++){
 
         arr[i*size]->current_value;
         printformat("%i, ",current_value);
@@ -190,7 +190,7 @@ function Vector.pushes(vec, newptr, newptr_len){
     var addr;
     var size;
     vec:element_size->size;
-    for(var i; newptr_len; i++ ;){
+    for(var i; i <= newptr_len; i++ ;){
         addr= i*size;
         newptr[ addr]->val;
         Vector.push(vec,val);

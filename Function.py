@@ -26,6 +26,11 @@ class Function:
         self.intexprs = 0
         self.fltexprs = 0
 
+        self.blncmpcounter =0
+
+
+        self.ifcounter = 0
+
         self.current_token = self.tokens[0]
         self.ct_idx = 0
     """
@@ -554,7 +559,7 @@ class Function:
 
 
 
-
+        negated_condition = "__blncmpncnd_%s_%s"%(self.name,hex(self.blncmpcounter))
         """
         #Create assembly for the math, and the re-deposit
         """
@@ -585,37 +590,80 @@ class Function:
             elif (expr[1] == "^"):
                 self.addline("xor bl, cl")
 
-
+            
 
             elif (expr[1] == "=="):
-                self.addline("test rbx, rcx")
-                self.addline("cmovne rbx, %s"%true)
-                self.addline("cmove rbx, %s"%false)
-            
+                
+
+                #self.addline("test rbx, rcx")
+                #self.addline("cmove rbx, %s"%true)
+                #self.addline("cmovne rbx, %s"%false)
+                self.blncmpcounter+=1
+                self.addline("cmp rbx, rcx")
+                self.addline("mov rbx, 0")
+                self.addline("jne %s"%negated_condition)
+                self.addline("mov rbx, -1")
+                self.addline("%s:"%negated_condition)
+                
+
             elif (expr[1] == ">="):
-                self.addline("test rbx, rcx")
-                self.addline("cmovle rbx, %s"%true)
-                self.addline("cmovnle rbx, %s"%false)
-            
+                #self.addline("test rbx, rcx")
+                #self.addline("cmovge rbx, %s"%true)
+                #self.addline("cmovnge rbx, %s"%false)
+                self.blncmpcounter+=1
+                self.addline("cmp rbx, rcx")
+                self.addline("mov rbx, 0")
+                self.addline("jl %s"%negated_condition)
+                self.addline("mov rbx, -1")
+                self.addline("%s:"%negated_condition)
+
             elif (expr[1] == "<="):
-                self.addline("test rbx, rcx")
-                self.addline("cmovge rbx, %s"%true)
-                self.addline("cmovnge rbx, %s"%false)
-            
+                #self.addline("test rbx, rcx")
+                #self.addline("cmovle rbx, %s"%true)
+                #self.addline("cmovnle rbx, %s"%false)
+                self.blncmpcounter+=1
+                self.addline("cmp rbx, rcx")
+                self.addline("mov rbx, 0")
+                self.addline("jg %s"%negated_condition)
+                self.addline("mov rbx, -1")
+                self.addline("%s:"%negated_condition)
+
             elif (expr[1] == "!="):
-                self.addline("test rbx, rcx")
-                self.addline("cmove rbx, %s"%true)
-                self.addline("cmovne rbx, %s"%false)
+                #self.addline("test rbx, rcx")
+                #self.addline("cmovne rbx, %s"%true)
+                #self.addline("cmove rbx, %s"%false)
+
+                self.blncmpcounter+=1
+                self.addline("cmp rbx, rcx")
+                self.addline("mov rbx, 0")
+                self.addline("je %s"%negated_condition)
+                self.addline("mov rbx, -1")
+                self.addline("%s:"%negated_condition)
 
             elif (expr[1] == ">"):
-                self.addline("test rbx, rcx")
-                self.addline("cmovg rbx, %s"%true)
-                self.addline("cmovng rbx, %s"%false)
+                #self.addline("test rbx, rcx")
+                #self.addline("cmovg rbx, %s"%true)
+                #self.addline("cmovl rbx, %s"%false)
+
+                self.blncmpcounter+=1
+                self.addline("cmp rbx, rcx")
+                self.addline("mov rbx, 0")
+                self.addline("jle %s"%negated_condition)
+                self.addline("mov rbx, -1")
+                self.addline("%s:"%negated_condition)
 
             elif (expr[1] == "<"):
-                self.addline("test rbx, rcx")
-                self.addline("cmovl rbx, %s"%true)
-                self.addline("cmovnl rbx, %s"%false)
+                #self.addline("test rbx, rcx")
+                #self.addline("cmovl rbx, %s"%true)
+                #self.addline("cmovg rbx, %s"%false)
+
+                self.blncmpcounter+=1
+                self.addline("cmp rbx, rcx")
+                self.addline("mov rbx, 0")
+                self.addline("jge %s"%negated_condition)
+                self.addline("mov rbx, -1")
+                self.addline("%s:"%negated_condition)
+
 
             if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
             elif (reg is not None): 
@@ -793,10 +841,11 @@ class Function:
 
 
         self.addline(load_value_toreg(maxdecl.offset,"rdi"))
-        self.addline(load_value_toreg(decl.offset,"rsi"))
-        
-        self.addline("cmp rsi, rdi")
-        self.addline("jl %s"%("__"+self.name+"__flp"+hex(decl.offset)))
+        #self.addline(load_value_toreg(decl.offset,"rsi"))
+        self.addline("mov rsi, -1")
+
+        self.addline("cmp rdi, rsi")
+        self.addline("je %s"%("__"+self.name+"__flp"+hex(decl.offset)))
 
         header = self.bodytext[beginidx:]
         self.bodytext = self.bodytext[:beginidx]
@@ -873,7 +922,19 @@ class Function:
         self.advance()
 
 
-
+    def buildIFBlock(self):
+        self.ifcounter+=1
+        if(self.current_token.tok != T_OPENP):
+            throw(InvalidIFHeader(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+        self.advance()
+        self.evaluation_wrapper(reg="r14")
+        self.addline("mov r15, -1")
+        self.addline("cmp r14, r15") #if r14 is not true:
+        labeltojump = "__ifntrue_%s_%s"%(self.name,hex(self.ifcounter))
+        self.addline("jne %s"%labeltojump)
+        self.doCompilations(forblock=True)
+        self.advance()
+        self.addline("%s:"%labeltojump)        
 
 
 
@@ -893,6 +954,9 @@ class Function:
         elif(self.current_token.value == "cmp"):
             self.advance()
             self.buildCMP()
+        elif(self.current_token.value == "if"):
+            self.advance()
+            self.buildIFBlock()
         else:
             self.advance()
 
