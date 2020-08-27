@@ -20,6 +20,13 @@ class Compiler:
         self._data = ""
         self._fdef = ""
         self.main = "align 16\n"
+
+
+    def create_expressionstack(self):
+        for i in range(32):
+            self.globals[0].append({"__expstack_int%s"%i:None,"isfloat":False})
+            self.globals[0].append({"__expstack_flt%s"%i:None,"isfloat":True})
+    
     """
     #main function to be called
     #will call all others
@@ -59,7 +66,9 @@ class Compiler:
             i+=1
 
         self.globals[1].append({"__FLT_STANDARD_1":1.0, "isfloat":True})
-
+        self.globals[1].append({"__BOOL_STANDARD_TRUE":-1, 'isfloat':False})
+        self.globals[1].append({"__BOOL_STANDARD_FALSE":0, 'isfloat':False})
+        self.create_expressionstack()
         while self.current_token.tok != T_EOF:
             
             if(self.current_token.tok == T_EOL):
@@ -141,9 +150,10 @@ class Compiler:
                     self._bss+=define_global(g)
                     if(isinstance(glob[g], float)):
                         self.main+="mov QWORD ["+g+"], "+str(glob[g])+"\n"
-                    else:
+                    elif(isinstance(glob[g], int)):
                         self.main+="mov QWORD ["+g+"], "+hex(glob[g])+"\n"
-        
+                    else:
+                        pass
         for glob in self.globals[1] : #data:
             for g in glob:
                 if(g != "isfloat"):
@@ -152,8 +162,10 @@ class Compiler:
                     elif (isinstance(glob[g], float)):
                         #self._data += g+": dq __float32("+str(glob[g])+")__\n"
                         self._data += g+": dq __float32__("+str(glob[g])+")\n"
-                    else:
+                    elif(isinstance(glob[g], int)):
                         self._data += g+": dq "+hex(glob[g])+"\n"
+                    else:
+                        pass
         self.main+="call m"
 
 

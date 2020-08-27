@@ -8,6 +8,11 @@ function main(args, numargs){
     printformat("The number of commandline arguments is: %u\n", numargs);
     var t = true || false;
     print_bool(t);
+    print_char(10);
+    var b = 100;
+    var c = 1020;
+    var bool = (((b == 100) && (c == 1020))==false) && (false && true);
+    print_bool(bool);
 
 
 }

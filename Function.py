@@ -23,6 +23,8 @@ class Function:
         self.allocationCounter = 8
         self.declarations = []
 
+        self.intexprs = 0
+        self.fltexprs = 0
 
         self.current_token = self.tokens[0]
         self.ct_idx = 0
@@ -56,10 +58,10 @@ class Function:
         else:
             t = types[len(params)]
             if(t == "var"):
-                self.evaluateExpression(reg=parameter_registers[len(params)])
+                self.evaluation_wrapper(reg=parameter_registers[len(params)])
                 params.append(parameter_registers[len(params)])
             else:
-                self.evaluateExpression(reg=flt_parameter_registers[len(params)])
+                self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                 params.append(flt_parameter_registers[len(params)])
             while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->" and self.current_token.tok != T_EOL:
                 t = types[len(params)]
@@ -67,25 +69,25 @@ class Function:
                 if(self.current_token.tok == T_COMMA):
                     self.advance()
                     if(t == "var"):
-                        self.evaluateExpression(reg=parameter_registers[len(params)])
+                        self.evaluation_wrapper(reg=parameter_registers[len(params)])
                         params.append(parameter_registers[len(params)])
                     else:
-                        self.evaluateExpression(reg=flt_parameter_registers[len(params)])
+                        self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                         params.append(flt_parameter_registers[len(params)])
 
                 elif(self.current_token.tok == T_ID):
                     if(t == "var"):
-                        self.evaluateExpression(reg=parameter_registers[len(params)])
+                        self.evaluation_wrapper(reg=parameter_registers[len(params)])
                         params.append(parameter_registers[len(params)])
                     else:
-                        self.evaluateExpression(reg=flt_parameter_registers[len(params)])
+                        self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                         params.append(flt_parameter_registers[len(params)])
                 elif (self.current_token.tok == T_INT or self.current_token.tok == T_FLOAT):
                     if(t == "var"):
-                        self.evaluateExpression(reg=parameter_registers[len(params)])
+                        self.evaluation_wrapper(reg=parameter_registers[len(params)])
                         params.append(parameter_registers[len(params)])
                     else:
-                        self.evaluateExpression(reg=flt_parameter_registers[len(params)])
+                        self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                         params.append(flt_parameter_registers[len(params)])
                 else:
                     throw(InvalidParameter(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
@@ -128,7 +130,7 @@ class Function:
 
 
     def buildPointerAssignment(self, id):
-        self.evaluateExpression(reg="rax") #store index in rax
+        self.evaluation_wrapper(reg="rax") #store index in rax
         self.addline(load_value_toreg(self.getDeclarationByID(id).offset, "rbx")) #store origin in rbx
         self.advance()
         
@@ -167,11 +169,11 @@ class Function:
         self.advance()
         if(self.current_token.tok == T_KEYWORD and self.current_token.value == "float"):
             self.advance()
-            self.evaluateExpression(reg="xmm10")
+            self.evaluation_wrapper(reg="xmm10")
             self.addline("movss [rbx+rax], xmm10")
             return
         
-        self.evaluateExpression(reg="r15")
+        self.evaluation_wrapper(reg="r15")
         self.addline("mov QWORD [rbx+rax], r15")
 
 
@@ -219,7 +221,7 @@ class Function:
 
         if(self.current_token.tok != T_EQUALS):throw(InvalidMemberAccess(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
         self.advance()
-        self.evaluateExpression(reg="rax") #store new value in rax
+        self.evaluation_wrapper(reg="rax") #store new value in rax
         self.addline("mov [rbx], rax")
 
     """
@@ -233,9 +235,9 @@ class Function:
         if(self.current_token.tok == "="):
             self.advance()
             if(not self.compiler.globalExists(id)):
-                self.evaluateExpression(decl=self.getDeclarationByID(id))
+                self.evaluation_wrapper(decl=self.getDeclarationByID(id))
             else:
-                self.evaluateExpression(glob=id)
+                self.evaluation_wrapper(glob=id)
             return
         elif(self.current_token.tok == "["):
             self.advance()
@@ -279,7 +281,12 @@ class Function:
                     return flt_parameter_registers[self.params.index(p)]
         return None
 
-
+    def evaluation_wrapper(self,decl=None,reg=None,glob=None):
+        self.fltexprs=0
+        self.intexprs=0
+        self.evaluateExpression(decl=decl,reg=reg,glob=glob)
+        self.intexprs=0
+        self.fltexprs=0
 
 
     """
@@ -314,18 +321,31 @@ class Function:
                     expr.append(self.current_token.value)
                     self.advance()
 
-            elif(self.current_token.tok in "^++--/*&&!!||%>><<"):
+            elif(self.current_token.tok in "^++--/*&&!!||%>><<==>=<=!="):
 
                 expr.append(self.current_token.tok)
                 self.advance()
             elif(self.current_token.tok == T_OPENP):
                 self.advance()
+                #if((isinstance(reg, str) and "xmm" in reg ) or (decl != None and decl.isfloat) or (glob != None and self.compiler.globalIsFloat(glob))):
+                #    self.evaluateExpression(reg="xmm10")
+                #    expr.append("xmm10")
+                #else:
+                #    self.evaluateExpression(reg="rdi")
+                #    expr.append("rdi")
                 if((isinstance(reg, str) and "xmm" in reg ) or (decl != None and decl.isfloat) or (glob != None and self.compiler.globalIsFloat(glob))):
-                    self.evaluateExpression(reg="xmm10")
-                    expr.append("xmm10")
+                    self.fltexprs+=1
+                    self.evaluateExpression(glob="__expstack_flt%s"%self.fltexprs)
+                    expr.append("__expstack_int%s"%self.fltexprs)
+                    
                 else:
-                    self.evaluateExpression(reg="rdi")
-                    expr.append("rdi")
+                    self.intexprs+=1
+                    self.evaluateExpression(glob="__expstack_int%s"%self.intexprs)
+                    expr.append("__expstack_int%s"%self.intexprs)
+                    
+                if(self.intexprs > 31 or self.fltexprs > 31):
+                    throw(ExpressionOverflow(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+
             else:
                 throw(InvalidExpressionComponent(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             #max expression size
@@ -361,7 +381,7 @@ class Function:
                             self.addline("mov  ["+glob+"], __float32__("+str(expr[0])+")")
                             return
                         elif(self.compiler.globalExists( expr[0] )):
-                            self.addline("mov QWORD ["+glob+"], "+expr[0])
+                            self.addline("mov QWORD ["+glob+"], [%s]"%expr[0])
                             return
                         elif(isinstance(expr[0], Declaration)):
                             if(expr[0].isfloat):
@@ -451,7 +471,7 @@ class Function:
             fltinvolved=True
         elif("xmm" in expr[0]):
             fltinvolved = True
-            self.addline("movss xmm15, %s"%expr[0])
+            self.addline("movss xmm15, [%s]"%expr[0])
 
         elif (self.compiler.globalExists( expr[0])):
             if("FLT_CONSTANT_" in expr[0]):
@@ -565,6 +585,38 @@ class Function:
             elif (expr[1] == "^"):
                 self.addline("xor bl, cl")
 
+
+
+            elif (expr[1] == "=="):
+                self.addline("test rbx, rcx")
+                self.addline("cmovne rbx, %s"%true)
+                self.addline("cmove rbx, %s"%false)
+            
+            elif (expr[1] == ">="):
+                self.addline("test rbx, rcx")
+                self.addline("cmovle rbx, %s"%true)
+                self.addline("cmovnle rbx, %s"%false)
+            
+            elif (expr[1] == "<="):
+                self.addline("test rbx, rcx")
+                self.addline("cmovge rbx, %s"%true)
+                self.addline("cmovnge rbx, %s"%false)
+            
+            elif (expr[1] == "!="):
+                self.addline("test rbx, rcx")
+                self.addline("cmove rbx, %s"%true)
+                self.addline("cmovne rbx, %s"%false)
+
+            elif (expr[1] == ">"):
+                self.addline("test rbx, rcx")
+                self.addline("cmovg rbx, %s"%true)
+                self.addline("cmovng rbx, %s"%false)
+
+            elif (expr[1] == "<"):
+                self.addline("test rbx, rcx")
+                self.addline("cmovl rbx, %s"%true)
+                self.addline("cmovnl rbx, %s"%false)
+
             if(decl is not None): self.addline("mov QWORD [rbp-%s], %s"%(hex(decl.offset), outputreg))
             elif (reg is not None): 
                 self.addline(correct_mov(reg,outputreg))
@@ -611,7 +663,7 @@ class Function:
                 #global                    
 
                 if(self.compiler.globalIsFloat(glob)):
-                    self.addline("movss %s, xmm15"%glob)
+                    self.addline("movss [%s], xmm15"%glob)
                 else:
 
                     self.addline("cvss2si rax, xmm15")
@@ -655,9 +707,9 @@ class Function:
             self.advance()
             self.appendDeclaration(id,flt)
             if(not self.compiler.globalExists(id)):
-                self.evaluateExpression(decl=self.declarations[len(self.declarations)-1])#evaluate expression, and place it into this declaration
+                self.evaluation_wrapper(decl=self.declarations[len(self.declarations)-1])#evaluate expression, and place it into this declaration
             else:
-                self.evaluateExpression(glob=id)
+                self.evaluation_wrapper(glob=id)
             return
         else: #invalid statement
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
@@ -674,10 +726,10 @@ class Function:
     def buildReturnStatement(self):
         #current token will already be the return value
         if(self.ret == "float"):
-            self.evaluateExpression(reg="xmm8")
+            self.evaluation_wrapper(reg="xmm8")
             self.addline("cvttss2si r8, xmm8")
         else:
-            self.evaluateExpression(reg="r8")
+            self.evaluation_wrapper(reg="r8")
             self.addline("cvtsi2ss xmm8,r8")
         
         self.addline("jmp __%s__leave_ret_"%self.name)
@@ -724,7 +776,7 @@ class Function:
             self.advance()
 
         self.addline("__"+self.name+"__flp_end_"+hex(decl.offset)+":")
-        self.evaluateExpression(decl=maxdecl)
+        self.evaluation_wrapper(decl=maxdecl)
 
         
         #self.evaluateExpression(decl=decl)
@@ -758,8 +810,8 @@ class Function:
         
         self.advance()
 
-        self.evaluateExpression(reg="r14")
-        self.evaluateExpression(reg="r15")
+        self.evaluation_wrapper(reg="r14")
+        self.evaluation_wrapper(reg="r15")
         
         if(self.current_token.tok != T_OSCOPE):
             throw(InvalidCMPBlockHeader(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))

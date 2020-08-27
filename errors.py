@@ -52,7 +52,7 @@ class InvalidVariableAssignment(Error):
 
 class ExpressionOverflow(Error):
     def __init__(self, start, end, details, tok):
-            super().__init__(start,end,"Expression too long (Use parenthrsis to split up your expression)", details, tok)
+            super().__init__(start,end,"Expression Overflow (Maximum of 32 temporaries)", details, tok)
 
 class InvalidExpressionComponent(Error):
     def __init__(self, start, end, details, tok):

@@ -35,6 +35,9 @@ T_EQUALS = "="
 T_XOR = "^"
 T_PROPOF = ":"
 
+true = "[__BOOL_STANDARD_TRUE]"
+false = "[__BOOL_STANDARD_FALSE]"
+
 #MULTICHAR
 
 TM_AND = "&&"

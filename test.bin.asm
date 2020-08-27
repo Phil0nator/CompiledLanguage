@@ -1044,6 +1044,8 @@ STRING_CONSTANT_7: db `%i ]\n`, 0
 STRING_CONSTANT_8: db `\n`, 0
 STRING_CONSTANT_9: db `The number of commandline arguments is: %u\n`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
+__BOOL_STANDARD_TRUE: dq -0x1
+__BOOL_STANDARD_FALSE: dq 0x0
 __PRINTFFLOAT: db `%g`, 0
 __PRINTTRUE: db `True`, 0
 __PRINTFALSE: db `False`, 0
@@ -1085,6 +1087,70 @@ isFloat: dq 0x1
 
 
 section .bss
+__expstack_int0: resb 0x8
+__expstack_flt0: resb 0x8
+__expstack_int1: resb 0x8
+__expstack_flt1: resb 0x8
+__expstack_int2: resb 0x8
+__expstack_flt2: resb 0x8
+__expstack_int3: resb 0x8
+__expstack_flt3: resb 0x8
+__expstack_int4: resb 0x8
+__expstack_flt4: resb 0x8
+__expstack_int5: resb 0x8
+__expstack_flt5: resb 0x8
+__expstack_int6: resb 0x8
+__expstack_flt6: resb 0x8
+__expstack_int7: resb 0x8
+__expstack_flt7: resb 0x8
+__expstack_int8: resb 0x8
+__expstack_flt8: resb 0x8
+__expstack_int9: resb 0x8
+__expstack_flt9: resb 0x8
+__expstack_int10: resb 0x8
+__expstack_flt10: resb 0x8
+__expstack_int11: resb 0x8
+__expstack_flt11: resb 0x8
+__expstack_int12: resb 0x8
+__expstack_flt12: resb 0x8
+__expstack_int13: resb 0x8
+__expstack_flt13: resb 0x8
+__expstack_int14: resb 0x8
+__expstack_flt14: resb 0x8
+__expstack_int15: resb 0x8
+__expstack_flt15: resb 0x8
+__expstack_int16: resb 0x8
+__expstack_flt16: resb 0x8
+__expstack_int17: resb 0x8
+__expstack_flt17: resb 0x8
+__expstack_int18: resb 0x8
+__expstack_flt18: resb 0x8
+__expstack_int19: resb 0x8
+__expstack_flt19: resb 0x8
+__expstack_int20: resb 0x8
+__expstack_flt20: resb 0x8
+__expstack_int21: resb 0x8
+__expstack_flt21: resb 0x8
+__expstack_int22: resb 0x8
+__expstack_flt22: resb 0x8
+__expstack_int23: resb 0x8
+__expstack_flt23: resb 0x8
+__expstack_int24: resb 0x8
+__expstack_flt24: resb 0x8
+__expstack_int25: resb 0x8
+__expstack_flt25: resb 0x8
+__expstack_int26: resb 0x8
+__expstack_flt26: resb 0x8
+__expstack_int27: resb 0x8
+__expstack_flt27: resb 0x8
+__expstack_int28: resb 0x8
+__expstack_flt28: resb 0x8
+__expstack_int29: resb 0x8
+__expstack_flt29: resb 0x8
+__expstack_int30: resb 0x8
+__expstack_flt30: resb 0x8
+__expstack_int31: resb 0x8
+__expstack_flt31: resb 0x8
 current_filereader: resb 0x8
 currentVector: resb 0x8
 bruhman: resb 0x8
@@ -1924,7 +1990,8 @@ mov QWORD [rbp-0x20], r8
 mov rbx, QWORD [rbp-0x18]
 mov rcx, QWORD [rbp-0x20]
 add rbx, rcx
-mov rdi,rbx
+mov [__expstack_int1],rbx
+mov rbx, [__expstack_int1]
 mov rcx, 0x1
 add rbx, rcx
 mov QWORD [rbp-0x28], rbx
@@ -1938,10 +2005,10 @@ mov QWORD [rbp-0x30], r8
 mov r14, QWORD [rbp-0x30]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__strAppend__0x229
+push __cmpblock__strAppend__0x252
 je memerror
 add rsp, 0x8
-__cmpblock__strAppend__0x229:
+__cmpblock__strAppend__0x252:
 mov r9, QWORD [rbp-0x30]
 mov r10, QWORD [rbp-0x10]
 call stringcat
@@ -2716,9 +2783,10 @@ mov rax, QWORD [rbp-0x20]
 movss xmm14,  [rbp-0x10]
 cvtsi2ss xmm15, rax
 mulss xmm15, xmm14
-movss xmm10, xmm15
+movss [__expstack_flt1], xmm15
 movss xmm15, [rbp-0x8]
-movss xmm14, xmm10
+mov rcx, [__expstack_int1]
+cvtsi2ss xmm14, rcx
 subss xmm15, xmm14
 movss [rbp-0x28], xmm15
 movss xmm8,  [rbp-0x28]
@@ -3928,7 +3996,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x20
+sub rsp, 0x38
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov r9, STRING_CONSTANT_9
@@ -3939,6 +4007,44 @@ mov rcx, 0x0
 or bl, cl
 mov QWORD [rbp-0x18], rbx
 mov r9, QWORD [rbp-0x18]
+call print_bool
+mov r9, 0xa
+call print_char
+mov rbx, 0x64
+mov QWORD [rbp-0x20], rbx
+mov rbx, 0x3fc
+mov QWORD [rbp-0x28], rbx
+mov rbx, QWORD [rbp-0x20]
+mov rcx, 0x64
+test rbx, rcx
+cmovne rbx, [__BOOL_STANDARD_TRUE]
+cmove rbx, [__BOOL_STANDARD_FALSE]
+mov [__expstack_int3],rbx
+mov rbx, QWORD [rbp-0x28]
+mov rcx, 0x3fc
+test rbx, rcx
+cmovne rbx, [__BOOL_STANDARD_TRUE]
+cmove rbx, [__BOOL_STANDARD_FALSE]
+mov [__expstack_int4],rbx
+mov rbx, [__expstack_int3]
+mov rcx, [__expstack_int4]
+and bl, cl
+mov [__expstack_int2],rbx
+mov rbx, [__expstack_int4]
+mov rcx, 0x0
+test rbx, rcx
+cmovne rbx, [__BOOL_STANDARD_TRUE]
+cmove rbx, [__BOOL_STANDARD_FALSE]
+mov [__expstack_int1],rbx
+mov rbx, 0x0
+mov rcx, -0x1
+and bl, cl
+mov [__expstack_int5],rbx
+mov rbx, [__expstack_int4]
+mov rcx, [__expstack_int5]
+and bl, cl
+mov QWORD [rbp-0x30], rbx
+mov r9, QWORD [rbp-0x30]
 call print_bool
 
 __m__leave_ret_:
