@@ -6,26 +6,7 @@ final var endl = "\n";
 function main(args, numargs){
 
     printformat("The number of commandline arguments is: %u\n", numargs);
-    var t = true || false;
-    print_bool(t);
-    print_char(10);
-    print_bool((true&&false) || (true||false));
-    print_bool( ((100 == 100) && (30 < 36))  && (300 <= 301)  );
-    for(var i; i < 100; i++;){
+    
 
-        if( (i % 2) == 0 ){
-
-            print_integer(i);
-            delay(1);
-            if( (i % 5) == 0 ){
-
-                print_string("\t THIS IS ALSO DIVISIBLE BY 10 because x % 2 == x % 5 == 0!");
-
-            }
-
-        }
-
-
-    }
 
 }

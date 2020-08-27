@@ -29,6 +29,8 @@ class Function:
         self.blncmpcounter =0
 
 
+        self.forstack = []
+
         self.ifcounter = 0
 
         self.current_token = self.tokens[0]
@@ -824,6 +826,8 @@ class Function:
             self.advance()
 
         self.addline("__"+self.name+"__flp_end_"+hex(decl.offset)+":")
+        self.forstack.append("__"+self.name+"__flp_end_final"+hex(decl.offset))
+        endmarker = "__"+self.name+"__flp_end_final"+hex(decl.offset)
         self.evaluation_wrapper(decl=maxdecl)
 
         
@@ -852,6 +856,10 @@ class Function:
         self.doCompilations(forblock=True)
         self.advance()
         self.addline(header)
+        self.addline("%s: "%endmarker)
+        if(len(self.forstack) > 0):
+            if(self.forstack[len(self.forstack)-1] == endmarker):
+                self.forstack.pop()
         
     def buildCMP(self):
         if(self.current_token.tok != T_OPENP):
@@ -957,6 +965,11 @@ class Function:
         elif(self.current_token.value == "if"):
             self.advance()
             self.buildIFBlock()
+        elif (self.current_token.value == "break"):
+            self.advance()
+            spot = self.forstack.pop()
+            self.addline("jmp %s"%spot)
+        
         else:
             self.advance()
 

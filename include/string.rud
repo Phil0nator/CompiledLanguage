@@ -1,5 +1,6 @@
 #include "include:memory.rud"
-
+#include "include:prints.rud"
+#include "include:Vector.rud"
 struct String{
 
     var data;
@@ -22,7 +23,18 @@ function fast toInt(str){
 
 
 }
+function fast char(integer){
 
+    __asm{"
+    
+        mov rax, r9
+        xor rbx, rbx
+        mov bl, al
+        mov r8, rbx
+    
+    "}
+
+}
 
 
 function String.init(str,initial){
@@ -50,6 +62,7 @@ function String.charAt(str, index){
     str:data->data;
     var ch;
     data[index]->ch;
+    char(ch)->ch;
     return ch;
 
 
@@ -99,6 +112,191 @@ function String.length(this){
     return len;
 
 }
+function String.print(this){
+
+    var data;
+    this:data->data;
+    printformat(data, 0);
+
+}
+
+function String.println(this){
+
+    var data;
+    this:data->data;
+    print_string(data);
+
+}
+
+function String.substring(this, start, end){
+
+    var data;
+    this:data->data;
+    var newlen = end-start;
+    var newdata;
+    alloc(newlen)->newdata;
+    var ch;
+    for(var i = 0; i < newlen; i++; ){
+        data[start+i]->ch;
+        newdata[i] =ch;
+        
+    }
+    newdata[newlen]=0;
+    var out;
+    String()->out;
+    out:len = newlen;
+    out:data = newdata;
+    return out;
+
+
+
+}
+
+
+function String.find_str(this, other){
+
+
+    var len;
+    this:len->len;
+    var otherlen;
+    other:len->otherlen;
+    var ch;
+    var tch;
+    var checked = 0;
+    otherlen--;
+    
+    for(var i; i < len-otherlen; i++;){
+
+        for(var j = 0; j < otherlen; j++;){
+
+            String.charAt(this, i+j)->ch;
+            String.charAt(other, j)->tch;
+            if(ch == tch){
+                checked++;
+            }
+
+        }
+
+        if(checked == (otherlen+1)){
+
+            return i;
+
+        }
+        checked =0;
+
+
+    }
+
+    return -1;
+
+}
+function String.find_chars(this, chars){
+
+    var temp;
+    String()->temp;
+    String.init(temp, chars);
+    var idx;
+    String.find_str(this, temp)->idx;
+    String.destroy(temp);
+    return idx;
+
+}
+
+function String.count_str(this, other){
+
+
+    var len;
+    this:len->len;
+    var otherlen;
+    other:len->otherlen;
+    var ch;
+    var tch;
+    var checked = 0;
+    otherlen--;
+
+    var count;
+    
+    for(var i; i < len-otherlen; i++;){
+
+        for(var j = 0; j < otherlen; j++;){
+
+            String.charAt(this, i+j)->ch;
+            String.charAt(other, j)->tch;
+            if(ch == tch){
+                checked++;
+            }
+
+        }
+        if(checked == (otherlen+1)){
+
+            count++;
+            
+
+        }
+        checked =0;
+
+
+    }
+
+    return count;
+
+
+}
+
+
+
+function String.copy(this){
+
+    var d;
+    this:data->d;
+    var out;
+    String()->out;
+    String.init(out, d);
+    return out;
+
+
+}
+
+
+function String.replace(this, old, new){
+    var data;
+    this:data->data;
+    var len;
+    this:len->len;
+    var oldlen;
+    strlen(old)->oldlen;
+    var newlen;
+    strlen(new)->newlen;
+    var loc;
+
+    print_string(old);
+    
+
+    String.find_chars(this, old)->loc;
+    print_integer(loc);
+    var first;
+
+    var second;
+
+    String.substring(this, 0, loc+1)->first;
+    String.substring(this, loc+oldlen, len)->second;
+    String.println(first);
+    String.append_chars(first, new);
+    String.append_string(first, second);
+    String.destroy(second);
+    destroy(data);
+    first:data->data;
+    this:data = data;
+    return 0;
+
+}
+
+
+
+
+
+
+
 
 function fast stringcat(reallocated, strb){
 

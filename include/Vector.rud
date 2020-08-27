@@ -174,6 +174,39 @@ function Vector.print(vec){
 
 
 }
+function Vector.printstrs(vec){
+    var arr;
+    vec:array->arr;
+    var size;
+    vec:element_size->size;
+    var len;
+    vec:len->len;
+    printformat("[ ", 0);
+    var current_value;
+    
+
+    if(len == 1){
+        arr[0]->current_value;
+        printformat(" %s ]", current_value);
+        return 0;
+
+    }
+    
+    for(var i = 0; i < (len - 2);i++;){
+        
+        arr[i*size]->current_value;
+        printformat("%s, ",current_value);
+        
+
+    }
+        
+
+    arr[(len-1)*size]->current_value;
+    printformat("%s ]\n",current_value);
+
+
+
+}
 
 function Vector.size(vec){
 
@@ -190,7 +223,7 @@ function Vector.pushes(vec, newptr, newptr_len){
     var addr;
     var size;
     vec:element_size->size;
-    for(var i; i <= newptr_len; i++ ;){
+    for(var i; i < newptr_len; i++ ;){
         addr= i*size;
         newptr[ addr]->val;
         Vector.push(vec,val);
@@ -208,5 +241,20 @@ function Vector.destroy(vec){
     destroy(vec);
     return 0;
 
+
+}
+
+function vectorize_args(args, numargs){
+    var tmp;
+    Vector()->tmp;
+    Vector.init(tmp, 8);
+    Vector.resize(tmp, numargs+1);
+    var item;
+    for(var i; i <= numargs;i++;){
+        args[i*8]->item;
+        Vector.set(tmp, i, item);
+
+    }
+    return tmp;
 
 }
