@@ -148,8 +148,10 @@ def updateCommands(inp,outp):
     C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"%outp)
     
     C_LINK = C_LINK.replace("out.o","\""+outp+".o"+"\"").replace("**OUT**",outp)
-
-    return [C_ASSEMBLE, C_LINK, "./%s"%"\""+outp+".o"+"\""]
+    if(platform.system() == "Linux"):
+        return [C_ASSEMBLE, C_LINK, "./%s"%"\""+outp+".o"+"\""]
+    else:
+        return [C_ASSEMBLE, C_LINK, "./%s"%"\""+outp+".o"+"\""]
 
 if platform.system() == "Linux":
 
