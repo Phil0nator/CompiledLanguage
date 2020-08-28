@@ -46,7 +46,6 @@ __asm{"
    call malloc
    xor r11, r11
    xor r12, r12
-   add rsp, 4
    test rax, rax ; check for error
 
    mov byte[rax+rdi], 0x0
@@ -70,13 +69,14 @@ function memerror(error){
 
 function fast destroy(ptr){
 __asm{"
-
+    ALIGN_STACK
     mov rdi, r9
+    
     call free
     xor r10, r10
     xor r11, r11 ;gc
     xor r12, r12
-    sub rsp,4
+    UNALIGN_STACK
 
 "}
 
@@ -87,7 +87,7 @@ function fast reallocate(ptr, newsize){
     __asm{
         "
         
-
+        ALIGN_STACK
         mov rdi, r9
         mov rsi, r10
         xor r10, r10
@@ -100,7 +100,7 @@ function fast reallocate(ptr, newsize){
         xor r11, r11 ;gc
         xor r12, r12
         mov r8, rax
-        
+        UNALIGN_STACK
         
         "}
 

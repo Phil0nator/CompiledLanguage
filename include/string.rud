@@ -1,6 +1,7 @@
 #include "include:memory.rud"
 #include "include:prints.rud"
 #include "include:Vector.rud"
+#include "include:math.rud"
 struct String{
 
     var data;
@@ -38,7 +39,7 @@ function fast char(integer){
 
 
 function String.init(str,initial){
-
+    String()->str;
     var data;
     var len;
     strlen(initial)->len;
@@ -82,6 +83,9 @@ function String.append_string(str, strb){
     strb:data->second_data;
     strAppend(data, second_data)->data;
     str:data = data;
+    var length;
+    strlen(data)->length;
+    str:len = length;
     return data;
 
 
@@ -93,6 +97,10 @@ function String.append_chars(str, chars){
     str:data->data;
     strAppend(data, chars)->data;
     str:data=data;
+    var length;
+    strlen(data)->length;
+    str:len = length;
+    
     return data;
 
 
@@ -132,23 +140,27 @@ function String.substring(this, start, end){
 
     var data;
     this:data->data;
-    var newlen = end-start;
-    var newdata;
-    alloc(newlen)->newdata;
-    var ch;
-    for(var i = 0; i < newlen; i++; ){
-        data[start+i]->ch;
-        newdata[i] =ch;
-        
-    }
-    newdata[newlen]=0;
+    var oldch;
+    data[end]->oldch;
+    data[end] = 0;
+    var newstart = data+start;
     var out;
-    String()->out;
-    out:len = newlen;
-    out:data = newdata;
+    String.init(out, newstart)->out;
+    data[end]=oldch;
     return out;
 
 
+
+}
+
+function String.substringend(this, start){
+
+    var data;
+    this:data->data;
+    var s = data+start;
+    var out;
+    String.init(out, s)->out;
+    return out;
 
 }
 
@@ -174,6 +186,7 @@ function String.find_str(this, other){
             if(ch == tch){
                 checked++;
             }
+            print_char(tch);
 
         }
 
@@ -193,8 +206,8 @@ function String.find_str(this, other){
 function String.find_chars(this, chars){
 
     var temp;
-    String()->temp;
-    String.init(temp, chars);
+    
+    String.init(temp, chars)->temp;
     var idx;
     String.find_str(this, temp)->idx;
     String.destroy(temp);
@@ -219,12 +232,14 @@ function String.count_str(this, other){
     for(var i; i < len-otherlen; i++;){
 
         for(var j = 0; j < otherlen; j++;){
-
+            
             String.charAt(this, i+j)->ch;
+            
             String.charAt(other, j)->tch;
             if(ch == tch){
                 checked++;
             }
+            
 
         }
         if(checked == (otherlen+1)){
@@ -250,8 +265,8 @@ function String.copy(this){
     var d;
     this:data->d;
     var out;
-    String()->out;
-    String.init(out, d);
+    
+    String.init(out, d)->out;
     return out;
 
 
@@ -259,35 +274,46 @@ function String.copy(this){
 
 
 function String.replace(this, old, new){
-    var data;
-    this:data->data;
+    var beg;
     var len;
     this:len->len;
-    var oldlen;
-    strlen(old)->oldlen;
-    var newlen;
-    strlen(new)->newlen;
-    var loc;
+    var otherlen;
+    strlen(old)->otherlen;
+    var checkidx;
+    var ch;
+    var och;
+    for(var i; i < (len-otherlen); i++;){
+
+        String.charAt(this, i)->ch;
+        old[checkidx]->och;
+        char(och)->och;
+        if(ch == och){
+            checkidx++;
+            if(checkidx == (otherlen-1)){
+                break;
+            }
+        }
+        if(ch != och){
+            checkidx=0;
+        }
+
+    }
+
+    var s;
+    i++; //correct orientation
+    String.substring(this, 0, i-otherlen)->s;
+    var s2;
+    String.substringend(this, i)->s2;
+    String.append_chars(s, new);
+    String.append_string(s,s2);
+    String.destroy(s2);
+    return s;
+    
+
 
     
     
-
-    String.find_chars(this, old)->loc;
-    print_integer(loc);
-    var first;
-
-    var second;
-
-    String.substring(this, 0, loc+1)->first;
-    String.substring(this, loc+oldlen, len)->second;
-    String.println(first);
-    String.append_chars(first, new);
-    String.append_string(first, second);
-    String.destroy(second);
-    destroy(data);
-    first:data->data;
-    this:data = data;
-    return 0;
+    
 
 }
 
@@ -301,14 +327,15 @@ function String.replace(this, old, new){
 function fast stringcat(reallocated, strb){
 
 __asm{"
+    ALIGN_STACK
     mov rdi, r9 ;reallocated
     mov rsi, r10;strb
     call strcat 
     xor r10, r10
     xor r11, r11 ;gc
     xor r12, r12
-    add rsp, 4
     mov r8, rax
+    UNALIGN_STACK
     "}
 
 }
@@ -324,10 +351,10 @@ function fast strcpy(destination, source){
         xor r8, r8
         xor rax, rax
         _strcpy_top_loop:
-        mov ax, word [r10 + r8]
-        cmp ax, 0
+        mov al, [r10 + r8]
+        cmp al, 0
         je _strcpy_end_loop
-        mov word [r9+r8],ax
+        mov  [r9+r8],al
         inc r8
         jmp _strcpy_top_loop
         _strcpy_end_loop  :
@@ -344,9 +371,10 @@ function fast strlen(ptr){
     __asm{"
     
     xor r8,r8
+    xor rax, rax
     _strlen_top_loop:
-    mov ax, word[r9+r8]
-    cmp ax,0
+    mov al, [r9+r8]
+    cmp al,0
     je _strlen_end_loop
     inc r8
     jmp _strlen_top_loop
@@ -365,13 +393,14 @@ function strAppend(stra, strb){
     var lenb;
     strlen(stra)->lena;
     strlen(strb)->lenb;
-    var newlen = (lena+lenb)+1;
+    var newlen = (lena+lenb);
     var out;
     reallocate(stra, newlen)->out;
     cmp(out, nullptr){
         ==:memerror;
     }
     stringcat(out, strb)->out;
+    
     return out;
 
 

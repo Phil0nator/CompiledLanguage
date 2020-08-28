@@ -1047,11 +1047,10 @@ STRING_CONSTANT_11: db ``, 0
 FLT_CONSTANT_16: dq __float32__(32767.0)
 STRING_CONSTANT_12: db `\n`, 0
 STRING_CONSTANT_13: db `The number of commandline arguments is: %u\n`, 0
-STRING_CONSTANT_14: db `test`, 0
-STRING_CONSTANT_15: db `  test2 `, 0
-STRING_CONSTANT_16: db `test2`, 0
-STRING_CONSTANT_17: db `test3`, 0
-STRING_CONSTANT_18: db `test2`, 0
+STRING_CONSTANT_14: db `This is a testing string. `, 0
+STRING_CONSTANT_15: db `And this sentance has been appended.`, 0
+STRING_CONSTANT_16: db `And`, 0
+STRING_CONSTANT_17: db `Andn't`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __BOOL_STANDARD_TRUE: dq -0x1
 __BOOL_STANDARD_FALSE: dq 0x0
@@ -1177,12 +1176,19 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-mov rdi, 0x30
-call malloc
-add rsp, 4
-test rax, rax ; check for error
-mov byte[rax+0x30], 0x0
-mov r8, rax
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x30
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+0x30], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
 leave
 ret
 
@@ -1193,12 +1199,19 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-mov rdi, 0x20
-call malloc
-add rsp, 4
-test rax, rax ; check for error
-mov byte[rax+0x20], 0x0
-mov r8, rax
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x20
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+0x20], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
 leave
 ret
 
@@ -1209,12 +1222,19 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-mov rdi, 0x38
-call malloc
-add rsp, 4
-test rax, rax ; check for error
-mov byte[rax+0x38], 0x0
-mov r8, rax
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x38
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+0x38], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
 leave
 ret
 
@@ -1225,12 +1245,19 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-mov rdi, 0x20
-call malloc
-add rsp, 4
-test rax, rax ; check for error
-mov byte[rax+0x20], 0x0
-mov r8, rax
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x20
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+0x20], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
 leave
 ret
 
@@ -1241,12 +1268,19 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-mov rdi, 0x30
-call malloc
-add rsp, 4
-test rax, rax ; check for error
-mov byte[rax+0x30], 0x0
-mov r8, rax
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x30
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+0x30], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
 leave
 ret
 
@@ -1415,6 +1449,33 @@ __print_two_formats__leave_ret_:
 leave
 ret
 
+print_three_formats:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (value)
+    mov     rsi, r10                 ; set 2nd parameter (fa)
+    mov     rdx, r11                ; set 3rd parameter (fb)
+    mov     rcx, r12
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    FFLUSH_STDOUT
+    
+
+__print_three_formats__leave_ret_:
+leave
+ret
+
 print_formatfloat:
 
 push rbp
@@ -1570,7 +1631,6 @@ sub rsp, 0x8
    call malloc
    xor r11, r11
    xor r12, r12
-   add rsp, 4
    test rax, rax ; check for error
 
    mov byte[rax+rdi], 0x0
@@ -1605,13 +1665,14 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
-
+    ALIGN_STACK
     mov rdi, r9
+    
     call free
     xor r10, r10
     xor r11, r11 ;gc
     xor r12, r12
-    sub rsp,4
+    UNALIGN_STACK
 
 
 
@@ -1626,7 +1687,7 @@ mov rbp, rsp
 sub rsp, 0x8
 
         
-
+        ALIGN_STACK
         mov rdi, r9
         mov rsi, r10
         xor r10, r10
@@ -1639,7 +1700,7 @@ sub rsp, 0x8
         xor r11, r11 ;gc
         xor r12, r12
         mov r8, rax
-        
+        UNALIGN_STACK
         
         
 
@@ -2498,6 +2559,7 @@ call printformat
 mov r8, 0x0
 cvtsi2ss xmm8,r8
 jmp __Vector.printstrs__leave_ret_
+jmp __ifntrue_Vector.printstrs_0x1
 __ifntrue_Vector.printstrs_0x1:
 mov rbx, 0x0
 mov QWORD [rbp-0x30], rbx
@@ -2801,6 +2863,9 @@ mov rbp, rsp
 sub rsp, 0x28
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
+call String
+mov QWORD [rbp-0x8], r8
+
 mov QWORD [rbp-0x18], 0x0
 
 mov QWORD [rbp-0x20], 0x0
@@ -2816,10 +2881,10 @@ mov QWORD [rbp-0x18], r8
 mov r14, QWORD [rbp-0x18]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__String.init__0x131
+push __cmpblock__String.init__0x156
 je memerror
 add rsp, 0x8
-__cmpblock__String.init__0x131:
+__cmpblock__String.init__0x156:
 mov r9, QWORD [rbp-0x18]
 mov r10, QWORD [rbp-0x10]
 call strcpy
@@ -2911,7 +2976,7 @@ String.append_string:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x30
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
@@ -2946,6 +3011,19 @@ mov rbx, QWORD [rbp-0x8]
 add rbx, 0x18
 mov rax, QWORD [rbp-0x18]
 mov [rbx], rax
+mov QWORD [rbp-0x28], 0x0
+
+mov r9, QWORD [rbp-0x18]
+call strlen
+mov QWORD [rbp-0x28], r8
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rax, QWORD [rbp-0x28]
+mov [rbx], rax
 mov r8, QWORD [rbp-0x18]
 cvtsi2ss xmm8,r8
 jmp __String.append_string__leave_ret_
@@ -2958,7 +3036,7 @@ String.append_chars:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x20
+sub rsp, 0x28
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
@@ -2982,6 +3060,19 @@ mov rbx, QWORD [rbp-0x8]
     
 add rbx, 0x18
 mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+mov QWORD [rbp-0x20], 0x0
+
+mov r9, QWORD [rbp-0x18]
+call strlen
+mov QWORD [rbp-0x20], r8
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x20
+mov rax, QWORD [rbp-0x20]
 mov [rbx], rax
 mov r8, QWORD [rbp-0x18]
 cvtsi2ss xmm8,r8
@@ -3094,7 +3185,7 @@ String.substring:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x58
+sub rsp, 0x40
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], r11
@@ -3108,94 +3199,81 @@ add rbx, 0x18
 mov rcx, [rbx]
 mov QWORD [rbp-0x20], rcx
 
-mov rbx, QWORD [rbp-0x18]
-mov rcx, QWORD [rbp-0x10]
-sub rbx, rcx
-mov QWORD [rbp-0x28], rbx
-mov QWORD [rbp-0x30], 0x0
+mov QWORD [rbp-0x28], 0x0
 
-mov r9, QWORD [rbp-0x28]
-call alloc
-mov QWORD [rbp-0x30], r8
-
-mov QWORD [rbp-0x38], 0x0
-
-mov rbx, 0x0
-mov QWORD [rbp-0x40], rbx
-__String.substring__flp0x40:
-mov rbx, QWORD [rbp-0x10]
-mov rcx, QWORD [rbp-0x40]
-add rbx, rcx
-mov rax,rbx
+mov rax, QWORD [rbp-0x18]
 
 mov rbx, QWORD [rbp-0x20]
 
     
 mov r15,QWORD [rbx+rax]
-mov QWORD [rbp-0x38], r15
-mov rax, QWORD [rbp-0x40]
+mov QWORD [rbp-0x28], r15
+mov rax, QWORD [rbp-0x18]
 
-mov rbx, QWORD [rbp-0x30]
-
-    
-mov r15, QWORD [rbp-0x38]
-mov QWORD [rbx+rax], r15
-__String.substring__flp_end_0x40:
-mov rbx, QWORD [rbp-0x40]
-mov rcx, QWORD [rbp-0x28]
-cmp rbx, rcx
-mov rbx, 0
-jge __blncmpncnd_String.substring_0x0
-mov rbx, -1
-__blncmpncnd_String.substring_0x0:
-mov QWORD [rbp-0x48], rbx
-
-mov rax, QWORD [rbp-0x40]
-
-    
-inc rax
-mov QWORD [rbp-0x40], rax
-
-
-mov rdi, QWORD [rbp-0x48]
-
-    
-mov rsi, -1
-cmp rdi, rsi
-je __String.substring__flp0x40
-
-__String.substring__flp_end_final0x40: 
-mov rax, QWORD [rbp-0x28]
-
-mov rbx, QWORD [rbp-0x30]
+mov rbx, QWORD [rbp-0x20]
 
     
 mov r15, 0x0
 mov QWORD [rbx+rax], r15
-mov QWORD [rbp-0x50], 0x0
+mov rbx, QWORD [rbp-0x20]
+mov rcx, QWORD [rbp-0x10]
+add rbx, rcx
+mov QWORD [rbp-0x30], rbx
+mov QWORD [rbp-0x38], 0x0
 
-call String
-mov QWORD [rbp-0x50], r8
+mov r9, QWORD [rbp-0x38]
+mov r10, QWORD [rbp-0x30]
+call String.init
+mov QWORD [rbp-0x38], r8
 
+mov rax, QWORD [rbp-0x18]
 
-mov rbx, QWORD [rbp-0x50]
+mov rbx, QWORD [rbp-0x20]
 
     
-add rbx, 0x20
-mov rax, QWORD [rbp-0x28]
-mov [rbx], rax
-
-mov rbx, QWORD [rbp-0x50]
-
-    
-add rbx, 0x18
-mov rax, QWORD [rbp-0x30]
-mov [rbx], rax
-mov r8, QWORD [rbp-0x50]
+mov r15, QWORD [rbp-0x28]
+mov QWORD [rbx+rax], r15
+mov r8, QWORD [rbp-0x38]
 cvtsi2ss xmm8,r8
 jmp __String.substring__leave_ret_
 
 __String.substring__leave_ret_:
+leave
+ret
+
+String.substringend:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], 0x0
+
+
+mov rbx, QWORD [rbp-0x8]
+
+    
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+
+mov rbx, QWORD [rbp-0x18]
+mov rcx, QWORD [rbp-0x10]
+add rbx, rcx
+mov QWORD [rbp-0x20], rbx
+mov QWORD [rbp-0x28], 0x0
+
+mov r9, QWORD [rbp-0x28]
+mov r10, QWORD [rbp-0x20]
+call String.init
+mov QWORD [rbp-0x28], r8
+
+mov r8, QWORD [rbp-0x28]
+cvtsi2ss xmm8,r8
+jmp __String.substringend__leave_ret_
+
+__String.substringend__leave_ret_:
 leave
 ret
 
@@ -3276,7 +3354,10 @@ mov rax, QWORD [rbp-0x38]
 inc rax
 mov QWORD [rbp-0x38], rax
 
+jmp __ifntrue_String.find_str_0x1
 __ifntrue_String.find_str_0x1:
+mov r9, QWORD [rbp-0x30]
+call print_char
 __String.find_str__flp_end_0x50:
 mov rbx, QWORD [rbp-0x50]
 mov rcx, QWORD [rbp-0x20]
@@ -3320,6 +3401,7 @@ jne __ifntrue_String.find_str_0x2
 mov r8, QWORD [rbp-0x40]
 cvtsi2ss xmm8,r8
 jmp __String.find_str__leave_ret_
+jmp __ifntrue_String.find_str_0x2
 __ifntrue_String.find_str_0x2:
 mov rbx, 0x0
 mov QWORD [rbp-0x38], rbx
@@ -3365,12 +3447,11 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 
-call String
-mov QWORD [rbp-0x18], r8
-
 mov r9, QWORD [rbp-0x18]
 mov r10, QWORD [rbp-0x10]
 call String.init
+mov QWORD [rbp-0x18], r8
+
 mov QWORD [rbp-0x20], 0x0
 
 mov r9, QWORD [rbp-0x8]
@@ -3467,6 +3548,7 @@ mov rax, QWORD [rbp-0x38]
 inc rax
 mov QWORD [rbp-0x38], rax
 
+jmp __ifntrue_String.count_str_0x1
 __ifntrue_String.count_str_0x1:
 __String.count_str__flp_end_0x58:
 mov rbx, QWORD [rbp-0x58]
@@ -3515,6 +3597,7 @@ mov rax, QWORD [rbp-0x40]
 inc rax
 mov QWORD [rbp-0x40], rax
 
+jmp __ifntrue_String.count_str_0x2
 __ifntrue_String.count_str_0x2:
 mov rbx, 0x0
 mov QWORD [rbp-0x38], rbx
@@ -3569,12 +3652,11 @@ mov QWORD [rbp-0x10], rcx
 
 mov QWORD [rbp-0x18], 0x0
 
-call String
-mov QWORD [rbp-0x18], r8
-
 mov r9, QWORD [rbp-0x18]
 mov r10, QWORD [rbp-0x10]
 call String.init
+mov QWORD [rbp-0x18], r8
+
 mov r8, QWORD [rbp-0x18]
 cvtsi2ss xmm8,r8
 jmp __String.copy__leave_ret_
@@ -3587,19 +3669,11 @@ String.replace:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x58
+sub rsp, 0x70
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
-
-
-mov rbx, QWORD [rbp-0x8]
-
-    
-add rbx, 0x18
-mov rcx, [rbx]
-mov QWORD [rbp-0x20], rcx
 
 mov QWORD [rbp-0x28], 0x0
 
@@ -3619,69 +3693,143 @@ mov QWORD [rbp-0x30], r8
 
 mov QWORD [rbp-0x38], 0x0
 
-mov r9, QWORD [rbp-0x18]
-call strlen
-mov QWORD [rbp-0x38], r8
-
 mov QWORD [rbp-0x40], 0x0
 
-mov r9, QWORD [rbp-0x8]
-mov r10, QWORD [rbp-0x10]
-call String.find_chars
-mov QWORD [rbp-0x40], r8
-
-mov r9, QWORD [rbp-0x40]
-call print_integer
 mov QWORD [rbp-0x48], 0x0
 
 mov QWORD [rbp-0x50], 0x0
 
+__String.replace__flp0x50:
 mov r9, QWORD [rbp-0x8]
-mov r10, 0x0
-mov rbx, QWORD [rbp-0x40]
-mov rcx, 0x1
-add rbx, rcx
-mov r11,rbx
-call String.substring
+mov r10, QWORD [rbp-0x50]
+call String.charAt
+mov QWORD [rbp-0x40], r8
+
+mov rax, QWORD [rbp-0x38]
+
+mov rbx, QWORD [rbp-0x10]
+
+    
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x48], r15
+mov r9, QWORD [rbp-0x48]
+call char
 mov QWORD [rbp-0x48], r8
 
-mov r9, QWORD [rbp-0x8]
 mov rbx, QWORD [rbp-0x40]
-mov rcx, QWORD [rbp-0x30]
-add rbx, rcx
-mov r10,rbx
-mov r11, QWORD [rbp-0x28]
-call String.substring
-mov QWORD [rbp-0x50], r8
+mov rcx, QWORD [rbp-0x48]
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_String.replace_0x1
+mov rbx, -1
+__blncmpncnd_String.replace_0x1:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_String.replace_0x1
 
-mov r9, QWORD [rbp-0x48]
-call String.println
-mov r9, QWORD [rbp-0x48]
+mov rax, QWORD [rbp-0x38]
+
+    
+inc rax
+mov QWORD [rbp-0x38], rax
+
+mov rbx, QWORD [rbp-0x30]
+mov [__expstack_int1],rbx
+mov rbx, QWORD [rbp-0x38]
+mov rcx, [__expstack_int1]
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_String.replace_0x2
+mov rbx, -1
+__blncmpncnd_String.replace_0x2:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_String.replace_0x2
+jmp __String.replace__flp_end_final0x50
+jmp __ifntrue_String.replace_0x2
+__ifntrue_String.replace_0x2:
+jmp __ifntrue_String.replace_0x1
+__ifntrue_String.replace_0x1:
+mov rbx, QWORD [rbp-0x40]
+mov rcx, QWORD [rbp-0x48]
+cmp rbx, rcx
+mov rbx, 0
+je __blncmpncnd_String.replace_0x3
+mov rbx, -1
+__blncmpncnd_String.replace_0x3:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_String.replace_0x3
+mov rbx, 0x0
+mov QWORD [rbp-0x38], rbx
+jmp __ifntrue_String.replace_0x3
+__ifntrue_String.replace_0x3:
+__String.replace__flp_end_0x50:
+mov rbx, QWORD [rbp-0x28]
+mov rcx, QWORD [rbp-0x30]
+sub rbx, rcx
+mov [__expstack_int1],rbx
+mov rbx, QWORD [rbp-0x50]
+mov rcx, [__expstack_int1]
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_String.replace_0x0
+mov rbx, -1
+__blncmpncnd_String.replace_0x0:
+mov QWORD [rbp-0x58], rbx
+
+mov rax, QWORD [rbp-0x50]
+
+    
+inc rax
+mov QWORD [rbp-0x50], rax
+
+
+mov rdi, QWORD [rbp-0x58]
+
+    
+mov rsi, -1
+cmp rdi, rsi
+je __String.replace__flp0x50
+
+__String.replace__flp_end_final0x50: 
+mov QWORD [rbp-0x60], 0x0
+
+
+mov rax, QWORD [rbp-0x50]
+
+    
+inc rax
+mov QWORD [rbp-0x50], rax
+
+mov r9, QWORD [rbp-0x8]
+mov r10, 0x0
+mov rbx, QWORD [rbp-0x50]
+mov rcx, QWORD [rbp-0x30]
+sub rbx, rcx
+mov r11,rbx
+call String.substring
+mov QWORD [rbp-0x60], r8
+
+mov QWORD [rbp-0x68], 0x0
+
+mov r9, QWORD [rbp-0x8]
+mov r10, QWORD [rbp-0x50]
+call String.substringend
+mov QWORD [rbp-0x68], r8
+
+mov r9, QWORD [rbp-0x60]
 mov r10, QWORD [rbp-0x18]
 call String.append_chars
-mov r9, QWORD [rbp-0x48]
-mov r10, QWORD [rbp-0x50]
+mov r9, QWORD [rbp-0x60]
+mov r10, QWORD [rbp-0x68]
 call String.append_string
-mov r9, QWORD [rbp-0x50]
+mov r9, QWORD [rbp-0x68]
 call String.destroy
-mov r9, QWORD [rbp-0x20]
-call destroy
-
-mov rbx, QWORD [rbp-0x48]
-
-    
-add rbx, 0x18
-mov rcx, [rbx]
-mov QWORD [rbp-0x20], rcx
-
-
-mov rbx, QWORD [rbp-0x8]
-
-    
-add rbx, 0x18
-mov rax, QWORD [rbp-0x20]
-mov [rbx], rax
-mov r8, 0x0
+mov r8, QWORD [rbp-0x60]
 cvtsi2ss xmm8,r8
 jmp __String.replace__leave_ret_
 
@@ -3695,14 +3843,15 @@ push rbp
 mov rbp, rsp
 sub rsp, 0x8
 
+    ALIGN_STACK
     mov rdi, r9 ;reallocated
     mov rsi, r10;strb
     call strcat 
     xor r10, r10
     xor r11, r11 ;gc
     xor r12, r12
-    add rsp, 4
     mov r8, rax
+    UNALIGN_STACK
     
 
 __stringcat__leave_ret_:
@@ -3719,10 +3868,10 @@ sub rsp, 0x8
         xor r8, r8
         xor rax, rax
         _strcpy_top_loop:
-        mov ax, word [r10 + r8]
-        cmp ax, 0
+        mov al, [r10 + r8]
+        cmp al, 0
         je _strcpy_end_loop
-        mov word [r9+r8],ax
+        mov  [r9+r8],al
         inc r8
         jmp _strcpy_top_loop
         _strcpy_end_loop  :
@@ -3742,9 +3891,10 @@ sub rsp, 0x8
 
     
     xor r8,r8
+    xor rax, rax
     _strlen_top_loop:
-    mov ax, word[r9+r8]
-    cmp ax,0
+    mov al, [r9+r8]
+    cmp al,0
     je _strlen_end_loop
     inc r8
     jmp _strlen_top_loop
@@ -3780,8 +3930,6 @@ mov rcx, QWORD [rbp-0x20]
 add rbx, rcx
 mov [__expstack_int1],rbx
 mov rbx, [__expstack_int1]
-mov rcx, 0x1
-add rbx, rcx
 mov QWORD [rbp-0x28], rbx
 mov QWORD [rbp-0x30], 0x0
 
@@ -3793,10 +3941,10 @@ mov QWORD [rbp-0x30], r8
 mov r14, QWORD [rbp-0x30]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__strAppend__0x252
+push __cmpblock__strAppend__0x238
 je memerror
 add rsp, 0x8
-__cmpblock__strAppend__0x252:
+__cmpblock__strAppend__0x238:
 mov r9, QWORD [rbp-0x30]
 mov r10, QWORD [rbp-0x10]
 call stringcat
@@ -4891,7 +5039,7 @@ m:
 
 push rbp
 mov rbp, rsp
-sub rsp, 0x28
+sub rsp, 0x40
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov r9, STRING_CONSTANT_13
@@ -4899,34 +5047,59 @@ mov r10, QWORD [rbp-0x10]
 call printformat
 mov QWORD [rbp-0x18], 0x0
 
-call String
-mov QWORD [rbp-0x18], r8
+mov QWORD [rbp-0x20], 0x0
 
+mov QWORD [rbp-0x28], 0x0
+
+mov QWORD [rbp-0x30], 0x0
+
+__m__flp0x30:
 mov r9, QWORD [rbp-0x18]
 mov r10, STRING_CONSTANT_14
 call String.init
-mov r9, QWORD [rbp-0x18]
-call String.println
+mov QWORD [rbp-0x18], r8
+
 mov r9, QWORD [rbp-0x18]
 mov r10, STRING_CONSTANT_15
 call String.append_chars
 mov r9, QWORD [rbp-0x18]
-call String.println
+mov r10, 0x0
+mov r11, 0x5
+call String.substring
+mov QWORD [rbp-0x20], r8
+
 mov r9, QWORD [rbp-0x18]
 mov r10, STRING_CONSTANT_16
 mov r11, STRING_CONSTANT_17
 call String.replace
-mov r9, QWORD [rbp-0x18]
-call String.println
-mov QWORD [rbp-0x20], 0x0
+mov QWORD [rbp-0x28], r8
 
 mov r9, QWORD [rbp-0x18]
-mov r10, STRING_CONSTANT_18
-call String.find_chars
-mov QWORD [rbp-0x20], r8
-
+call String.destroy
 mov r9, QWORD [rbp-0x20]
-call print_integer
+call String.destroy
+mov r9, QWORD [rbp-0x28]
+call String.destroy
+__m__flp_end_0x30:
+mov rbx, QWORD [rbp-0x30]
+mov rcx, 0x1
+cmp rbx, rcx
+mov rbx, 0
+je __blncmpncnd_m_0x0
+mov rbx, -1
+__blncmpncnd_m_0x0:
+mov QWORD [rbp-0x38], rbx
+mov rbx, QWORD [rbp-0x30]
+mov QWORD [rbp-0x30], rbx
+
+mov rdi, QWORD [rbp-0x38]
+
+    
+mov rsi, -1
+cmp rdi, rsi
+je __m__flp0x30
+
+__m__flp_end_final0x30: 
 
 __m__leave_ret_:
 leave

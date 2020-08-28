@@ -8,5 +8,19 @@ function main(args, numargs){
     printformat("The number of commandline arguments is: %u\n", numargs);
     
     
+    var str;
+    var str2;
+    var str3;
+    for(var i; i != 1; i=i;){
+        String.init(str, "This is a testing string. ")->str;
+        String.append_chars(str, "And this sentance has been appended.");
+        String.substring(str, 0, 5)->str2;
+        String.replace(str, "And", "Andn't")->str3;
+        //String.println(str3);
+        String.destroy(str);
+        String.destroy(str2);
+        String.destroy(str3);
+    }
+
 
 }

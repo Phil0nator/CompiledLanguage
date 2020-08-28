@@ -941,7 +941,17 @@ class Function:
         labeltojump = "__ifntrue_%s_%s"%(self.name,hex(self.ifcounter))
         self.addline("jne %s"%labeltojump)
         self.doCompilations(forblock=True)
+        self.addline("jmp %s"%labeltojump)
+        
+
+        if(self.current_token.tok != T_CLSCOPE) : throw(InvalidIFHeader(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
         self.advance()
+        
+        if(self.current_token.tok == T_KEYWORD and self.current_token.value == "else"):
+            if(self.current_token.tok != T_CLSCOPE) : throw(InvalidIFHeader(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+            self.doCompilations(forblock=True)
+            if(self.current_token.tok != T_CLSCOPE) : throw(InvalidIFHeader(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+            self.advance()
         self.addline("%s:"%labeltojump)        
 
 

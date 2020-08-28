@@ -25,6 +25,7 @@ __fileoutput__ = ""
 __tonasm__ = False
 __autorun__ = False
 __comp__ = None
+__dbg__ = False
 
 def main():
     global cc, __comp__
@@ -72,6 +73,8 @@ def main():
     with open("%s.asm"%__fileoutput__, "wb") as f:
         f.write(asm.encode())
     commands = updateCommands(__fileinput__, __fileoutput__)
+    if(__dbg__): commands[1] = commands[1].replace("&G","-g")
+    else:commands[1] = commands[1].replace("&G","")
     os.system(commands[0] + " && " + commands[1])
     os.remove(__fileoutput__+".o")
 
@@ -79,7 +82,7 @@ def main():
         os.remove("%s.asm"%__fileoutput__)
 
     end = time.time()
-    print("Compiled and linked all symbols in %s ms\n"%str(end-start))
+    print("Compiled and linked symbols in %s ms\n"%str(end-start))
 
 
     if(__autorun__):
@@ -107,17 +110,19 @@ def main():
 
 
 def handleArgs():
-    global __fileinput__,__fileoutput__,__tonasm__,__autorun__
+    global __fileinput__,__fileoutput__,__tonasm__,__autorun__,__dbg__
     parser = arg.ArgumentParser(description='Compile .rud programs into either nasm assembly, or to an executable.')
     parser.add_argument("-o", "--output", required=True)
     parser.add_argument("-i", "--input", required=True)
     parser.add_argument("-nasm", action="store_true", default=False)
     parser.add_argument("-r", action="store_true", default=False)
+    parser.add_argument("-g", action="store_true",default=False)
     args = parser.parse_args()
     __fileinput__=args.input
     __fileoutput__=args.output
     __tonasm__=args.nasm
     __autorun__=args.r
+    __dbg__ = args.g
 if( __name__ == "__main__"):
     handleArgs()
     try:

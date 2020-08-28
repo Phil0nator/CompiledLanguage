@@ -140,7 +140,7 @@ ret
 C_ASSEMBLE_LINK_RUN = "nasm -felf64 out.asm && gcc \"include/macro.c\" -Wimplicit-function-declaration out.o -no-pie  && ./a.out"
 C_ASSEMBLE = "nasm -felf64 out.asm"
 
-C_LINK = "gcc \"include/macro.c\" -Wimplicit-function-declaration out.o -no-pie -lm -o **OUT**"
+C_LINK = "gcc \"include/macro.c\" -Wimplicit-function-declaration &G out.o -no-pie -lm -o **OUT**"
 
 
 def updateCommands(inp,outp):

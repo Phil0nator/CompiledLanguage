@@ -44,12 +44,19 @@ class Struct:
         self.allocator = """
 %s
 %s
-mov rdi, %s
-call malloc
-add rsp, 4
-test rax, rax ; check for error
-mov byte[rax+%s], 0x0
-mov r8, rax
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, %s
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+%s], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
 leave
 ret
 
