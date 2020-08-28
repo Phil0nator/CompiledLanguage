@@ -1,3 +1,9 @@
+#ifndef __entryexit__ 1
+#define __entryexit__ 1
+
+
+
+
 function fast exit(code){
 
 
@@ -15,6 +21,9 @@ function fast exit(code){
 
 }
 
+
+
+
 function fast doInterrupt(code, value){
 
 
@@ -30,3 +39,6 @@ function fast doInterrupt(code, value){
 
 
 }
+
+
+#endif

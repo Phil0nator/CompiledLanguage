@@ -21,6 +21,7 @@ function Vector.init(vec, size){
 
     var arr;
     alloc(1*size)->arr;
+    Vector()->vec;
     vec:array = arr;
     vec:len = 0;
     vec:pushpos = 0;
@@ -246,8 +247,8 @@ function Vector.destroy(vec){
 
 function vectorize_args(args, numargs){
     var tmp;
-    Vector()->tmp;
-    Vector.init(tmp, 8);
+    
+    Vector.init(tmp, 8)->tmp;
     Vector.resize(tmp, numargs+1);
     var item;
     for(var i; i <= numargs;i++;){

@@ -24,7 +24,12 @@ class PreLexer:
             if(self.current_char in ' \t'):#ignore whitespace 
                 self.advance()
             elif (self.current_char == "#" or self.current_char in ID_CHARS):
+
+                
                 tokens.append(self.make_identifier())
+            
+            
+            
             elif(self.current_char in T_NUMBERS):
                 tokens.append(self.make_number())
             elif (self.current_char == "\""):
@@ -110,7 +115,7 @@ class Preprocessor:
         self.tokens, error = self.lexer.make_tokens()
 
         self.current_token = self.tokens[0]
-
+        self.ifstack = 0
         self.ct_idx = 0
 
     def advance(self):
@@ -122,6 +127,13 @@ class Preprocessor:
             if f == file:
                 return True
         return False 
+    
+    def isDefined(self, name):
+        for d in cc["DEF"]:
+            for n in d:
+                if n == name:
+                    return True
+        return False
     
     def buildInclude(self):
         self.advance()
@@ -166,7 +178,66 @@ class Preprocessor:
         else:
             cc["DEF"].append({id:None})
 
+    def buildIfndef(self):
+        self.advance()
+        if(self.current_token.tok != T_ID):
+            throw(InvalidDefinrdirective(self.current_token.start.idx,self.current_token.end,self.current_token.value, self.current_token.tok))
+        id = self.current_token.value
+        ifdefmarker = "&CIFD%s&"%self.ifstack
+        endifmarker = "&EIF%s&"%self.ifstack
+        self.ifstack+=1
+        self.data = self.data.replace("#ifndef %s"%id, ifdefmarker, 1)
+        if(not self.isDefined(id)):
+            self.advance()
+            self.data = self.data.replace("#endif","",1)
+            self.data = self.data.replace(ifdefmarker,"")
+            self.ifstack-=1
+            return
+
+        else:
+            while (not(self.current_token.tok == T_KEYWORD and self.current_token.value=="#endif")):
+                self.advance()
+            self.data = self.data.replace("#endif",endifmarker,1)
+            self.advance()
             
+        start = self.data.find(ifdefmarker)
+        end = self.data.find(endifmarker)
+        self.data = self.data[0:start] + self.data[end+len(endifmarker):len(self.data)-1]
+        
+        self.data = self.data.replace(endifmarker,"")
+        self.data = self.data.replace(ifdefmarker,"")
+        self.ifstack-=1
+
+    def buildIfdef(self):
+        self.advance()
+        if(self.current_token.tok != T_ID):
+            throw(InvalidDefinrdirective(self.current_token.start.idx,self.current_token.end,self.current_token.value, self.current_token.tok))
+        id = self.current_token.value
+        ifdefmarker = "&CIFD%s&"%self.ifstack
+        endifmarker = "&EIF%s&"%self.ifstack
+        self.ifstack+=1
+        self.data = self.data.replace("#ifdef %s"%id, ifdefmarker, 1)
+        if(self.isDefined(id)):
+            self.advance()
+            self.data = self.data.replace("#endif","",1)
+            self.data = self.data.replace(ifdefmarker,"")
+            self.ifstack-=1
+            return
+
+        else:
+            while (not(self.current_token.tok == T_KEYWORD and self.current_token.value=="#endif")):
+                self.advance()
+            self.data = self.data.replace("#endif",endifmarker,1)
+            self.advance()
+            
+        start = self.data.find(ifdefmarker)
+        end = self.data.find(endifmarker)
+        self.data = self.data[0:start] + self.data[end+len(endifmarker):len(self.data)-1]
+        
+        self.data = self.data.replace(endifmarker,"")
+        self.data = self.data.replace(ifdefmarker,"")
+        self.ifstack-=1
+
     def process(self):
         while self.current_token.tok != T_EOF:
             if(self.current_token.tok == T_KEYWORD):
@@ -174,6 +245,10 @@ class Preprocessor:
                     self.buildInclude()
                 elif(self.current_token.value == "#define"):
                     self.buildDefine()
+                elif (self.current_token.value == "#ifdef"):
+                    self.buildIfdef()
+                elif (self.current_token.value == "#ifndef"):
+                    self.buildIfndef()
                 else:
                     self.advance()
             else:
@@ -191,59 +266,3 @@ def pre_process(data,cc):
 
 
     return prep.process()
-
-
-
-
-
-""" THE OLD WAY
-def include(file_indicator, data,cc):
-
-    if(file_indicator.startswith("\"")):
-        with open(file_indicator.replace("\"",""), "rb") as f:
-            cc["FILES"].append(file_indicator.replace("\"",""))        
-            return pre_process(f.read().decode(),cc)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def pre_process(data,cc):
-    lines = data.split("\n")
-    i =0
-    
-    for line in lines:
-        if(line.startswith("#")):
-            if(line[1:8] == "include"):
-               lines[i]=include(line.split(" ")[1],data,cc)+chr(3)#+"\n&&FN:"+line.split(" ")[1]+"&&"
-            elif(line[1:7] == "define"):
-                cc["DEF"][line.split(" ")[1]] = line.split(" ")[2]
-                lines[i] = ""
-
-
-
-
-            else:
-                print("Unkown Preprocessor Directive: "+line)
-                exit(1)
-        i+=1
-
-    data = ""
-    for line in lines:
-        data+=line+"\n"
-
-    for definition in cc["DEF"]:
-        data = data.replace(definition,cc["DEF"][definition])
-
-
-    return data
-"""
