@@ -22,6 +22,8 @@ import argparse as arg
 
 import platform
 
+import subprocess
+
 __fileinput__ = ""
 __fileoutput__ = ""
 __tonasm__ = False
@@ -47,6 +49,7 @@ def main():
 
     with open(__fileinput__, "rb") as f:
         data = f.read().decode()
+        
 
     
 
@@ -57,8 +60,10 @@ def main():
     l = Lexer(0, data)
     tokens, errors = l.make_tokens()
     if(errors != None):
+        
         print(errors.as_string())
         exit(1)
+    
     
 
     compiler = Compiler(tokens)
@@ -79,9 +84,25 @@ def main():
     commands = updateCommands(__fileinput__, __fileoutput__)
     if(__dbg__): commands[1] = commands[1].replace("&G","-g")
     else:commands[1] = commands[1].replace("&G","")
-    os.system(commands[0] + " && " + commands[1])
-    os.remove(__fileoutput__+".o")
 
+    print(commands)
+
+    
+    
+    if(platform.system() == "Linux"):
+        os.system(commands[0] + " && " + commands[1])
+        os.remove(__fileoutput__+".o")
+    else:
+        #os.environ['gcc'] = r'include/win-base/GCC64win/MinGW64/bin/'
+        print("\n"*10)
+        print(commands[1])
+        print("\n"*10)
+        
+        subprocess.Popen(commands[0])
+
+        subprocess.Popen(commands[1])
+        os.remove(__fileoutput__+".obj")
+        
     if(not __tonasm__):
         os.remove("%s.asm"%__fileoutput__)
 

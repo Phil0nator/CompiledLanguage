@@ -9,6 +9,7 @@ class Lexer:
     def __init__(self, fn ,text):
         self.fn = fn
         self.text=text
+        self.text=self.text.strip().replace("\r","")
         self.loc = Location(-1,0,-1,fn,text)
         self.current_char = None
         self.advance()
@@ -16,7 +17,7 @@ class Lexer:
     def advance(self):
         self.loc.advance(self.current_char)
         self.current_char = self.text[self.loc.idx] if self.loc.idx < len(self.text) else None
-
+        
     def nextChar(self):
         return self.text[self.loc.idx+1]
 
@@ -114,6 +115,7 @@ class Lexer:
                 start = self.loc.copy()
                 char = self.current_char
                 self.advance()
+                
                 return [], UnexpectedTokenError(start,self.loc,"'%s'"%char, self.current_char)
 
 

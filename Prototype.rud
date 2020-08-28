@@ -1,11 +1,10 @@
-#include "include:all.rud"
 var bruhman = 100;
 final var endl = "\n";
 
 
 function main(args, numargs){
 
-    printformat("The number of commandline arguments is: %u\n", numargs);
+    var test = 0;
     
     
 

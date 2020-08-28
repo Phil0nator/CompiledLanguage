@@ -1,5 +1,10 @@
 #Tokens:
 import platform
+from pathlib import Path
+
+fullpath = Path(__file__).parent.absolute()
+
+
 T_NUMBERS = "0123456789"
 T_INT = "INT"
 T_FLOAT = "FLOAT"
@@ -145,18 +150,30 @@ C_LINK = "gcc \"include/macro.c\" -Wimplicit-function-declaration &G out.o -no-p
 
 def updateCommands(inp,outp):
     global C_ASSEMBLE, C_LINK
-    C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"%outp)
-    
-    C_LINK = C_LINK.replace("out.o","\""+outp+".o"+"\"").replace("**OUT**",outp)
+    if platform.system() == "Linux":
+        C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"%outp)
+        
+        C_LINK = C_LINK.replace("out.o","\""+outp+".o"+"\"").replace("**OUT**",outp)
 
-    return [C_ASSEMBLE, C_LINK, "./%s"%"\""+outp+".o"+"\""]
+        return [C_ASSEMBLE, C_LINK, "./%s"%"\""+outp+".o"+"\""]
+    else:
+        #C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"% ("\"%s"%outp+"\"")).replace("-felf64", "-f win64")
+        #C_LINK = "gcc -Wimplicit-function-declaration &G out.o -no-pie -lm -o **OUT** %s/include/macro.c\""%("\"%s"%fullpath)
+        #C_LINK = C_LINK.replace("out.o",("\"%s/"%fullpath)+outp+".obj"+"\"").replace("**OUT**",(("\"%s/%s"%(fullpath,outp))+"\""))+" -m64"
+        #C_LINK = C_LINK.replace("--no-pie","").replace("-no-pie","")
+        C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"%outp).replace("-felf64", "-f win64")
+        C_LINK = C_LINK.replace("out.o","\""+outp+".obj"+"\"").replace("**OUT**",outp+" -m64")
+        C_LINK = C_LINK.replace("--no-pie","").replace("-no-pie","")
+        return [C_ASSEMBLE,"%s"%C_LINK, "./%s"%"\""+outp+".obj"+"\""]
 
 if platform.system() == "Linux":
 
     with open("include/linux-base/io64.inc", "rb") as f:
         top_stub =top_stub.replace("&&IO64&&",f.read().decode())
 
-
+else:
+    with open("include/win-base/io64.inc", "rb") as f:
+        top_stub =  top_stub.replace("&&IO64&&", f.read().decode())
 
 
 parameter_registers = ["r9","r10","r11","r12","r13","r14","r15"]
