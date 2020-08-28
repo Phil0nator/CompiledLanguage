@@ -1,5 +1,8 @@
-final var CLOCK_MONOTONIC = 1;
+
 #include "include:memory.rud"
+#ifdef __Linux__
+#include "include:linux-base/t.rud"
+#endif
 
 struct TimeSpec{
     
@@ -7,18 +10,6 @@ struct TimeSpec{
     var nano;
     var b;
     var a;
-
-}
-
-
-function fast systime(){
-
-    __asm{"
-        mov rax, 201 ;sys_time
-        xor rdi, rdi
-        syscall
-        mov r8, rax
-    "}
 
 }
 
@@ -114,20 +105,6 @@ function TimeSpec.isLaterThan(this, other){
 
 }
 
-
-
-function fast sys_get_time(ptr){
-    
-    __asm{"
-    mov rax, 228
-    mov rdi, [CLOCK_MONOTONIC]
-    mov rsi, r9
-    syscall
-    mov r8, rax
-    "}
-    
-
-}
 
 
 function delay(seconds){

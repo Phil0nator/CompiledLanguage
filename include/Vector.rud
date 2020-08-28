@@ -3,7 +3,8 @@
 #include "include:prints.rud"
 #include "include:string.rud"
 #include "include:entryexit.rud"
-
+#ifndef __Vector__
+#define __Vector__ 1
 
 var currentVector;
 
@@ -259,3 +260,6 @@ function vectorize_args(args, numargs){
     return tmp;
 
 }
+
+
+#endif

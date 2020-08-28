@@ -20,6 +20,8 @@ from Compiler import *
 
 import argparse as arg
 
+import platform
+
 __fileinput__ = ""
 __fileoutput__ = ""
 __tonasm__ = False
@@ -37,7 +39,7 @@ def main():
 
 
     
-    cc["DEF"] = []
+    cc["DEF"] = [{"__%s__"%platform.system():"1"}]
     cc["GL_VAR"] = []
     cc["FILES"] = [__fileinput__]
     cc["WSPACE"] = []
@@ -45,6 +47,8 @@ def main():
 
     with open(__fileinput__, "rb") as f:
         data = f.read().decode()
+
+    
 
     data = pre_process(data,cc)
     

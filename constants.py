@@ -1,5 +1,5 @@
 #Tokens:
-
+import platform
 T_NUMBERS = "0123456789"
 T_INT = "INT"
 T_FLOAT = "FLOAT"
@@ -150,8 +150,11 @@ def updateCommands(inp,outp):
     C_LINK = C_LINK.replace("out.o","\""+outp+".o"+"\"").replace("**OUT**",outp)
 
     return [C_ASSEMBLE, C_LINK, "./%s"%"\""+outp+".o"+"\""]
-with open("include/io64.inc", "rb") as f:
-    top_stub =top_stub.replace("&&IO64&&",f.read().decode())
+
+if platform.system() == "Linux":
+
+    with open("include/linux-base/io64.inc", "rb") as f:
+        top_stub =top_stub.replace("&&IO64&&",f.read().decode())
 
 
 

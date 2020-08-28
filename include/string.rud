@@ -2,6 +2,10 @@
 #include "include:prints.rud"
 #include "include:Vector.rud"
 #include "include:math.rud"
+
+#ifndef __String__
+#define __String__ 1
+
 struct String{
 
     var data;
@@ -407,3 +411,6 @@ function strAppend(stra, strb){
 
 
 }
+
+
+#endif
