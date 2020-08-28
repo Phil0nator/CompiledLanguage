@@ -42,6 +42,10 @@ CEXTERN fflush
 CEXTERN get_stdin
 CEXTERN get_stdout
 
+CEXTERN malloc
+CEXTERN free
+CEXTERN realloc
+
 ; Make stack be 16 bytes aligned and reserve 32 byte space for parameters
 %macro ALIGN_STACK 0.nolist
     enter 0, 0

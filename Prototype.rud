@@ -1,3 +1,4 @@
+#include "include:prints.rud"
 var bruhman = 100;
 final var endl = "\n";
 
@@ -5,7 +6,7 @@ final var endl = "\n";
 function main(args, numargs){
 
     var test = 0;
-    
+    printformat("Hello World!", 0);
     
 
 }

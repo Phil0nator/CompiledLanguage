@@ -157,13 +157,14 @@ def updateCommands(inp,outp):
 
         return [C_ASSEMBLE, C_LINK, "./%s"%"\""+outp+".o"+"\""]
     else:
-        #C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"% ("\"%s"%outp+"\"")).replace("-felf64", "-f win64")
-        #C_LINK = "gcc -Wimplicit-function-declaration &G out.o -no-pie -lm -o **OUT** %s/include/macro.c\""%("\"%s"%fullpath)
-        #C_LINK = C_LINK.replace("out.o",("\"%s/"%fullpath)+outp+".obj"+"\"").replace("**OUT**",(("\"%s/%s"%(fullpath,outp))+"\""))+" -m64"
-        #C_LINK = C_LINK.replace("--no-pie","").replace("-no-pie","")
-        C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"%outp).replace("-felf64", "-f win64")
-        C_LINK = C_LINK.replace("out.o","\""+outp+".obj"+"\"").replace("**OUT**",outp+" -m64")
+        C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"% ("\"%s"%outp+"\"")).replace("-felf64", "-f win64")
+        C_LINK = "gcc -Wimplicit-function-declaration &G out.o -no-pie -lm -o **OUT** %s/include/macro.c\""%("\"%s"%fullpath)
+        C_LINK = C_LINK.replace("out.o",("\"%s/"%fullpath)+outp+".obj"+"\"").replace("**OUT**",(("\"%s/%s"%(fullpath,outp))+"\""))+" -m64"
         C_LINK = C_LINK.replace("--no-pie","").replace("-no-pie","")
+        #C_ASSEMBLE = C_ASSEMBLE.replace("out.asm","%s.asm"%outp).replace("-felf64", "-f win64")
+        #C_LINK = C_LINK.replace("gcc", "\"C://MinGW//bin//gcc.exe\" -v ")
+        #C_LINK = C_LINK.replace("out.o","\""+outp+".obj"+"\"").replace("**OUT**",outp+" -m64")
+        #C_LINK = C_LINK.replace("--no-pie","").replace("-no-pie","")
         return [C_ASSEMBLE,"%s"%C_LINK, "./%s"%"\""+outp+".obj"+"\""]
 
 if platform.system() == "Linux":

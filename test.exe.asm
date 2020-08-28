@@ -43,6 +43,10 @@ CEXTERN fflush
 CEXTERN get_stdin
 CEXTERN get_stdout
 
+CEXTERN malloc
+CEXTERN free
+CEXTERN realloc
+
 ; Make stack be 16 bytes aligned and reserve 32 byte space for parameters
 %macro ALIGN_STACK 0.nolist
     enter 0, 0
@@ -951,10 +955,19 @@ section .text
 
 
 section .data
-STRING_CONSTANT_0: db `\n`, 0
+STRING_CONSTANT_0: db `Memory error encountered`, 0
+STRING_CONSTANT_1: db `%g`, 0
+STRING_CONSTANT_2: db `True`, 0
+STRING_CONSTANT_3: db `False`, 0
+STRING_CONSTANT_4: db `\n`, 0
+STRING_CONSTANT_5: db `Hello World!`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __BOOL_STANDARD_TRUE: dq -0x1
 __BOOL_STANDARD_FALSE: dq 0x0
+__isincluded__MEMORY_: dq 0x96c6
+__PRINTFFLOAT: db `%g`, 0
+__PRINTTRUE: db `True`, 0
+__PRINTFALSE: db `False`, 0
 endl: db `\n`, 0
 FLT_STANDARD_ZERO: dq __float32__(0.0)
 isFloat: dq 0x1
@@ -1034,6 +1047,428 @@ section .text
 global CMAIN
 
 
+exit:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    
+    mov rax, 1  ; 1 = exit system call
+    mov rdi, r9 ; r9 = exit code given in parameter
+    int 0x80    ; interrupt
+    
+    
+
+__exit__leave_ret_:
+leave
+ret
+
+doInterrupt:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+        mov rax, r9;
+        mov rdi, r10;
+        int 0x80
+        mov r8, rax
+
+    
+
+__doInterrupt__leave_ret_:
+leave
+ret
+
+Array:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+
+mov rax, QWORD [rbp-0x8]
+mov rcx, 0x8
+imul rcx
+mov r9,rax
+call alloc
+mov QWORD [rbp-0x10], r8
+
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __Array__leave_ret_
+
+__Array__leave_ret_:
+leave
+ret
+
+putValue:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    mov rax, r11
+    mov QWORD [r9+r10], rax  
+    
+
+__putValue__leave_ret_:
+leave
+ret
+
+getValue:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    mov rax, QWORD [r9+r10]
+    mov r8, rax
+    
+    
+
+__getValue__leave_ret_:
+leave
+ret
+
+alloc:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+   ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, r9
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+rdi], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+
+
+
+__alloc__leave_ret_:
+leave
+ret
+
+memerror:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov QWORD [rbp-0x8], r9
+mov r9, STRING_CONSTANT_0
+call print_string
+mov r9, QWORD [rbp-0x8]
+call exit
+
+__memerror__leave_ret_:
+leave
+ret
+
+destroy:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    ALIGN_STACK
+    mov rdi, r9
+    
+    call free
+    xor r10, r10
+    xor r11, r11 ;gc
+    xor r12, r12
+    UNALIGN_STACK
+
+
+
+__destroy__leave_ret_:
+leave
+ret
+
+reallocate:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+        
+        ALIGN_STACK
+        mov rdi, r9
+        mov rsi, r10
+        xor r10, r10
+        xor r11, r11 ;gc
+        xor r12, r12
+        call realloc
+
+        test rax, rax
+        xor r10, r10
+        xor r11, r11 ;gc
+        xor r12, r12
+        mov r8, rax
+        UNALIGN_STACK
+        
+        
+
+__reallocate__leave_ret_:
+leave
+ret
+
+print_bool:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    cmp r9, -1
+    je __pb_istrue
+    PRINT_STRING __PRINTFALSE
+    leave
+    ret
+    __pb_istrue:
+    PRINT_STRING __PRINTTRUE
+    leave
+    ret
+
+    
+
+__print_bool__leave_ret_:
+leave
+ret
+
+print_char:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    PRINT_CHAR r9
+    NEWLINE
+    
+
+__print_char__leave_ret_:
+leave
+ret
+
+print_string:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    PRINT_STRING [r9]
+    NEWLINE
+    
+
+__print_string__leave_ret_:
+leave
+ret
+
+print_integer:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    PRINT_DEC 8, r9
+    NEWLINE
+    
+
+__print_integer__leave_ret_:
+leave
+ret
+
+print_uint:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    PRINT_UDEC 8, r9
+    NEWLINE
+    
+
+__print_uint__leave_ret_:
+leave
+ret
+
+printformat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    ALIGN_STACK
+    mov     rdi, r9                ; set 1st parameter (format)
+    mov     rsi, r10                 ; set 2nd parameter (current_number)
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    UNALIGN_STACK                    
+    FFLUSH_STDOUT
+    
+
+__printformat__leave_ret_:
+leave
+ret
+
+print_two_formats:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (value)
+    mov     rsi, r10                 ; set 2nd parameter (fa)
+    mov     rdx, r11                ; set 3rd parameter (fb)
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    FFLUSH_STDOUT
+    
+
+__print_two_formats__leave_ret_:
+leave
+ret
+
+print_three_formats:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    
+    push rax
+    push rcx
+    mov     rdi, r9                ; set 1st parameter (value)
+    mov     rsi, r10                 ; set 2nd parameter (fa)
+    mov     rdx, r11                ; set 3rd parameter (fb)
+    mov     rcx, r12
+    xor     rax, rax                ; because printf is varargs
+
+    ; Stack is already aligned because we pushed three 8 byte registers
+    call    printf                  ; printf(format, current_number)
+
+    pop     rcx                     ; restore caller-save register
+    pop     rax                     ; restore caller-save register
+    FFLUSH_STDOUT
+    
+
+__print_three_formats__leave_ret_:
+leave
+ret
+
+print_formatfloat:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov QWORD [rbp-0x8], 0x0
+
+
+    ALIGN_STACK
+    mov     rdi, r9                ; set 1st parameter (format)
+    cvtps2pd xmm0, xmm1
+    mov rax, 1
+
+    call    printf                  ; printf(format, current_number)
+
+    FFLUSH_STDOUT
+    ;add rsp, 12
+    UNALIGN_STACK
+    
+
+__print_formatfloat__leave_ret_:
+leave
+ret
+
+print_floatln:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov QWORD [rbp-0x8], 0x0
+
+
+
+
+        ALIGN_STACK
+        mov     rdi, __PRINTFFLOAT                ; set 1st parameter (format)
+        cvtps2pd xmm0, xmm0
+        mov rax, 1
+
+        call    printf                  ; printf(format, current_number)
+
+        NEWLINE
+        ;add rsp, 12
+        UNALIGN_STACK
+
+    
+
+__print_floatln__leave_ret_:
+leave
+ret
+
+print_float:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x10
+mov QWORD [rbp-0x8], 0x0
+
+
+
+        ALIGN_STACK
+        mov     rdi, __PRINTFFLOAT                ; set 1st parameter (format)
+        cvtps2pd xmm0, xmm0
+        mov rax, 1
+
+        call    printf                  ; printf(format, current_number)
+
+        FFLUSH_STDOUT
+        ;add rsp, 12
+        UNALIGN_STACK
+    
+
+__print_float__leave_ret_:
+leave
+ret
+
+newline:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+    NEWLINE
+    
+
+__newline__leave_ret_:
+leave
+ret
+
 m:
 
 push rbp
@@ -1043,6 +1478,9 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov rbx, 0x0
 mov QWORD [rbp-0x18], rbx
+mov r9, STRING_CONSTANT_5
+mov r10, 0x0
+call printformat
 
 __m__leave_ret_:
 leave

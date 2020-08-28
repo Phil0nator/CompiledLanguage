@@ -98,10 +98,12 @@ def main():
         print(commands[1])
         print("\n"*10)
         
-        subprocess.Popen(commands[0])
-
-        subprocess.Popen(commands[1])
-        os.remove(__fileoutput__+".obj")
+        os.system(commands[0])
+        os.chdir(r"C:\\msys64")
+        os.system(commands[1])
+        
+        
+        #os.remove(__fileoutput__+".obj")
         
     if(not __tonasm__):
         os.remove("%s.asm"%__fileoutput__)
