@@ -89,7 +89,7 @@ ESCAPE_CHARS = {
 
 KEYWORDS = ["if", "struct", "class", "while", "for", "var", "final", "function", "true", "false", \
             "return", "__asm", "__c", "#include", "#define", "#ifdef", "#ifndef", "#else", "#endif", \
-            "constructor", "cmp", "float", "fast", "break", "continue", "Function"]
+            "constructor", "cmp", "float", "fast", "break", "continue", "Function", "else", "elif", "label", "goto"]
 
 
 

@@ -157,7 +157,7 @@ class Function:
                     self.addline("mov %s,r8"% value_of_global(self.current_token.value, self.compiler) )
             else:
                 if(self.getDeclarationByID(self.current_token.value).isfloat):
-                    self.addline("movss [rbp-%s], xmm8"%self.getDeclarationByID(self.current_token.value).offset)
+                    self.addline("movss [rbp-%s], xmm8"%hex(self.getDeclarationByID(self.current_token.value).offset))
                 else:
                     self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "r8"))
         for i in range(len(self.params)):
@@ -1052,14 +1052,17 @@ class Function:
 
         if(self.current_token.tok != T_CLSCOPE) : throw(InvalidIFHeader(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
         self.advance()
-        
         if(self.current_token.tok == T_KEYWORD and self.current_token.value == "else"):
-            if(self.current_token.tok != T_CLSCOPE) : throw(InvalidIFHeader(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+            self.advance()
+            if(self.current_token.tok != T_OSCOPE) : throw(InvalidIFHeader(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
             self.doCompilations(forblock=True)
             if(self.current_token.tok != T_CLSCOPE) : throw(InvalidIFHeader(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
             self.advance()
-        self.addline("%s:"%labeltojump)        
+        self.addline("%s:"%labeltojump)
 
+    def checkendlinesemi(self):
+        if(self.current_token.tok != T_EOL): throw(MissingSemiColon(self.current_token.start,self.current_token.end, self.current_token.value,self.current_token.tok))
+        self.advance()
 
 
     def buildKeywordStatement(self):
@@ -1085,7 +1088,22 @@ class Function:
             self.advance()
             spot = self.forstack.pop()
             self.addline("jmp %s"%spot)
-        
+        elif(self.current_token.value == "label"):
+            self.advance()
+            if self.current_token.tok != T_ID: throw(InvalidLabelDeclaration(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+            id = self.current_token.value
+            self.addline("%s:"%id)
+            self.advance()
+            self.checkendlinesemi()
+        elif (self.current_token.value == "goto"):
+            self.advance()
+            if self.current_token.tok != T_ID: throw(InvalidLabelDeclaration(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+            id = self.current_token.value
+            self.addline("jmp %s"%id)
+            self.advance()
+            self.checkendlinesemi()
+
+
         else:
             self.advance()
 
@@ -1124,7 +1142,7 @@ class Function:
         self.bodytext = "&&ALLOCATOR&&"
         self.doCompilations()
         self.advance()
-        self.allocator = allocate(self.allocationoffset)
+        self.allocator = "%s%s"%(allocate(self.allocationoffset),self.allocator)
 
         self.bodytext = self.bodytext.replace("&&ALLOCATOR&&","%s"%(self.allocator))
         self.bodytext = FNO(self).optimize()

@@ -6,13 +6,15 @@ final var endl = "\n";
 
 function main(args, numargs){
 
+     
      printformat("The number of commandline arguments is: %u\n", numargs);
      var st;
      Vector.init(st, 8)->st;
-     var t;
+     float test;
+     tan_approx(1.0)->test;
+     print_floatln(test);
      
-     
-
 
 
 }
+

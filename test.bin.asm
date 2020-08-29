@@ -1080,7 +1080,8 @@ FLT_CONSTANT_11: dq __float32__(0.6366197723675814)
 FLT_CONSTANT_12: dq __float32__(1.1283791670955126)
 FLT_CONSTANT_13: dq __float32__(1.4142135623730951)
 FLT_CONSTANT_14: dq __float32__(0.7071067811865476)
-FLT_CONSTANT_15: dq __float32__(2147483646.0)
+FLT_CONSTANT_15: dq __float32__(1.5708)
+FLT_CONSTANT_16: dq __float32__(2147483646.0)
 STRING_CONSTANT_4: db `@ `, 0
 STRING_CONSTANT_5: db `%i, `, 0
 STRING_CONSTANT_6: db `%i ]\n`, 0
@@ -1089,7 +1090,7 @@ STRING_CONSTANT_8: db ` %s ]`, 0
 STRING_CONSTANT_9: db `%s, `, 0
 STRING_CONSTANT_10: db `%s ]\n`, 0
 STRING_CONSTANT_11: db ``, 0
-FLT_CONSTANT_16: dq __float32__(32767.0)
+FLT_CONSTANT_17: dq __float32__(32767.0)
 STRING_CONSTANT_12: db `[ `, 0
 STRING_CONSTANT_13: db `%i, `, 0
 STRING_CONSTANT_14: db `%i ]\n`, 0
@@ -1099,6 +1100,7 @@ STRING_CONSTANT_17: db `%s ]\n`, 0
 STRING_CONSTANT_18: db `Stack: Error: StackOverflow.`, 0
 STRING_CONSTANT_19: db `\n`, 0
 STRING_CONSTANT_20: db `The number of commandline arguments is: %u\n`, 0
+FLT_CONSTANT_18: dq __float32__(1.0)
 __FLT_STANDARD_1: dq __float32__(1.0)
 __BOOL_STANDARD_TRUE: dq -0x1
 __BOOL_STANDARD_FALSE: dq 0x0
@@ -1122,6 +1124,7 @@ M_2_PI: dq __float32__(0.6366197723675814)
 M_2_SQRTPI: dq __float32__(1.1283791670955126)
 M_SQRT2: dq __float32__(1.4142135623730951)
 M_SQRT1_2: dq __float32__(0.7071067811865476)
+RDN_90: dq __float32__(1.5708)
 FLT_MAX: dq __float32__(2147483646.0)
 INTMAX: dq 0x7fffffffffffffff
 O_RDONLY: dq 0x0
@@ -1426,6 +1429,16 @@ __doInterrupt__leave_ret_:
 leave
 ret
 
+permhang:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+jmp $
+
+__permhang__leave_ret_:
+leave
+ret
+
 print_bool:
 push rbp
 mov rbp, rsp
@@ -1616,6 +1629,7 @@ Array:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov rax, QWORD [rbp-0x8]
 mov rcx, 0x8
@@ -1677,6 +1691,7 @@ memerror:
 push rbp
 mov rbp, rsp
 sub rsp, 0x10
+mov QWORD [rbp-0x8], r9
 mov r9, STRING_CONSTANT_3
 call print_string
 mov r9, QWORD [rbp-0x8]
@@ -1819,6 +1834,8 @@ __fmod:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+movss [rbp-0x8], xmm0
+movss [rbp-0x10], xmm1
 movss xmm15, [rbp-0x8]
 movss xmm14,  [rbp-0x10]
 divss xmm15, xmm14
@@ -1887,10 +1904,72 @@ __fabs__leave_ret_:
 leave
 ret
 
+sin_approx:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+;numerator term 2:
+;x/pi
+movss xmm1, [M_PI]
+movss xmm2, xmm0
+divss xmm2, xmm1 ;          xmm2 = x/pi
+;term2:
+movss xmm3, [FLT_ONE]
+subss xmm3, xmm2;           xmm3 = 1 - x/pi
+;term1
+mov rax, 16
+cvtsi2ss xmm4, rax          ;xmm4 = 16.0
+mulss xmm4, xmm2            ;xmm4 = 16(x/pi)
+mulss xmm4, xmm3;           xmm4 = 16(x/pi)(1-x/pi)
+;denominator
+mov rax, 5
+cvtsi2ss xmm5, rax;         xmm5 = 5.0
+mov rax, 4
+cvtsi2ss xmm6, rax;         xmm6 = 4.0
+mulss xmm6, xmm2            ;xmm6 = 4(x/pi)
+mulss xmm6, xmm3            ;xmm6 = 4(x/pi)(1-x/pi)
+subss xmm5, xmm6            ;xmm5 = 5 - 4(x/pi)(1-x/pi)
+divss xmm4, xmm5            ;xmm4 = ( 16(x/pi)(1-x/pi)  )   /   (5 - 4(x/pi)(1-x/pi))
+movss xmm8, xmm4
+
+__sin_approx__leave_ret_:
+leave
+ret
+
+cos_approx:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+movss xmm1, [RDN_90]
+subss xmm1, xmm0
+movss xmm0, xmm1
+call sin_approx
+
+__cos_approx__leave_ret_:
+leave
+ret
+
+tan_approx:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+movss xmm15, xmm0
+call cos_approx
+movss xmm14, xmm8
+movss xmm0, xmm15
+call sin_approx
+divss xmm8, xmm14
+
+__tan_approx__leave_ret_:
+leave
+ret
+
 Vector.init:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov rax, 0x1
 mov rcx, QWORD [rbp-0x10]
@@ -1928,6 +2007,8 @@ Vector.resize:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -1984,6 +2065,7 @@ Vector.expand:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -2031,6 +2113,8 @@ Vector.push:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov rbx, QWORD [rbp-0x8]
 mov [currentVector], rbx
 mov QWORD [rbp-0x18], 0x0
@@ -2096,6 +2180,7 @@ Vector.pop:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
 mov rbx, QWORD [rbp-0x8]
 mov [currentVector], rbx
 mov QWORD [rbp-0x10], 0x0
@@ -2139,6 +2224,8 @@ Vector.at:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2169,6 +2256,9 @@ Vector.set:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov r8, QWORD [rbp-0x8]
@@ -2195,6 +2285,7 @@ Vector.print:
 push rbp
 mov rbp, rsp
 sub rsp, 0x40
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2271,6 +2362,7 @@ Vector.printstrs:
 push rbp
 mov rbp, rsp
 sub rsp, 0x40
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2368,6 +2460,7 @@ Vector.size:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -2385,6 +2478,9 @@ Vector.pushes:
 push rbp
 mov rbp, rsp
 sub rsp, 0x48
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov QWORD [rbp-0x30], 0x0
@@ -2431,6 +2527,7 @@ Vector.destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2452,6 +2549,8 @@ vectorize_args:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r9, QWORD [rbp-0x18]
 mov r10, 0x8
@@ -2532,6 +2631,8 @@ String.init:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 call String
 mov QWORD [rbp-0x8], r8
 mov QWORD [rbp-0x18], 0x0
@@ -2572,6 +2673,8 @@ String.charAt:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2597,6 +2700,7 @@ String.printable:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2614,6 +2718,8 @@ String.append_string:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2652,6 +2758,8 @@ String.append_chars:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2685,6 +2793,7 @@ String.destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2706,6 +2815,7 @@ String.length:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -2723,6 +2833,7 @@ String.print:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2740,6 +2851,7 @@ String.println:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2756,6 +2868,9 @@ String.substring:
 push rbp
 mov rbp, rsp
 sub rsp, 0x40
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2795,6 +2910,8 @@ String.substringend:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -2821,6 +2938,8 @@ String.find_str:
 push rbp
 mov rbp, rsp
 sub rsp, 0x60
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -2940,6 +3059,8 @@ String.find_chars:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r9, QWORD [rbp-0x18]
 mov r10, QWORD [rbp-0x10]
@@ -2964,6 +3085,8 @@ String.count_str:
 push rbp
 mov rbp, rsp
 sub rsp, 0x68
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -3082,6 +3205,7 @@ String.copy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -3104,6 +3228,9 @@ String.replace:
 push rbp
 mov rbp, rsp
 sub rsp, 0x70
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov r8, QWORD [rbp-0x8]
@@ -3290,6 +3417,8 @@ strAppend:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov QWORD [rbp-0x20], 0x0
 mov r9, QWORD [rbp-0x8]
@@ -3458,6 +3587,9 @@ lseek:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 mov rax, 8
 mov rdi, r9
 mov rsi, r10
@@ -3473,6 +3605,9 @@ FileReader.init:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 call FileReader
 mov QWORD [rbp-0x8], r8
 mov QWORD [rbp-0x20], 0x0
@@ -3530,6 +3665,7 @@ FileReader.destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x30
@@ -3580,6 +3716,7 @@ FileReader.nextChar:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
 mov rbx, QWORD [rbp-0x8]
 mov [current_filereader], rbx
 mov QWORD [rbp-0x10], 0x0
@@ -3624,6 +3761,7 @@ FileReader.asString:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 call String
 mov QWORD [rbp-0x10], r8
@@ -3647,6 +3785,9 @@ FileWriter.init:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 call FileWriter
 mov QWORD [rbp-0x8], r8
 mov QWORD [rbp-0x20], 0x0
@@ -3682,6 +3823,8 @@ FileWriter.write:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
@@ -3704,6 +3847,7 @@ FileWriter.destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -3752,6 +3896,7 @@ getString:
 push rbp
 mov rbp, rsp
 sub rsp, 0x10
+mov QWORD [rbp-0x8], r9
 call alloc
 GET_STRING [r8], r9
 
@@ -3763,6 +3908,7 @@ input_int:
 push rbp
 mov rbp, rsp
 sub rsp, 0x10
+mov QWORD [rbp-0x8], r9
 PRINT_STRING [r9]
 GET_DEC 8, r8
 NEWLINE
@@ -3864,6 +4010,7 @@ TimeSpec.init:
 push rbp
 mov rbp, rsp
 sub rsp, 0x10
+mov QWORD [rbp-0x8], r9
 call TimeSpec
 mov QWORD [rbp-0x8], r8
 mov r9, QWORD [rbp-0x8]
@@ -3880,6 +4027,7 @@ TimeSpec.update:
 push rbp
 mov rbp, rsp
 sub rsp, 0x10
+mov QWORD [rbp-0x8], r9
 mov rbx, QWORD [rbp-0x8]
 mov rcx, 0x18
 add rbx, rcx
@@ -3897,6 +4045,7 @@ TimeSpec.getSeconds:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -3914,6 +4063,7 @@ TimeSpec.getSubs_nano:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -3931,6 +4081,7 @@ TimeSpec.getSubs_milli:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -3952,6 +4103,8 @@ TimeSpec.equals:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
@@ -4007,6 +4160,8 @@ TimeSpec.isLaterThan:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
@@ -4070,6 +4225,7 @@ delay:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 call systime
 mov QWORD [rbp-0x10], r8
@@ -4114,6 +4270,7 @@ LLNode.init:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 call LLNode
 mov QWORD [rbp-0x10], r8
@@ -4137,6 +4294,8 @@ LLNode.setValue:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
 mov rax, QWORD [rbp-0x10]
@@ -4150,6 +4309,8 @@ LLNode.buildNext:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -4171,6 +4332,7 @@ LLNode.value:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4188,6 +4350,7 @@ LLNode.next:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -4205,6 +4368,8 @@ LLNode.setConnection:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -4222,6 +4387,7 @@ LLNode.destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -4241,6 +4407,7 @@ LinkedList.init:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 call LinkedList
 mov QWORD [rbp-0x10], r8
@@ -4264,6 +4431,8 @@ LinkedList.push:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r9, QWORD [rbp-0x8]
 call LinkedList.getLastNode
@@ -4280,6 +4449,7 @@ LinkedList.getLastNode:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4330,6 +4500,8 @@ LinkedList.at:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4373,6 +4545,8 @@ LinkedList.nodeAt:
 push rbp
 mov rbp, rsp
 sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4428,6 +4602,9 @@ LinkedList.set:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4489,6 +4666,9 @@ LinkedList.insertItem:
 push rbp
 mov rbp, rsp
 sub rsp, 0x40
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4569,6 +4749,9 @@ LinkedList.insertOther:
 push rbp
 mov rbp, rsp
 sub rsp, 0x60
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4673,6 +4856,7 @@ LinkedList.printints:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4735,6 +4919,7 @@ LinkedList.printstrs:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4797,6 +4982,7 @@ LinkedList.destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4843,6 +5029,7 @@ Stack.init:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 call Stack
 mov QWORD [rbp-0x10], r8
@@ -4871,6 +5058,8 @@ Stack.push:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -4921,6 +5110,7 @@ Stack.pop:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x20
@@ -4957,6 +5147,7 @@ Stack.getraw:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4974,6 +5165,7 @@ Stack.getrawptr:
 push rbp
 mov rbp, rsp
 sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -4999,6 +5191,7 @@ Stack.destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
 add r8, 0x18
@@ -5016,7 +5209,10 @@ ret
 m:
 push rbp
 mov rbp, rsp
-sub rsp, 0x350
+sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+startmain:
 mov r9, STRING_CONSTANT_20
 mov r10, QWORD [rbp-0x10]
 call printformat
@@ -5025,23 +5221,15 @@ mov r9, QWORD [rbp-0x18]
 mov r10, 0x8
 call Vector.init
 mov QWORD [rbp-0x18], r8
-mov QWORD [rbp-0x20], 0x0
-mov QWORD [rbp-0x28], rbp
-sub QWORD [rbp-0x28], -0x2f0
-mov rax, 0x0
-mov r15, 0x8
-mul r15
-mov rbx, QWORD [rbp-0x28]
-mov r15, [M_PI]
-mov QWORD [rbx+rax], r15
-mov rax, 0x0
-mov r15, 0x8
-mul r15
-mov rbx, QWORD [rbp-0x28]
-mov r15,QWORD [rbx+rax]
-mov QWORD [rbp-0x20], r15
+movss  xmm10, [FLT_STANDARD_ZERO]
+movss [rbp-0x20], xmm10
+movss xmm0, [FLT_CONSTANT_18]
+call tan_approx
+movss [rbp-0x20], xmm8
 movss xmm0,  [rbp-0x20]
 call print_floatln
+call permhang
+jmp startmain
 
 __m__leave_ret_:
 leave

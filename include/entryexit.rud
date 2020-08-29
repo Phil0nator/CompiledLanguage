@@ -40,5 +40,15 @@ function fast doInterrupt(code, value){
 
 }
 
+function fast permhang(){
+
+    __asm{"
+
+        jmp $
+
+    "}
+
+}
+
 
 #endif

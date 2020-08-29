@@ -31,7 +31,7 @@ final float M_SQRT2 = 1.41421356237309504880;
 // 1 / sqrt(2)
 final float M_SQRT1_2 = 0.707106781186547524401;
 
-
+final float RDN_90 = 1.5708;
 
 final float FLT_MAX = 2147483646.0;
 final var INTMAX = MAX_INT;
@@ -183,3 +183,71 @@ function fast fabs(float x) float {
     "}
 
 }
+
+//SIN approx. Bhaskara I's approx sin
+function fast sin_approx(float inp) float{
+    
+    __asm{"
+    
+        ;numerator term 2:
+        ;x/pi
+        movss xmm1, [M_PI]
+        movss xmm2, xmm0
+        divss xmm2, xmm1 ;          xmm2 = x/pi
+        ;term2:
+        movss xmm3, [FLT_ONE]
+        subss xmm3, xmm2;           xmm3 = 1 - x/pi
+
+        ;term1
+        mov rax, 16
+        cvtsi2ss xmm4, rax          ;xmm4 = 16.0
+        mulss xmm4, xmm2            ;xmm4 = 16(x/pi)
+        mulss xmm4, xmm3;           xmm4 = 16(x/pi)(1-x/pi)
+
+        ;denominator 
+        mov rax, 5
+        cvtsi2ss xmm5, rax;         xmm5 = 5.0
+        mov rax, 4
+        cvtsi2ss xmm6, rax;         xmm6 = 4.0
+        mulss xmm6, xmm2            ;xmm6 = 4(x/pi)
+        mulss xmm6, xmm3            ;xmm6 = 4(x/pi)(1-x/pi)
+        subss xmm5, xmm6            ;xmm5 = 5 - 4(x/pi)(1-x/pi)
+
+
+
+        divss xmm4, xmm5            ;xmm4 = ( 16(x/pi)(1-x/pi)  )   /   (5 - 4(x/pi)(1-x/pi)) 
+        movss xmm8, xmm4
+
+    "}
+
+}
+
+function fast cos_approx(float inp) float {
+
+    __asm{"
+
+        movss xmm1, [RDN_90]
+        subss xmm1, xmm0
+        movss xmm0, xmm1
+        call sin_approx
+
+    
+    "}
+
+}
+
+function fast tan_approx(float inp) float {
+
+    __asm{"
+    
+        movss xmm15, xmm0
+        call cos_approx
+        movss xmm14, xmm8
+        movss xmm0, xmm15
+        call sin_approx
+        divss xmm8, xmm14
+    
+    "}
+
+}
+

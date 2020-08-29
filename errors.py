@@ -109,3 +109,11 @@ class InvalidIFHeader(Error):
 class InvalidStackspaceAllocator(Error):
     def __init__(self, start, end, details, tok):
         super().__init__(start,end,"Invalid Stackspace Allocator", details, tok)
+
+class InvalidLabelDeclaration(Error):
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid Label Declarator", details, tok)
+
+class MissingSemiColon(Error):
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Missing Semicolon on end of line", details, tok)
