@@ -3,10 +3,20 @@ var bruhman = 100;
 final var endl = "\n";
 
 
+
 function main(args, numargs){
 
     printformat("The number of commandline arguments is: %u\n", numargs);
-    
-    
+    var t = (100 + 200) == 55;
+    absint(t*23452)->t;
+    print_integer(t);
+    float b = 0.2623 * 8;
+    print_floatln(b);
+    b = b * -36.23;
+    fabs(b)->b;
+    fmod(b, 3.25)->b;
+    print_floatln(b);
+
+
 
 }

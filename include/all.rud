@@ -7,3 +7,4 @@
 #include "include:string.rud"
 #include "include:time.rud"
 #include "include:Vector.rud"
+#include "include:Thread.rud"

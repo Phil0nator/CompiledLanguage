@@ -3,6 +3,7 @@ from Token import *
 from errors import *
 from constants import *
 from Struct import *
+from FunctionOptimizer import *
 
 class Function:
     def __init__(self,name,params,tokens, compiler, types):
@@ -59,25 +60,34 @@ class Function:
         #collect parameters
         params = []
         types = self.compiler.getFunctionByName(id).types
+        
+
         if(self.current_token.tok == T_CLOSEP): #No parameters
             pass
-            
         else:
             t = types[len(params)]
             if(t == "var"):
                 self.evaluation_wrapper(reg=parameter_registers[len(params)])
                 params.append(parameter_registers[len(params)])
+            elif (t == "Function"):
+                self.addline("mov %s, %s"%(parameter_registers[len(params)], self.current_token.value))
+                params.append(parameter_registers[len(params)])
             else:
                 self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                 params.append(flt_parameter_registers[len(params)])
             while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->" and self.current_token.tok != T_EOL:
-                t = types[len(params)]
 
+                t = types[len(params)]
+                
                 if(self.current_token.tok == T_COMMA):
                     self.advance()
                     if(t == "var"):
                         self.evaluation_wrapper(reg=parameter_registers[len(params)])
                         params.append(parameter_registers[len(params)])
+                    elif (t == "Function"):
+                        self.addline("mov %s, %s"%(parameter_registers[len(params)], self.current_token.value))
+                        params.append(parameter_registers[len(params)])
+                        self.advance()
                     else:
                         self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                         params.append(flt_parameter_registers[len(params)])
@@ -86,6 +96,10 @@ class Function:
                     if(t == "var"):
                         self.evaluation_wrapper(reg=parameter_registers[len(params)])
                         params.append(parameter_registers[len(params)])
+                    elif (t == "Function"):
+                        self.addline("mov %s, %s"%(parameter_registers[len(params)], self.current_token.value))
+                        params.append(parameter_registers[len(params)])
+                        self.advance()
                     else:
                         self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                         params.append(flt_parameter_registers[len(params)])
@@ -93,6 +107,10 @@ class Function:
                     if(t == "var"):
                         self.evaluation_wrapper(reg=parameter_registers[len(params)])
                         params.append(parameter_registers[len(params)])
+                    elif (t == "Function"):
+                        self.addline("mov %s, %s"%(parameter_registers[len(params)], self.current_token.value))
+                        params.append(parameter_registers[len(params)])
+                        self.advance()
                     else:
                         self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                         params.append(flt_parameter_registers[len(params)])
@@ -1019,6 +1037,8 @@ class Function:
         self.bodytext = "%s%s"%(self.allocator,self.bodytext)
         self.doCompilations()
         self.advance()
+
+        self.bodytext = FNO(self).optimize()
         
 
 

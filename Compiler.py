@@ -178,6 +178,11 @@ class Compiler:
         if(self.current_token.tok == T_KEYWORD and self.current_token.value == "fast"):
             isFast = True
             self.advance()
+        
+        isThread = False
+        if(self.current_token.tok == T_KEYWORD and self.current_token.value == "Function"):
+            isThread = True
+            self.advance()
 
         if(self.current_token.tok != T_ID):
             throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
@@ -207,6 +212,13 @@ class Compiler:
                     if(self.current_token.tok != T_ID):throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
                     params.append(self.current_token.value)
                     self.advance()
+                elif (self.current_token.tok == T_KEYWORD and self.current_token.value == "Function"):
+                    types.append("Function")
+                    self.advance()
+                    if(self.current_token.tok != T_ID):throw(InvalidFunctionDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+                    params.append(self.current_token.value)
+                    self.advance()
+
                 else:
                     throw(InvalidFunctionParameterDeclaration(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         
