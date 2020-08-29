@@ -6,18 +6,12 @@ final var endl = "\n";
 
 function main(args, numargs){
 
-    printformat("The number of commandline arguments is: %u\n", numargs);
-    var st;
-    var t;
-
-
-    for(var i; true; i=i;){
-     Stack.init(4096)->st;
-     Stack.push(st, 0);
-     Stack.push(st, 100);
-     Stack.pop(st)->t;
-     print_integer(t);
-    }
+     printformat("The number of commandline arguments is: %u\n", numargs);
+     var st;
+     Vector.init(st, 8)->st;
+     var t;
+     
+     
 
 
 

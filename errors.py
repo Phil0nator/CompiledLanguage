@@ -104,4 +104,8 @@ class InvalidMemberAccess(Error):
 
 class InvalidIFHeader(Error):
     def __init__(self, start, end, details, tok):
-        super().__init__(start,end,"Invalid ff structure header", details, tok)
+        super().__init__(start,end,"Invalid if structure header", details, tok)
+
+class InvalidStackspaceAllocator(Error):
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid Stackspace Allocator", details, tok)

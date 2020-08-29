@@ -66,7 +66,7 @@ function String.charAt(str, index){
     var data;
     str:data->data;
     var ch;
-    data[index]->ch;
+    data@index]->ch;
     char(ch)->ch;
     return ch;
 
@@ -145,12 +145,12 @@ function String.substring(this, start, end){
     var data;
     this:data->data;
     var oldch;
-    data[end]->oldch;
-    data[end] = 0;
+    data@end]->oldch;
+    data@end] = 0;
     var newstart = data+start;
     var out;
     String.init(out, newstart)->out;
-    data[end]=oldch;
+    data@end]=oldch;
     return out;
 
 
@@ -289,7 +289,7 @@ function String.replace(this, old, new){
     for(var i; i < (len-otherlen); i++;){
 
         String.charAt(this, i)->ch;
-        old[checkidx]->och;
+        old@checkidx]->och;
         char(och)->och;
         if(ch == och){
             checkidx++;

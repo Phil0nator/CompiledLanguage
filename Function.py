@@ -33,6 +33,7 @@ class Function:
         self.bodytext = ""
         self.isFast = False
         self.allocationCounter = 8
+        self.allocationoffset = 0
         self.declarations = []
 
         self.intexprs = 0
@@ -165,6 +166,52 @@ class Function:
         
         self.advance() # end the line
 
+    def buildArrayIndexer(self, id):
+        self.evaluation_wrapper(reg="rax") #store index in rax
+        
+        self.addline("mov r15, 0x8")
+        self.addline("mul r15") #account for sizeof(var)
+        self.addline(load_value_toreg(self.getDeclarationByID(id).offset, "rbx")) #store origin in rbx
+        self.advance()
+        
+        if(self.current_token.tok == "->"):
+            self.advance()
+
+
+            if(self.current_token.tok != T_ID):
+                throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+
+            if(self.compiler.globalExists( self.current_token.value ) ):
+                if(self.compiler.globalIsFloat(self.current_token.value)):
+                    self.addline("movss %s, [rbx+rax]"%value_of_global(self.current_token.value, self.compiler).replace("QWORD", ""))
+
+                else:
+                    self.addline("mov %s,[rbx+rax]"% value_of_global(self.current_token.value, self.compiler) )
+            else:
+                if(self.getDeclarationByID(self.current_token.value).isfloat):
+                    self.addline("movss xmm10, [rbx+rax]")
+                    self.addline("movss [rbp-%s], xmm10"%self.getDeclarationByID(self.current_token.value).offset)
+                
+                else:
+                    #self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "[rbx+rax]"))
+                    self.addline("mov r15,QWORD [rbx+rax]")
+                    self.addline("mov QWORD [rbp-%s], r15"%hex(self.getDeclarationByID(self.current_token.value).offset))
+            self.advance()
+            return
+
+
+        if(self.current_token.tok != T_EQUALS):
+            throw(InvalidVariableAssignment(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+
+        self.advance()
+        if(self.current_token.tok == T_KEYWORD and self.current_token.value == "float"):
+            self.advance()
+            self.evaluation_wrapper(reg="xmm10")
+            self.addline("movss [rbx+rax], xmm10")
+            return
+        
+        self.evaluation_wrapper(reg="r15")
+        self.addline("mov QWORD [rbx+rax], r15")
 
 
     def buildPointerAssignment(self, id):
@@ -229,11 +276,11 @@ class Function:
         addr = struct.getOffsetByMemberName(self.current_token.value)
         
         if(self.compiler.globalExists(id)):
-            self.addline("mov rbx, ["+id+"]")
+            self.addline("mov r8, ["+id+"]")
         else:
-            self.addline(load_value_toreg(self.getDeclarationByID(id).offset, "rbx")) #store origin in rbx
+            self.addline(load_value_toreg(self.getDeclarationByID(id).offset, "r8")) #store origin in r8
         
-        self.addline("add rbx, "+hex(int(addr))) # add offset
+        self.addline("add r8, "+hex(int(addr))) # add offset
         
 
         self.advance()
@@ -246,15 +293,15 @@ class Function:
 
             if(self.compiler.globalExists( self.current_token.value ) ):
                 if(self.compiler.globalIsFloat(self.current_token.value)):
-                    self.addline("movss %s, [rbx]"%value_of_global(self.current_token.value, self.compiler).replace("QWORD", ""))
+                    self.addline("movss %s, [r8]"%value_of_global(self.current_token.value, self.compiler).replace("QWORD", ""))
 
                 else:
-                    self.addline("mov %s,[rbx]"% value_of_global(self.current_token.value, self.compiler) )
+                    self.addline("mov %s,[r8]"% value_of_global(self.current_token.value, self.compiler) )
             else:
                 if(self.getDeclarationByID(self.current_token.value).isfloat):
-                    self.addline("movss [rbp-%s], [rbx]"%self.getDeclarationByID(self.current_token.value).offset)
+                    self.addline("movss [rbp-%s], [r8]"%self.getDeclarationByID(self.current_token.value).offset)
                 else:         
-                    self.addline("mov rcx, [rbx]")
+                    self.addline("mov rcx, [r8]")
                     self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "rcx"))
             self.advance()
             return
@@ -262,7 +309,7 @@ class Function:
         if(self.current_token.tok != T_EQUALS):throw(InvalidMemberAccess(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
         self.advance()
         self.evaluation_wrapper(reg="rax") #store new value in rax
-        self.addline("mov [rbx], rax")
+        self.addline("mov [r8], rax")
 
     """
     #Construct a statement that starts with a T_ID (based on current position)
@@ -279,9 +326,12 @@ class Function:
             else:
                 self.evaluation_wrapper(glob=id)
             return
-        elif(self.current_token.tok == "["):
+        elif(self.current_token.tok == "@"):
             self.advance()
             self.buildPointerAssignment(id)
+        elif (self.current_token.tok == "["):
+            self.advance()
+            self.buildArrayIndexer(id)
 
         elif(self.current_token.tok == T_PROPOF):
             
@@ -768,6 +818,17 @@ class Function:
     def buildVariableDeclaration(self):
         flt = (self.current_token.value == "float")
         self.advance()
+        isarr = False
+        if(self.current_token.tok == T_OPENLINDEX):
+            isarr=True
+            self.advance()
+            if(self.current_token.tok != T_INT): throw(InvalidStackspaceAllocator(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+            size = int(self.current_token.value)*8
+            self.allocationoffset+=size
+            self.advance()
+            if(self.current_token.tok != T_CLSLINDEX): throw(InvalidStackspaceAllocator(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+            self.advance()
+
         if(self.current_token.tok != T_ID):
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
             
@@ -779,13 +840,25 @@ class Function:
         if(self.current_token.tok == T_EOL): #variable declaration without assignment
             self.appendDeclaration(id,flt)
             if(not flt):
-                self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "0x0"))
+                if(not isarr):
+                    self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "0x0"))
+                else:
+                    
+                    self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "rbp"))
+                    self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, hex(self.allocationCounter-size)).replace("mov", "sub"))
+            
             else:
-                self.addline("movss  xmm10, [FLT_STANDARD_ZERO]")
-                self.addline("movss [rbp-"+hex(self.declarations[len(self.declarations)-1].offset)+"], xmm10")
+                if(not isarr):
+                    self.addline("movss  xmm10, [FLT_STANDARD_ZERO]")
+                    self.addline("movss [rbp-"+hex(self.declarations[len(self.declarations)-1].offset)+"], xmm10")
+                else:
+                    self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "rbp"))
+                    self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, hex(self.allocationCounter-size)).replace("mov", "sub"))
+
             #self.advance()
             return
-        
+        if(isarr):return
+
         if(self.current_token.tok == "="): #with assignment
             self.advance()
             self.appendDeclaration(id,flt)
@@ -1026,18 +1099,17 @@ class Function:
 
     def compile(self):
         if(not self.isFast): #the fast keyword prevents this paramter storage
-            allocationoffset = len(self.params)*8+8
+            self.allocationoffset = len(self.params)*8+8
             for token in self.tokens:
                 
                 if(token.tok == T_KEYWORD and token.value == "var" or token.value == "float" or token.value=="for"): #forloops require extra declarations
-                    allocationoffset += 8
+                    self.allocationoffset += 8
         else:
-            allocationoffset = 8
+            self.allocationoffset = 8
             for token in self.tokens:
                 if(token.tok == T_KEYWORD and token.value == "var" or token.value == "float"):
-                    allocationoffset += 8
+                    self.allocationoffset += 8
 
-        self.allocator = allocate(allocationoffset)
         if(not self.isFast):
             for i in range(len(self.params)):
                 if(self.types[i] == "var"):
@@ -1049,10 +1121,12 @@ class Function:
                     self.allocator += "movss [rbp-"+hex((i+1)*8)+"], "+flt_parameter_registers[i]+"\n"
 
             
-        self.bodytext = "%s%s"%(self.allocator,self.bodytext)
+        self.bodytext = "&&ALLOCATOR&&"
         self.doCompilations()
         self.advance()
+        self.allocator = allocate(self.allocationoffset)
 
+        self.bodytext = self.bodytext.replace("&&ALLOCATOR&&","%s"%(self.allocator))
         self.bodytext = FNO(self).optimize()
         
 

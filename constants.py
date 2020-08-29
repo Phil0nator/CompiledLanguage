@@ -34,6 +34,7 @@ T_EOL = "EOL"
 T_EQUALS = "="
 T_XOR = "^"
 T_PROPOF = ":"
+T_PTRAT = "@"
 
 true = "[__BOOL_STANDARD_TRUE]"
 false = "[__BOOL_STANDARD_FALSE]"

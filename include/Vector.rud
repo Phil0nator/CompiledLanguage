@@ -102,7 +102,7 @@ function Vector.push(vec, item){
     vec:len = len;
     
     vec:array->arr;
-    arr[pos*size] = item;
+    arr@pos*size] = item;
     pos = pos + 1;
     vec:pushpos=pos;
 
@@ -125,7 +125,7 @@ function Vector.pop(vec){
     vec:pushpos->pos;
     pos = pos-1;
     var out;
-    arr[pos*size]->out;
+    arr@pos*size]->out;
     vec:pushpos=pos;
     return out;
 
@@ -139,7 +139,7 @@ function Vector.at(vec, index){
     var item;
     var size;
     vec:element_size->size;
-    arr[index*size]->item;
+    arr@index*size]->item;
     return item;
 
 }
@@ -150,7 +150,7 @@ function Vector.set(vec, index, value){
     var size;
     vec:element_size->size;
     vec:array->arr;
-    arr [index*size]  = value;
+    arr @index*size]  = value;
 
 }
 
@@ -161,16 +161,16 @@ function Vector.print(vec){
     vec:element_size->size;
     var len;
     vec:len->len;
-    printformat("[ ", 0);
+    printformat("@ ", 0);
     var current_value;
     for(var i=0; i <= (len - 1);i++){
 
-        arr[i*size]->current_value;
+        arr@i*size]->current_value;
         printformat("%i, ",current_value);
 
     }
     len = len - 1;
-    arr[len*size]->current_value;
+    arr@len*size]->current_value;
     printformat("%i ]\n",current_value);
 
 
@@ -188,7 +188,7 @@ function Vector.printstrs(vec){
     
 
     if(len == 1){
-        arr[0]->current_value;
+        arr@0]->current_value;
         printformat(" %s ]", current_value);
         return 0;
 
@@ -196,14 +196,14 @@ function Vector.printstrs(vec){
     
     for(var i = 0; i < (len - 2);i++;){
         
-        arr[i*size]->current_value;
+        arr@i*size]->current_value;
         printformat("%s, ",current_value);
         
 
     }
         
 
-    arr[(len-1)*size]->current_value;
+    arr@(len-1)*size]->current_value;
     printformat("%s ]\n",current_value);
 
 
@@ -227,7 +227,7 @@ function Vector.pushes(vec, newptr, newptr_len){
     vec:element_size->size;
     for(var i; i < newptr_len; i++ ;){
         addr= i*size;
-        newptr[ addr]->val;
+        newptr@ addr]->val;
         Vector.push(vec,val);
 
     }
@@ -253,7 +253,7 @@ function vectorize_args(args, numargs){
     Vector.resize(tmp, numargs+1);
     var item;
     for(var i; i <= numargs;i++;){
-        args[i*8]->item;
+        args[i]->item;
         Vector.set(tmp, i, item);
 
     }

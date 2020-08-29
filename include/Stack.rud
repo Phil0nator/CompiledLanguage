@@ -6,8 +6,6 @@ struct Stack{
 
     var mem;
     var ptr;
-    var base;
-    var element_size;
 
 
 }
@@ -20,19 +18,16 @@ function Stack.init(initialsize){
     var m;
     alloc(initialsize)->m;
     out:mem = m;
-    out:ptr = initialsize;
-    out:base = 0;
-    out:element_size = 8;
+    out:ptr = initialsize-8;
     return out;
 
 }
 
 function Stack.push(this, value){
-    var s;
-    this:element_size->s;
+
     var ptr;
     this:ptr->ptr;
-    ptr = ptr - s;
+    ptr = ptr - 1;
 
     if(ptr < 0){
 
@@ -52,15 +47,14 @@ function Stack.push(this, value){
 
 function Stack.pop(this){
 
-    var s;
-    this:element_size->s;
+
     var ptr;
     this:ptr->ptr;
     var m;
     this:mem->m;
     var i;
     m[ptr]->i;
-    this:ptr = ptr + s;
+    this:ptr = ptr + 1;
 
 
     return i;
@@ -82,5 +76,14 @@ function Stack.getrawptr(this){
     var ptr;
     this:ptr->ptr;
     return m+ptr;
+
+}
+
+function Stack.destroy(this){
+
+    var m;
+    this:mem->m;
+    destroy(m);
+    destroy(this);
 
 }

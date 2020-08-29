@@ -70,7 +70,7 @@ function FileReader.nextChar(ptr){
     var buf;
     ptr:data->buf;
     var ch;
-    buf[idx]->ch;
+    buf@idx]->ch;
     idx = idx + 1;
     ptr:idx = idx;
 

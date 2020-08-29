@@ -108,7 +108,9 @@ class Lexer:
             elif self.current_char == T_XOR:
                 tokens.append(Token(T_XOR, value=T_XOR, start=self.loc.copy()))
                 self.advance()
-
+            elif self.current_char == T_PTRAT:
+                tokens.append(Token(T_PTRAT, value=T_PTRAT,start=self.loc.copy()))
+                self.advance()
             
 
             
