@@ -856,6 +856,7 @@ class Function:
                     self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, hex(self.allocationCounter-size)).replace("mov", "sub"))
 
             #self.advance()
+
             return
         if(isarr):return
 
@@ -866,6 +867,7 @@ class Function:
                 self.evaluation_wrapper(decl=self.declarations[len(self.declarations)-1])#evaluate expression, and place it into this declaration
             else:
                 self.evaluation_wrapper(glob=id)
+            
             return
         else: #invalid statement
             throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
@@ -966,6 +968,7 @@ class Function:
         if(len(self.forstack) > 0):
             if(self.forstack[len(self.forstack)-1] == endmarker):
                 self.forstack.pop()
+        
         
     def buildCMP(self):
         if(self.current_token.tok != T_OPENP):

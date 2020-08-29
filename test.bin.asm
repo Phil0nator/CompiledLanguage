@@ -5212,7 +5212,6 @@ mov rbp, rsp
 sub rsp, 0x28
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
-startmain:
 mov r9, STRING_CONSTANT_20
 mov r10, QWORD [rbp-0x10]
 call printformat
@@ -5228,8 +5227,6 @@ call tan_approx
 movss [rbp-0x20], xmm8
 movss xmm0,  [rbp-0x20]
 call print_floatln
-call permhang
-jmp startmain
 
 __m__leave_ret_:
 leave
