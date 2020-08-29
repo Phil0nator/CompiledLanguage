@@ -3,7 +3,9 @@ from Lexer import *
 from errors import *
 
 
-
+'''
+#The PreLexer class works the same as the Lexer class, but it is designed to look for things only significant to the preprocessor.
+'''
 class PreLexer:
     def __init__(self, fn ,text):
         self.fn = fn
@@ -105,7 +107,10 @@ class PreLexer:
 
 
 
-
+'''
+#The Preprocessor uses similar conventions as the compiler to handle directives like #include, #define, #ifdef, etc...
+#The Preprocessor will directly edit the text that will go on to be tokenized and compiled
+'''
 
 class Preprocessor:
     def __init__(self, data, cc, fn):

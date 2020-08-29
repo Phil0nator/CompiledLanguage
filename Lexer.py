@@ -4,7 +4,10 @@ from constants import *
 from Token import *
 from errors import *
 
-
+'''
+#The lexer class can take a body of text (in .rud syntax) and tokenize it for processing by a compiler object.
+#It will go through character by character (self.advance()) and detect what kind of token needs to be created.
+'''
 class Lexer:
     def __init__(self, fn ,text):
         self.fn = fn

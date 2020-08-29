@@ -86,7 +86,7 @@ def main():
         os.remove("%s.asm"%__fileoutput__)
 
     end = time.time()
-    print("Compiled and linked symbols in %s ms\n"%str(end-start))
+    print("Compiled and linked symbols in %s s\n"%str(end-start))
 
 
     if(__autorun__):

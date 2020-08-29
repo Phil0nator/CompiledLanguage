@@ -4,8 +4,8 @@
 #define NULL 0
 #define nullptr 0
 #define SIZEOF_CHAR 1
-#define SIZEOF_VAR 64
-#define SIZEOF_PTR 64
+#define SIZEOF_VAR 8
+#define SIZEOF_PTR 8
 
 final var __isincluded__MEMORY_ = 38598;
 
@@ -57,7 +57,6 @@ __asm{"
 
 
 }
-
 
 
 function memerror(error){

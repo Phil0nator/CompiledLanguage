@@ -4,7 +4,18 @@ from errors import *
 from constants import *
 from Struct import *
 from FunctionOptimizer import *
+'''
+#The function class is where most things are compiled: the body of functions;
+#Function objects are constructed by the compiler, and then sent to compile here.
+#The Function object looks through a list of its tokens line by line, and depending on how the line begins it will determine 
+    what kind of statement it needs to create (variable declaration, if, etc...)
+#All expressions (parameters, assignements, etc...) will be passed through the bulky evaluateExpression() function, which handles the bulk of math operations
+#xmm10 is defined as the float transit register
+#evaluateExpression() outlines other register uses
 
+
+#Each different type of statement has its own member function designed to construct it.
+'''
 class Function:
     def __init__(self,name,params,tokens, compiler, types):
         self.tokens = tokens
@@ -179,7 +190,9 @@ class Function:
                     self.addline("mov %s,[rbx+rax]"% value_of_global(self.current_token.value, self.compiler) )
             else:
                 if(self.getDeclarationByID(self.current_token.value).isfloat):
-                    self.addline("movss [rbp-%s], [rbx+rax]"%self.getDeclarationByID(self.current_token.value).offset)
+                    self.addline("movss xmm10, [rbx+rax]")
+                    self.addline("movss [rbp-%s], xmm10"%self.getDeclarationByID(self.current_token.value).offset)
+                
                 else:
                     #self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "[rbx+rax]"))
                     self.addline("mov r15,QWORD [rbx+rax]")

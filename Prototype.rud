@@ -7,39 +7,18 @@ final var endl = "\n";
 function main(args, numargs){
 
     printformat("The number of commandline arguments is: %u\n", numargs);
-    var l2;
-    var ll;
-
-   for (var d; true;d++;){
-   
-        //LinkedList.init(0)->ll;
-        //LinkedList.push(ll, 1);
-        //LinkedList.push(ll, 2);
-        //LinkedList.push(ll, 3);
-        //LinkedList.push(ll, 4);
-        //LinkedList.set(ll, 3, 1);
-        //LinkedList.insertItem(ll, 3, 16);
-        //LinkedList.printints(ll);
+    var st;
+    var t;
 
 
-        
-        LinkedList.init(0)->l2;
-        //LinkedList.push(l2, 1);
-        //LinkedList.push(l2, 2);
-        //LinkedList.push(l2, 3);
-        //LinkedList.push(l2, 4);
-        //LinkedList.set(l2, 3, 1);
-        //LinkedList.insertItem(l2, 3, 16);
-        LinkedList.printints(l2);
-
-        //LinkedList.insertOther(ll, 2, l2);
-
-        
-
-        //LinkedList.destroy(l2);
+    for(var i; true; i=i;){
+     Stack.init(4096)->st;
+     Stack.push(st, 0);
+     Stack.push(st, 100);
+     Stack.pop(st)->t;
+     print_integer(t);
+    }
 
 
-   }
-    
 
 }

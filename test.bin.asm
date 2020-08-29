@@ -1093,8 +1093,12 @@ FLT_CONSTANT_16: dq __float32__(32767.0)
 STRING_CONSTANT_12: db `[ `, 0
 STRING_CONSTANT_13: db `%i, `, 0
 STRING_CONSTANT_14: db `%i ]\n`, 0
-STRING_CONSTANT_15: db `\n`, 0
-STRING_CONSTANT_16: db `The number of commandline arguments is: %u\n`, 0
+STRING_CONSTANT_15: db `[ `, 0
+STRING_CONSTANT_16: db `%s, `, 0
+STRING_CONSTANT_17: db `%s ]\n`, 0
+STRING_CONSTANT_18: db `Stack: Error: StackOverflow.`, 0
+STRING_CONSTANT_19: db `\n`, 0
+STRING_CONSTANT_20: db `The number of commandline arguments is: %u\n`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __BOOL_STANDARD_TRUE: dq -0x1
 __BOOL_STANDARD_FALSE: dq 0x0
@@ -1229,7 +1233,7 @@ ALIGN_STACK
    xor r12, r12
    test rax, rax ; check for error
 
-   mov byte[rax+0x30], 0x0
+   ;mov byte[rax+0x30], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -1252,7 +1256,7 @@ ALIGN_STACK
    xor r12, r12
    test rax, rax ; check for error
 
-   mov byte[rax+0x20], 0x0
+   ;mov byte[rax+0x20], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -1275,7 +1279,7 @@ ALIGN_STACK
    xor r12, r12
    test rax, rax ; check for error
 
-   mov byte[rax+0x38], 0x0
+   ;mov byte[rax+0x38], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -1298,7 +1302,7 @@ ALIGN_STACK
    xor r12, r12
    test rax, rax ; check for error
 
-   mov byte[rax+0x20], 0x0
+   ;mov byte[rax+0x20], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -1321,7 +1325,7 @@ ALIGN_STACK
    xor r12, r12
    test rax, rax ; check for error
 
-   mov byte[rax+0x30], 0x0
+   ;mov byte[rax+0x30], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -1344,7 +1348,7 @@ ALIGN_STACK
    xor r12, r12
    test rax, rax ; check for error
 
-   mov byte[rax+0x20], 0x0
+   ;mov byte[rax+0x20], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -1367,7 +1371,30 @@ ALIGN_STACK
    xor r12, r12
    test rax, rax ; check for error
 
-   mov byte[rax+0x28], 0x0
+   ;mov byte[rax+0x28], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+Stack:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x30
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   ;mov byte[rax+0x30], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -4816,6 +4843,69 @@ __LinkedList.printints__leave_ret_:
 leave
 ret
 
+LinkedList.printstrs:
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-0x18], 0x0
+mov QWORD [rbp-0x20], 0x0
+mov r9, STRING_CONSTANT_15
+call printformat
+mov QWORD [rbp-0x28], 0x0
+__LinkedList.printstrs__flp0x28:
+mov r9, QWORD [rbp-0x10]
+call LLNode.next
+mov QWORD [rbp-0x20], r8
+mov rbx, QWORD [rbp-0x20]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_LinkedList.printstrs_0x0
+mov rbx, -1
+__blncmpncnd_LinkedList.printstrs_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.printstrs_0x1
+jmp __LinkedList.printstrs__flp_end_final0x28
+jmp __ifntrue_LinkedList.printstrs_0x1
+__ifntrue_LinkedList.printstrs_0x1:
+mov r9, QWORD [rbp-0x10]
+call LLNode.value
+mov QWORD [rbp-0x18], r8
+mov r9, STRING_CONSTANT_16
+mov r10, QWORD [rbp-0x18]
+call printformat
+mov rbx, QWORD [rbp-0x20]
+mov QWORD [rbp-0x10], rbx
+__LinkedList.printstrs__flp_end_0x28:
+mov rbx, -0x1
+mov QWORD [rbp-0x30], rbx
+mov rax, QWORD [rbp-0x28]
+inc rax
+mov QWORD [rbp-0x28], rax
+mov rdi, QWORD [rbp-0x30]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.printstrs__flp0x28
+__LinkedList.printstrs__flp_end_final0x28:
+mov r9, QWORD [rbp-0x10]
+call LLNode.value
+mov QWORD [rbp-0x18], r8
+mov r9, STRING_CONSTANT_17
+mov r10, QWORD [rbp-0x18]
+call printformat
+
+__LinkedList.printstrs__leave_ret_:
+leave
+ret
+
 LinkedList.destroy:
 push rbp
 mov rbp, rsp
@@ -4829,12 +4919,8 @@ mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
 __LinkedList.destroy__flp0x18:
 mov r9, QWORD [rbp-0x10]
-call print_integer
-mov r9, QWORD [rbp-0x10]
 call LLNode.destroy
 mov QWORD [rbp-0x10], r8
-mov r9, QWORD [rbp-0x10]
-call print_integer
 mov rbx, QWORD [rbp-0x10]
 mov rcx, 0x0
 cmp rbx, rcx
@@ -4846,9 +4932,7 @@ mov r14,rbx
 mov r15, -1
 cmp r14, r15
 jne __ifntrue_LinkedList.destroy_0x1
-mov r8, 0x0
-cvtsi2ss xmm8,r8
-jmp __LinkedList.destroy__leave_ret_
+jmp __LinkedList.destroy__flp_end_final0x18
 jmp __ifntrue_LinkedList.destroy_0x1
 __ifntrue_LinkedList.destroy_0x1:
 __LinkedList.destroy__flp_end_0x18:
@@ -4869,30 +4953,213 @@ __LinkedList.destroy__leave_ret_:
 leave
 ret
 
+Stack.init:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+call Stack
+mov QWORD [rbp-0x10], r8
+mov QWORD [rbp-0x18], 0x0
+mov r9, QWORD [rbp-0x8]
+call alloc
+mov QWORD [rbp-0x18], r8
+mov rbx, QWORD [rbp-0x10]
+add rbx, 0x18
+mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+mov rbx, QWORD [rbp-0x10]
+add rbx, 0x20
+mov rax, QWORD [rbp-0x8]
+mov [rbx], rax
+mov rbx, QWORD [rbp-0x10]
+add rbx, 0x28
+mov rax, 0x0
+mov [rbx], rax
+mov rbx, QWORD [rbp-0x10]
+add rbx, 0x30
+mov rax, 0x8
+mov [rbx], rax
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __Stack.init__leave_ret_
+
+__Stack.init__leave_ret_:
+leave
+ret
+
+Stack.push:
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x30
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-0x20], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x20], rcx
+mov rbx, QWORD [rbp-0x20]
+mov rcx, QWORD [rbp-0x18]
+sub rbx, rcx
+mov QWORD [rbp-0x20], rbx
+mov rbx, QWORD [rbp-0x20]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_Stack.push_0x0
+mov rbx, -1
+__blncmpncnd_Stack.push_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_Stack.push_0x1
+mov r9, STRING_CONSTANT_18
+call print_string
+mov r9, 0x1
+call exit
+jmp __ifntrue_Stack.push_0x1
+__ifntrue_Stack.push_0x1:
+mov QWORD [rbp-0x28], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x28], rcx
+mov rax, QWORD [rbp-0x20]
+mov rbx, QWORD [rbp-0x28]
+mov r15, QWORD [rbp-0x10]
+mov QWORD [rbx+rax], r15
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rax, QWORD [rbp-0x20]
+mov [rbx], rax
+
+__Stack.push__leave_ret_:
+leave
+ret
+
+Stack.pop:
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x30
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-0x18], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-0x20], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], 0x0
+mov rax, QWORD [rbp-0x18]
+mov rbx, QWORD [rbp-0x20]
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x28], r15
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rbx, QWORD [rbp-0x18]
+mov rcx, QWORD [rbp-0x10]
+add rbx, rcx
+mov rax,rbx
+mov [rbx], rax
+mov r8, QWORD [rbp-0x28]
+cvtsi2ss xmm8,r8
+jmp __Stack.pop__leave_ret_
+
+__Stack.pop__leave_ret_:
+leave
+ret
+
+Stack.getraw:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __Stack.getraw__leave_ret_
+
+__Stack.getraw__leave_ret_:
+leave
+ret
+
+Stack.getrawptr:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-0x18], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+mov rbx, QWORD [rbp-0x10]
+mov rcx, QWORD [rbp-0x18]
+add rbx, rcx
+mov r8,rbx
+cvtsi2ss xmm8,r8
+jmp __Stack.getrawptr__leave_ret_
+
+__Stack.getrawptr__leave_ret_:
+leave
+ret
+
 m:
 push rbp
 mov rbp, rsp
 sub rsp, 0x38
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
-mov r9, STRING_CONSTANT_16
+mov r9, STRING_CONSTANT_20
 mov r10, QWORD [rbp-0x10]
 call printformat
 mov QWORD [rbp-0x18], 0x0
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 __m__flp0x28:
-mov r9, 0x0
-call LinkedList.init
+mov r9, 0x1000
+call Stack.init
 mov QWORD [rbp-0x18], r8
 mov r9, QWORD [rbp-0x18]
-call LinkedList.printints
+mov r10, 0x0
+call Stack.push
+mov r9, QWORD [rbp-0x18]
+mov r10, 0x64
+call Stack.push
+mov r9, QWORD [rbp-0x18]
+call Stack.pop
+mov QWORD [rbp-0x20], r8
+mov r9, QWORD [rbp-0x20]
+call print_integer
 __m__flp_end_0x28:
 mov rbx, -0x1
 mov QWORD [rbp-0x30], rbx
-mov rax, QWORD [rbp-0x28]
-inc rax
-mov QWORD [rbp-0x28], rax
+mov rbx, QWORD [rbp-0x28]
+mov QWORD [rbp-0x28], rbx
 mov rdi, QWORD [rbp-0x30]
 mov rsi, -1
 cmp rdi, rsi

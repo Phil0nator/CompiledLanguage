@@ -4,7 +4,14 @@ from Function import *
 from Location import *
 from Struct import *
 
-
+'''
+#The Compiler looks through for basic components of the main text.
+    -Global Constants
+    -Global Variables
+    -Structures
+    -Functions
+#It will then seperate these out for their own compilation processes
+'''
 class Compiler:
     def __init__(self, tokens):
         self.tokens = tokens

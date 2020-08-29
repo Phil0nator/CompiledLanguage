@@ -263,16 +263,40 @@ function LinkedList.printints(this){
 
 }
 
+function LinkedList.printstrs(this){
+
+    var node;
+    this:nodestart->node;
+    var v;
+    var second;
+    printformat("[ ");
+    for(var i; true;i++;){
+        LLNode.next(node)->second;
+        if(second == 0){
+            break;
+        }
+        
+        LLNode.value(node)->v;
+        printformat("%s, ",v);
+        node = second;
+
+    }
+    LLNode.value(node)->v;
+    printformat("%s ]\n", v);
+
+
+}
+
+
+
 function LinkedList.destroy(this){
     var sn;
     this:nodestart->sn;
 
     for(var i; true; i++;){
-        print_integer(sn);
         LLNode.destroy(sn)->sn;
-        print_integer(sn);
         if(sn == 0){
-            return 0;
+            break;
         }
 
     }

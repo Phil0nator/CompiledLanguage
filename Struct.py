@@ -53,7 +53,7 @@ ALIGN_STACK
    xor r12, r12
    test rax, rax ; check for error
 
-   mov byte[rax+%s], 0x0
+   ;mov byte[rax+%s], 0x0
 
    mov r8, rax
    UNALIGN_STACK
