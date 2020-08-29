@@ -1090,11 +1090,11 @@ STRING_CONSTANT_9: db `%s, `, 0
 STRING_CONSTANT_10: db `%s ]\n`, 0
 STRING_CONSTANT_11: db ``, 0
 FLT_CONSTANT_16: dq __float32__(32767.0)
-STRING_CONSTANT_12: db `\n`, 0
-STRING_CONSTANT_13: db `The number of commandline arguments is: %u\n`, 0
-FLT_CONSTANT_17: dq __float32__(0.2623)
-FLT_CONSTANT_18: dq __float32__(-36.23)
-FLT_CONSTANT_19: dq __float32__(3.25)
+STRING_CONSTANT_12: db `[ `, 0
+STRING_CONSTANT_13: db `%i, `, 0
+STRING_CONSTANT_14: db `%i ]\n`, 0
+STRING_CONSTANT_15: db `\n`, 0
+STRING_CONSTANT_16: db `The number of commandline arguments is: %u\n`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __BOOL_STANDARD_TRUE: dq -0x1
 __BOOL_STANDARD_FALSE: dq 0x0
@@ -1322,6 +1322,52 @@ ALIGN_STACK
    test rax, rax ; check for error
 
    mov byte[rax+0x30], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+LLNode:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x20
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+0x20], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+LinkedList:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x28
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   mov byte[rax+0x28], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -4121,55 +4167,737 @@ __delay__leave_ret_:
 leave
 ret
 
-m:
+LLNode.init:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+call LLNode
+mov QWORD [rbp-0x10], r8
+mov rbx, QWORD [rbp-0x10]
+add rbx, 0x18
+mov rax, QWORD [rbp-0x8]
+mov [rbx], rax
+mov rbx, QWORD [rbp-0x10]
+add rbx, 0x20
+mov rax, 0x0
+mov [rbx], rax
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __LLNode.init__leave_ret_
+
+__LLNode.init__leave_ret_:
+leave
+ret
+
+LLNode.setValue:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rax, QWORD [rbp-0x10]
+mov [rbx], rax
+
+__LLNode.setValue__leave_ret_:
+leave
+ret
+
+LLNode.buildNext:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+mov r9, QWORD [rbp-0x10]
+call LLNode.init
+mov QWORD [rbp-0x18], r8
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+
+__LLNode.buildNext__leave_ret_:
+leave
+ret
+
+LLNode.value:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __LLNode.value__leave_ret_
+
+__LLNode.value__leave_ret_:
+leave
+ret
+
+LLNode.next:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __LLNode.next__leave_ret_
+
+__LLNode.next__leave_ret_:
+leave
+ret
+
+LLNode.setConnection:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rax, QWORD [rbp-0x10]
+mov [rbx], rax
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __LLNode.setConnection__leave_ret_
+
+__LLNode.setConnection__leave_ret_:
+leave
+ret
+
+LLNode.destroy:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x20
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov r9, QWORD [rbp-0x8]
+call destroy
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __LLNode.destroy__leave_ret_
+
+__LLNode.destroy__leave_ret_:
+leave
+ret
+
+LinkedList.init:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+call LinkedList
+mov QWORD [rbp-0x10], r8
+mov QWORD [rbp-0x18], 0x0
+mov r9, QWORD [rbp-0x8]
+call LLNode.init
+mov QWORD [rbp-0x18], r8
+mov rbx, QWORD [rbp-0x10]
+add rbx, 0x18
+mov rax, QWORD [rbp-0x18]
+mov [rbx], rax
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __LinkedList.init__leave_ret_
+
+__LinkedList.init__leave_ret_:
+leave
+ret
+
+LinkedList.push:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], 0x0
+mov r9, QWORD [rbp-0x8]
+call LinkedList.getLastNode
+mov QWORD [rbp-0x18], r8
+mov r9, QWORD [rbp-0x18]
+mov r10, QWORD [rbp-0x10]
+call LLNode.buildNext
+
+__LinkedList.push__leave_ret_:
+leave
+ret
+
+LinkedList.getLastNode:
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-0x18], 0x0
+mov QWORD [rbp-0x20], 0x0
+__LinkedList.getLastNode__flp0x20:
+mov r9, QWORD [rbp-0x10]
+call LLNode.next
+mov QWORD [rbp-0x18], r8
+mov rbx, QWORD [rbp-0x18]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_LinkedList.getLastNode_0x0
+mov rbx, -1
+__blncmpncnd_LinkedList.getLastNode_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.getLastNode_0x1
+jmp __LinkedList.getLastNode__flp_end_final0x20
+jmp __ifntrue_LinkedList.getLastNode_0x1
+__ifntrue_LinkedList.getLastNode_0x1:
+mov rbx, QWORD [rbp-0x18]
+mov QWORD [rbp-0x10], rbx
+__LinkedList.getLastNode__flp_end_0x20:
+mov rbx, -0x1
+mov QWORD [rbp-0x28], rbx
+mov rax, QWORD [rbp-0x20]
+inc rax
+mov QWORD [rbp-0x20], rax
+mov rdi, QWORD [rbp-0x28]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.getLastNode__flp0x20
+__LinkedList.getLastNode__flp_end_final0x20:
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __LinkedList.getLastNode__leave_ret_
+
+__LinkedList.getLastNode__leave_ret_:
+leave
+ret
+
+LinkedList.at:
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-0x20], 0x0
+__LinkedList.at__flp0x20:
+mov r9, QWORD [rbp-0x18]
+call LLNode.next
+mov QWORD [rbp-0x18], r8
+__LinkedList.at__flp_end_0x20:
+mov rbx, QWORD [rbp-0x20]
+mov rcx, QWORD [rbp-0x10]
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_LinkedList.at_0x0
+mov rbx, -1
+__blncmpncnd_LinkedList.at_0x0:
+mov QWORD [rbp-0x28], rbx
+mov rax, QWORD [rbp-0x20]
+inc rax
+mov QWORD [rbp-0x20], rax
+mov rdi, QWORD [rbp-0x28]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.at__flp0x20
+__LinkedList.at__flp_end_final0x20:
+mov QWORD [rbp-0x30], 0x0
+mov r9, QWORD [rbp-0x18]
+call LLNode.value
+mov QWORD [rbp-0x30], r8
+mov r8, QWORD [rbp-0x30]
+cvtsi2ss xmm8,r8
+jmp __LinkedList.at__leave_ret_
+
+__LinkedList.at__leave_ret_:
+leave
+ret
+
+LinkedList.nodeAt:
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x18], rcx
+mov rbx, QWORD [rbp-0x10]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_LinkedList.nodeAt_0x0
+mov rbx, -1
+__blncmpncnd_LinkedList.nodeAt_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.nodeAt_0x1
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __LinkedList.nodeAt__leave_ret_
+jmp __ifntrue_LinkedList.nodeAt_0x1
+__ifntrue_LinkedList.nodeAt_0x1:
+mov QWORD [rbp-0x20], 0x0
+__LinkedList.nodeAt__flp0x20:
+mov r9, QWORD [rbp-0x18]
+call LLNode.next
+mov QWORD [rbp-0x18], r8
+__LinkedList.nodeAt__flp_end_0x20:
+mov rbx, QWORD [rbp-0x20]
+mov rcx, QWORD [rbp-0x10]
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_LinkedList.nodeAt_0x1
+mov rbx, -1
+__blncmpncnd_LinkedList.nodeAt_0x1:
+mov QWORD [rbp-0x28], rbx
+mov rax, QWORD [rbp-0x20]
+inc rax
+mov QWORD [rbp-0x20], rax
+mov rdi, QWORD [rbp-0x28]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.nodeAt__flp0x20
+__LinkedList.nodeAt__flp_end_final0x20:
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __LinkedList.nodeAt__leave_ret_
+
+__LinkedList.nodeAt__leave_ret_:
+leave
+ret
+
+LinkedList.set:
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
+mov QWORD [rbp-0x20], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x20], rcx
+mov rbx, QWORD [rbp-0x10]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_LinkedList.set_0x0
+mov rbx, -1
+__blncmpncnd_LinkedList.set_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.set_0x1
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x18]
+call LLNode.setValue
+mov r8, 0x0
+cvtsi2ss xmm8,r8
+jmp __LinkedList.set__leave_ret_
+jmp __ifntrue_LinkedList.set_0x1
+__ifntrue_LinkedList.set_0x1:
+mov rax, QWORD [rbp-0x10]
+dec rax
+mov QWORD [rbp-0x10], rax
+mov QWORD [rbp-0x28], 0x0
+__LinkedList.set__flp0x28:
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x20], r8
+__LinkedList.set__flp_end_0x28:
+mov rbx, QWORD [rbp-0x28]
+mov rcx, QWORD [rbp-0x10]
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_LinkedList.set_0x1
+mov rbx, -1
+__blncmpncnd_LinkedList.set_0x1:
+mov QWORD [rbp-0x30], rbx
+mov rax, QWORD [rbp-0x28]
+inc rax
+mov QWORD [rbp-0x28], rax
+mov rdi, QWORD [rbp-0x30]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.set__flp0x28
+__LinkedList.set__flp_end_final0x28:
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x18]
+call LLNode.setValue
+
+__LinkedList.set__leave_ret_:
+leave
+ret
+
+LinkedList.insertItem:
+push rbp
+mov rbp, rsp
+sub rsp, 0x40
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
+mov QWORD [rbp-0x20], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], 0x0
+mov rbx, QWORD [rbp-0x10]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_LinkedList.insertItem_0x0
+mov rbx, -1
+__blncmpncnd_LinkedList.insertItem_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.insertItem_0x1
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x28], r8
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x18]
+call LLNode.buildNext
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x20], r8
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x28]
+call LLNode.setConnection
+mov r8, 0x0
+cvtsi2ss xmm8,r8
+jmp __LinkedList.insertItem__leave_ret_
+jmp __ifntrue_LinkedList.insertItem_0x1
+__ifntrue_LinkedList.insertItem_0x1:
+mov rax, QWORD [rbp-0x10]
+dec rax
+mov QWORD [rbp-0x10], rax
+mov QWORD [rbp-0x30], 0x0
+__LinkedList.insertItem__flp0x30:
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x20], r8
+__LinkedList.insertItem__flp_end_0x30:
+mov rbx, QWORD [rbp-0x30]
+mov rcx, QWORD [rbp-0x10]
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_LinkedList.insertItem_0x1
+mov rbx, -1
+__blncmpncnd_LinkedList.insertItem_0x1:
+mov QWORD [rbp-0x38], rbx
+mov rax, QWORD [rbp-0x30]
+inc rax
+mov QWORD [rbp-0x30], rax
+mov rdi, QWORD [rbp-0x38]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.insertItem__flp0x30
+__LinkedList.insertItem__flp_end_final0x30:
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x28], r8
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x18]
+call LLNode.buildNext
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x20], r8
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x28]
+call LLNode.setConnection
+
+__LinkedList.insertItem__leave_ret_:
+leave
+ret
+
+LinkedList.insertOther:
+push rbp
+mov rbp, rsp
+sub rsp, 0x60
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
+mov QWORD [rbp-0x20], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], 0x0
+mov rbx, QWORD [rbp-0x10]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_LinkedList.insertOther_0x0
+mov rbx, -1
+__blncmpncnd_LinkedList.insertOther_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.insertOther_0x1
+mov r8, 0x0
+cvtsi2ss xmm8,r8
+jmp __LinkedList.insertOther__leave_ret_
+jmp __ifntrue_LinkedList.insertOther_0x1
+__ifntrue_LinkedList.insertOther_0x1:
+mov QWORD [rbp-0x30], 0x0
+__LinkedList.insertOther__flp0x30:
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x20], r8
+__LinkedList.insertOther__flp_end_0x30:
+mov rbx, QWORD [rbp-0x30]
+mov rcx, QWORD [rbp-0x10]
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_LinkedList.insertOther_0x1
+mov rbx, -1
+__blncmpncnd_LinkedList.insertOther_0x1:
+mov QWORD [rbp-0x38], rbx
+mov rax, QWORD [rbp-0x30]
+inc rax
+mov QWORD [rbp-0x30], rax
+mov rdi, QWORD [rbp-0x38]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.insertOther__flp0x30
+__LinkedList.insertOther__flp_end_final0x30:
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x28], r8
+mov QWORD [rbp-0x40], 0x0
+mov r9, QWORD [rbp-0x18]
+mov r10, 0x0
+call LinkedList.nodeAt
+mov QWORD [rbp-0x40], r8
+mov QWORD [rbp-0x48], 0x0
+mov QWORD [rbp-0x50], 0x0
+__LinkedList.insertOther__flp0x50:
+mov r9, QWORD [rbp-0x40]
+call LLNode.value
+mov QWORD [rbp-0x48], r8
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x48]
+call LLNode.buildNext
+mov r9, QWORD [rbp-0x20]
+call LLNode.next
+mov QWORD [rbp-0x20], r8
+mov r9, QWORD [rbp-0x40]
+call LLNode.next
+mov QWORD [rbp-0x40], r8
+mov rbx, QWORD [rbp-0x40]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_LinkedList.insertOther_0x2
+mov rbx, -1
+__blncmpncnd_LinkedList.insertOther_0x2:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.insertOther_0x2
+jmp __LinkedList.insertOther__flp_end_final0x50
+jmp __ifntrue_LinkedList.insertOther_0x2
+__ifntrue_LinkedList.insertOther_0x2:
+__LinkedList.insertOther__flp_end_0x50:
+mov rbx, -0x1
+mov QWORD [rbp-0x58], rbx
+mov rax, QWORD [rbp-0x50]
+inc rax
+mov QWORD [rbp-0x50], rax
+mov rdi, QWORD [rbp-0x58]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.insertOther__flp0x50
+__LinkedList.insertOther__flp_end_final0x50:
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x28]
+call LLNode.setConnection
+
+__LinkedList.insertOther__leave_ret_:
+leave
+ret
+
+LinkedList.printints:
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-0x18], 0x0
+mov QWORD [rbp-0x20], 0x0
+mov r9, STRING_CONSTANT_12
+call printformat
+mov QWORD [rbp-0x28], 0x0
+__LinkedList.printints__flp0x28:
+mov r9, QWORD [rbp-0x10]
+call LLNode.next
+mov QWORD [rbp-0x20], r8
+mov rbx, QWORD [rbp-0x20]
+mov rcx, 0x0
+cmp rbx, rcx
+mov rbx, 0
+jne __blncmpncnd_LinkedList.printints_0x0
+mov rbx, -1
+__blncmpncnd_LinkedList.printints_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.printints_0x1
+jmp __LinkedList.printints__flp_end_final0x28
+jmp __ifntrue_LinkedList.printints_0x1
+__ifntrue_LinkedList.printints_0x1:
+mov r9, QWORD [rbp-0x10]
+call LLNode.value
+mov QWORD [rbp-0x18], r8
+mov r9, STRING_CONSTANT_13
+mov r10, QWORD [rbp-0x18]
+call printformat
+mov rbx, QWORD [rbp-0x20]
+mov QWORD [rbp-0x10], rbx
+__LinkedList.printints__flp_end_0x28:
+mov rbx, -0x1
+mov QWORD [rbp-0x30], rbx
+mov rax, QWORD [rbp-0x28]
+inc rax
+mov QWORD [rbp-0x28], rax
+mov rdi, QWORD [rbp-0x30]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.printints__flp0x28
+__LinkedList.printints__flp_end_final0x28:
+mov r9, QWORD [rbp-0x10]
+call LLNode.value
+mov QWORD [rbp-0x18], r8
+mov r9, STRING_CONSTANT_14
+mov r10, QWORD [rbp-0x18]
+call printformat
+
+__LinkedList.printints__leave_ret_:
+leave
+ret
+
+LinkedList.destroy:
 push rbp
 mov rbp, rsp
 sub rsp, 0x28
 mov QWORD [rbp-0x8], r9
-mov QWORD [rbp-0x10], r10
-mov r9, STRING_CONSTANT_13
-mov r10, QWORD [rbp-0x10]
-call printformat
-mov rbx, 0x64
-mov rcx, 0xc8
-add rbx, rcx
-mov [__expstack_int1],rbx
-mov rbx, [__expstack_int1]
-mov rcx, 0x37
+mov QWORD [rbp-0x10], 0x0
+mov rbx, QWORD [rbp-0x8]
+add rbx, 0x18
+mov rcx, [rbx]
+mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-0x18], 0x0
+__LinkedList.destroy__flp0x18:
+mov r9, QWORD [rbp-0x10]
+call print_integer
+mov r9, QWORD [rbp-0x10]
+call LLNode.destroy
+mov QWORD [rbp-0x10], r8
+mov r9, QWORD [rbp-0x10]
+call print_integer
+mov rbx, QWORD [rbp-0x10]
+mov rcx, 0x0
 cmp rbx, rcx
 mov rbx, 0
-jne __blncmpncnd_m_0x0
+jne __blncmpncnd_LinkedList.destroy_0x0
 mov rbx, -1
-__blncmpncnd_m_0x0:
-mov QWORD [rbp-0x18], rbx
+__blncmpncnd_LinkedList.destroy_0x0:
+mov r14,rbx
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_LinkedList.destroy_0x1
+mov r8, 0x0
+cvtsi2ss xmm8,r8
+jmp __LinkedList.destroy__leave_ret_
+jmp __ifntrue_LinkedList.destroy_0x1
+__ifntrue_LinkedList.destroy_0x1:
+__LinkedList.destroy__flp_end_0x18:
+mov rbx, -0x1
+mov QWORD [rbp-0x20], rbx
 mov rax, QWORD [rbp-0x18]
-mov rcx, 0x5b9c
-imul rcx
-mov r9,rax
-call absint
+inc rax
+mov QWORD [rbp-0x18], rax
+mov rdi, QWORD [rbp-0x20]
+mov rsi, -1
+cmp rdi, rsi
+je __LinkedList.destroy__flp0x18
+__LinkedList.destroy__flp_end_final0x18:
+mov r9, QWORD [rbp-0x8]
+call destroy
+
+__LinkedList.destroy__leave_ret_:
+leave
+ret
+
+m:
+push rbp
+mov rbp, rsp
+sub rsp, 0x38
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov r9, STRING_CONSTANT_16
+mov r10, QWORD [rbp-0x10]
+call printformat
+mov QWORD [rbp-0x18], 0x0
+mov QWORD [rbp-0x20], 0x0
+mov QWORD [rbp-0x28], 0x0
+__m__flp0x28:
+mov r9, 0x0
+call LinkedList.init
 mov QWORD [rbp-0x18], r8
 mov r9, QWORD [rbp-0x18]
-call print_integer
-movss xmm15, [FLT_CONSTANT_17]
-mov rcx, 0x8
-cvtsi2ss xmm14, rcx
-mulss xmm15, xmm14
-movss [rbp-0x20], xmm15
-movss xmm0,  [rbp-0x20]
-call print_floatln
-movss xmm15, [rbp-0x20]
-movss xmm14, [FLT_CONSTANT_18]
-mulss xmm15, xmm14
-movss [rbp-0x20], xmm15
-movss xmm0,  [rbp-0x20]
-call fabs
-movss [rbp-32], xmm8
-movss xmm0,  [rbp-0x20]
-movss xmm1, [FLT_CONSTANT_19]
-call fmod
-movss [rbp-32], xmm8
-movss xmm0,  [rbp-0x20]
-call print_floatln
+call LinkedList.printints
+__m__flp_end_0x28:
+mov rbx, -0x1
+mov QWORD [rbp-0x30], rbx
+mov rax, QWORD [rbp-0x28]
+inc rax
+mov QWORD [rbp-0x28], rax
+mov rdi, QWORD [rbp-0x30]
+mov rsi, -1
+cmp rdi, rsi
+je __m__flp0x28
+__m__flp_end_final0x28:
 
 __m__leave_ret_:
 leave

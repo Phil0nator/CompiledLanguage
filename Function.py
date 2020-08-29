@@ -65,7 +65,9 @@ class Function:
         if(self.current_token.tok == T_CLOSEP): #No parameters
             pass
         else:
-            t = types[len(params)]
+            t = types[len(params)] #
+            
+
             if(t == "var"):
                 self.evaluation_wrapper(reg=parameter_registers[len(params)])
                 params.append(parameter_registers[len(params)])

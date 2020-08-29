@@ -7,16 +7,39 @@ final var endl = "\n";
 function main(args, numargs){
 
     printformat("The number of commandline arguments is: %u\n", numargs);
-    var t = (100 + 200) == 55;
-    absint(t*23452)->t;
-    print_integer(t);
-    float b = 0.2623 * 8;
-    print_floatln(b);
-    b = b * -36.23;
-    fabs(b)->b;
-    fmod(b, 3.25)->b;
-    print_floatln(b);
+    var l2;
+    var ll;
+
+   for (var d; true;d++;){
+   
+        //LinkedList.init(0)->ll;
+        //LinkedList.push(ll, 1);
+        //LinkedList.push(ll, 2);
+        //LinkedList.push(ll, 3);
+        //LinkedList.push(ll, 4);
+        //LinkedList.set(ll, 3, 1);
+        //LinkedList.insertItem(ll, 3, 16);
+        //LinkedList.printints(ll);
 
 
+        
+        LinkedList.init(0)->l2;
+        //LinkedList.push(l2, 1);
+        //LinkedList.push(l2, 2);
+        //LinkedList.push(l2, 3);
+        //LinkedList.push(l2, 4);
+        //LinkedList.set(l2, 3, 1);
+        //LinkedList.insertItem(l2, 3, 16);
+        LinkedList.printints(l2);
+
+        //LinkedList.insertOther(ll, 2, l2);
+
+        
+
+        //LinkedList.destroy(l2);
+
+
+   }
+    
 
 }
