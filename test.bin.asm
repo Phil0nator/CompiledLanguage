@@ -1757,6 +1757,26 @@ __memcpy__leave_ret_:
 leave
 ret
 
+memdup:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+push r9
+push r10
+mov r9, r10
+call alloc
+pop r10
+pop r9
+mov r11, r10
+mov r10, r9
+mov r9, r8
+call memcpy
+mov r8, r9
+
+__memdup__leave_ret_:
+leave
+ret
+
 sqrtint:
 push rbp
 mov rbp, rsp
@@ -5255,7 +5275,7 @@ ret
 m:
 push rbp
 mov rbp, rsp
-sub rsp, 0x1d8
+sub rsp, 0x1e0
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov r9, STRING_CONSTANT_20
@@ -5288,17 +5308,26 @@ call print_integer
 mov QWORD [rbp-0x1d0], 0x0
 mov rbx, rbp
 sub rbx, 0x1b8
+mov r9,rbx
+mov r10, 0x19
+call memdup
+mov QWORD [rbp-0x1d0], r8
+mov r9, QWORD [rbp-0x1d0]
+call print_string
+mov QWORD [rbp-0x1d8], 0x0
+mov rbx, rbp
+sub rbx, 0x1b8
 mov r15,rbx
 mov rax, 0x0
 mov rbx, 0x8
 mul rbx
 mov r14, rax
 mov rbx, [r15+r14]
-mov [rbp-0x1d0],rbx
-mov r9, QWORD [rbp-0x1d0]
+mov [rbp-0x1d8],rbx
+mov r9, QWORD [rbp-0x1d8]
 call char
-mov QWORD [rbp-0x1d0], r8
-mov r9, QWORD [rbp-0x1d0]
+mov QWORD [rbp-0x1d8], r8
+mov r9, QWORD [rbp-0x1d8]
 call print_char
 
 __m__leave_ret_:

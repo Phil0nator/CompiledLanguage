@@ -128,3 +128,24 @@ function fast memcpy(destination, source, length){
 
 
 }
+
+function fast memdup(source, length){
+
+    __asm{
+        "
+        push r9
+        push r10
+        mov r9, r10
+        call alloc
+        pop r10
+        pop r9
+        mov r11, r10
+        mov r10, r9
+        mov r9, r8
+        call memcpy
+        mov r8, r9
+
+        "
+    }
+
+}

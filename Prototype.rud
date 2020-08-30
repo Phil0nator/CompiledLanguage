@@ -24,6 +24,10 @@ function main(args, numargs){
      (fntest)(&t);
      print_integer(t);
 
+     var ch3;
+     memdup(&ch2, 25)->ch3;
+     print_string(ch3);
+
 
      var ch;
      (&ch2)[0]->ch;
