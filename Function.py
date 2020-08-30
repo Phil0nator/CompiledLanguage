@@ -441,7 +441,6 @@ class Function:
             #max expression size
         if(self.current_token.tok in T_CLOSEP+T_COMMA+T_EOL):
             self.advance()
-            
         if(reg == None): 
        
             if(len(expr) == 1):
@@ -580,7 +579,13 @@ class Function:
                 elif(expr[1] == "--"):
                     self.addline("dec %s"%_reg)
                 
-                    
+                if(expr[0] == T_AMPERSAND):
+                    if(isinstance(expr[1], Declaration)):
+                        self.addline("mov %s, rbp"%_reg)
+                        self.addline("sub %s, %s"%(_reg, hex(expr[1].offset)))
+                    elif self.compiler.globalExists(expr[1]):
+                        self.addline("mov %s, %s"%expr[1])
+
 
 
 
@@ -603,6 +608,7 @@ class Function:
                 if(expr[1] == "--"):
                     self.addline("movss xmm14, __FLT_STANDARD_1")
                     self.addline("subss xmm15, xmm14")
+                
                 
 
 

@@ -8,11 +8,10 @@ function main(args, numargs){
 
      
      printformat("The number of commandline arguments is: %u\n", numargs);
-     var st;
-     Vector.init(st, 8)->st;
-     float test;
-     tan_approx(1.0)->test;
-     print_floatln(test);
+     var ch1 = "This is a piece of memory";
+     var[50] ch2;
+     memcpy(&ch2, ch1, 25);
+     print_string(&ch2);
      
 
 

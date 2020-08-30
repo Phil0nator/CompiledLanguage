@@ -105,3 +105,26 @@ function fast reallocate(ptr, newsize){
 
 
 }
+
+
+
+function fast memcpy(destination, source, length){
+
+    __asm{"
+        xor r8, r8
+        xor r12, r12
+        __memcpy_flp_0x0:
+        mov r12, [r10+r8]
+        mov [r9+r8], r12
+        inc r8
+        cmp r8, r11
+        jne __memcpy_flp_0x0
+
+        __memcpy_flp_0x0_endfinal:
+    
+    
+    
+    "}
+
+
+}
