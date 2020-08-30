@@ -1205,10 +1205,13 @@ class Function:
             self.addline("mul rbx")
             self.addline("mov r14, rax")
             isindexptr=True
+        elif(self.current_token.tok == "="):
+            self.addline("xor r14, r14")
+            isindexptr=True
 
         if(isindexptr):
-            if(self.current_token.tok != "]"): throw(InvalidLefthandExpression(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
-            self.advance()
+            if(self.current_token.tok == "]"): 
+                self.advance()
             if(self.current_token.tok == T_EQUALS):
                 self.advance()
                 self.addline("push r15")

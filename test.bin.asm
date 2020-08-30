@@ -5233,10 +5233,8 @@ mov rbx, [rbp-0x8]
 mov rbx, [rbx]
 mov r9,rbx
 call print_integer
-mov rbx, rbp
-sub rbx, 0x8
-mov r15,rbx
-mov r14, 0x0
+mov r15, QWORD [rbp-0x8]
+xor r14, r14
 push r15
 push r14
 mov rbx, [rbp-0x8]
@@ -5249,9 +5247,6 @@ mov r13,rax
 pop r14
 pop r15
 mov [r15+r14], r13
-mov r8, QWORD [rbp-0x8]
-cvtsi2ss xmm8,r8
-jmp __addtwo__leave_ret_
 
 __addtwo__leave_ret_:
 leave
@@ -5288,7 +5283,6 @@ mov rbx, rbp
 sub rbx, 0x1c0
 mov r9,rbx
 call r15
-mov QWORD [rbp-0x1c0], r8
 mov r9, QWORD [rbp-0x1c0]
 call print_integer
 mov QWORD [rbp-0x1d0], 0x0

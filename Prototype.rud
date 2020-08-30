@@ -5,8 +5,8 @@ final var endl = "\n";
 
 function addtwo(ref){
      print_integer(*ref);
-     (&ref)@0]=(*ref)*2;
-     return ref;
+     (ref)=(*ref)*2;
+     
 
 }
 
@@ -21,7 +21,7 @@ function main(args, numargs){
      print_string(&ch2);
      var t = 6;
      var fntest = addtwo;
-     (fntest)(&t)->t;
+     (fntest)(&t);
      print_integer(t);
 
 
