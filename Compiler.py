@@ -303,6 +303,12 @@ class Compiler:
         else:
             return Function(name,[],[Token(T_EOF)], self, [])
 
+    def functionExists(self, name):
+        for fn in self.functions:
+            if(fn.name == name):
+                return True
+        return False
+
     """
     #Based on the current position, read the current line and identify a global variable
     """

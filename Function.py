@@ -171,7 +171,17 @@ class Function:
         
         self.addline("mov r15, 0x8")
         self.addline("mul r15") #account for sizeof(var)
-        self.addline(load_value_toreg(self.getDeclarationByID(id).offset, "rbx")) #store origin in rbx
+
+        decl = self.getDeclarationByID(id)
+        
+        if(decl.isarr):
+            self.addline("mov rbx, rbp")
+            self.addline("sub rbx, %s"%hex(decl.offset))
+        else:
+            self.addline(load_value_toreg(self.getDeclarationByID(id).offset, "rbx")) #store origin in rbx
+        
+        
+        
         self.advance()
         
         if(self.current_token.tok == "->"):
@@ -189,6 +199,8 @@ class Function:
                     self.addline("mov %s,[rbx+rax]"% value_of_global(self.current_token.value, self.compiler) )
             else:
                 if(self.getDeclarationByID(self.current_token.value).isfloat):
+
+                    
                     self.addline("movss xmm10, [rbx+rax]")
                     self.addline("movss [rbp-%s], xmm10"%self.getDeclarationByID(self.current_token.value).offset)
                 
@@ -579,13 +591,21 @@ class Function:
                 elif(expr[1] == "--"):
                     self.addline("dec %s"%_reg)
                 
-                if(expr[0] == T_AMPERSAND):
+                elif(expr[0] == T_AMPERSAND):
                     if(isinstance(expr[1], Declaration)):
                         self.addline("mov %s, rbp"%_reg)
                         self.addline("sub %s, %s"%(_reg, hex(expr[1].offset)))
-                    elif self.compiler.globalExists(expr[1]):
-                        self.addline("mov %s, %s"%expr[1])
-
+                    elif self.compiler.globalExists(expr[1]) or self.compiler.functionExists(expr[1]):
+                        self.addline("mov %s, %s"%(_reg,expr[1]))
+                    
+                
+                elif(expr[0] == "*"):
+                    if(isinstance(expr[1], Declaration)):
+                        self.addline("mov %s, [rbp-%s]"%(_reg, hex(expr[1].offset)))
+                        self.addline("mov %s, [%s]"%(_reg,_reg))
+                    elif self.compiler.globalExists(expr[1]) or self.compiler.functionExists(expr[1]):
+                        self.addline("mov %s, [%s]"%(_reg,expr[1]))
+                        
 
 
 
@@ -829,8 +849,9 @@ class Function:
             isarr=True
             self.advance()
             if(self.current_token.tok != T_INT): throw(InvalidStackspaceAllocator(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
-            size = int(self.current_token.value)*8
+            size = (int(self.current_token.value)+1)*8
             self.allocationoffset+=size
+            self.allocationCounter+=size
             self.advance()
             if(self.current_token.tok != T_CLSLINDEX): throw(InvalidStackspaceAllocator(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
             self.advance()
@@ -845,6 +866,8 @@ class Function:
         self.advance()
         if(self.current_token.tok == T_EOL): #variable declaration without assignment
             self.appendDeclaration(id,flt)
+            
+
             if(not flt):
                 if(not isarr):
                     self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, "0x0"))
@@ -865,11 +888,19 @@ class Function:
 
             return
         if(isarr):return
-
         if(self.current_token.tok == "="): #with assignment
             self.advance()
             self.appendDeclaration(id,flt)
-            if(not self.compiler.globalExists(id)):
+            
+            terma = self.current_token.value
+
+            if(self.compiler.functionExists(terma)):
+                self.addline(place_value_from_reg(self.declarations[len(self.declarations)-1].offset, terma))
+                self.advance()
+                if(self.current_token.tok != T_EOL):      throw(InvalidVariableDeclarator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+                self.advance()
+            
+            elif(not self.compiler.globalExists(id)):
                 self.evaluation_wrapper(decl=self.declarations[len(self.declarations)-1])#evaluate expression, and place it into this declaration
             else:
                 self.evaluation_wrapper(glob=id)
@@ -1155,19 +1186,130 @@ class Function:
 
         self.bodytext = self.bodytext.replace("&&ALLOCATOR&&","%s"%(self.allocator))
         self.bodytext = FNO(self).optimize()
+    
+
+    def buildLeftsideExpression(self):
+        self.advance()
+        self.evaluation_wrapper(reg="r15") # store expression value in r15
+        isindexptr = False
+        if(self.current_token.tok == "@"):
+            #build pointer assignent
+            self.advance()
+            self.evaluation_wrapper(reg = "r14")
+            isindexptr=True
+        elif (self.current_token.tok == "["):
+            #build indexer assignment
+            self.advance()
+            self.evaluation_wrapper(reg="rax")
+            self.addline("mov rbx, 0x8")
+            self.addline("mul rbx")
+            self.addline("mov r14, rax")
+            isindexptr=True
+
+        if(isindexptr):
+            if(self.current_token.tok != "]"): throw(InvalidLefthandExpression(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+            self.advance()
+            if(self.current_token.tok == T_EQUALS):
+                self.advance()
+                self.addline("push r15")
+                self.addline("push r14")
+                self.evaluation_wrapper(reg="r13")
+                #if(self.current_token.tok != T_EOL) :  throw(InvalidLefthandExpression(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+                self.addline("pop r14")
+                self.addline("pop r15")
+                self.addline("mov [r15+r14], r13")
+            
+            elif (self.current_token.tok == "->"):
+                self.advance()
+                if(self.current_token.tok != T_ID) :  throw(InvalidLefthandExpression(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+                id = self.current_token.value
+                self.advance()
+                if(self.compiler.globalExists(id)):
+                    if(self.compiler.globalIsFloat(id)):
+                        self.addline("movss xmm10,[r15+r14]")
+                        self.addline("movss [%s], xmm10"%id)
+                    else:
+                        self.addline("mov rbx, [r15+r14]")
+                        self.addline("mov [%s],rbx"%id)
+                else:
+                    d = self.getDeclarationByID(id)
+                    if(d.isfloat):
+                        self.addline("movss xmm10,[r15+r14]")
+                        self.addline("movss [rbp-%s], xmm10"%hex(d.offset))
+                    else:
+                        self.addline("mov rbx, [r15+r14]")
+                        self.addline("mov [rbp-%s],rbx"%hex(d.offset))
+                
+                if(self.current_token.tok != T_EOL) :  throw(InvalidLefthandExpression(self.current_token.start,self.current_token.end,self.current_token.value,self.current_token.tok))
+
+
+
+
+            return
+
+
+        if (self.current_token.tok == "("):
+            #build fnptr call
+            self.advance()
+            pindex = 0
+            while self.current_token.tok != T_CLOSEP and self.current_token.tok != "->" and self.current_token.tok != T_EOL:
+                if(self.current_token.tok == T_COMMA):
+                    self.advance()
+                
+                self.evaluation_wrapper(reg=parameter_registers[pindex])
+                #self.addline("cvttss2si %s, %s"%(parameter_registers[pindex],flt_parameter_registers[pindex]))
+                pindex+=1
+            
+            self.addline("call r15")
+            
+            
+            
+            
+            
+            #same as end of fncall
+            
+            
+            if(self.current_token.tok == ")"):
+                self.advance()#move past ')'
         
+        
+            if(self.current_token.tok == "->"): #use return value
+                self.advance()
+                if(self.current_token.tok != T_ID):
+                    throw(InvalidFunctionReturnDestination(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
+
+                if(self.compiler.globalExists( self.current_token.value ) ):
+                    if(self.compiler.globalIsFloat(self.current_token.value)):
+                        self.addline("movss %s, xmm8"%value_of_global(self.current_token.value, self.compiler).replace("QWORD", ""))
+
+                    else:
+                        self.addline("mov %s,r8"% value_of_global(self.current_token.value, self.compiler) )
+                else:
+                    if(self.getDeclarationByID(self.current_token.value).isfloat):
+                        self.addline("movss [rbp-%s], xmm8"%hex(self.getDeclarationByID(self.current_token.value).offset))
+                    else:
+                        self.addline(place_value_from_reg(self.getDeclarationByID(self.current_token.value).offset, "r8"))
+            for i in range(len(self.params)):
+                pass
+                #########self.addline("pop %s"%(parameter_registers[len(self.params)-(i+1)]))
+            
+            self.advance() # end the line
+
 
 
     def doCompilations(self, forblock=False):
         opens = 0
         while self.current_token != None and self.current_token.tok != T_EOF and self.current_token.tok != T_CLSCOPE:
             
-            if(self.current_token.tok in T_EOL+T_OPENP+T_OSCOPE+T_CLSCOPE+T_COLON):
+            if(self.current_token.tok in T_EOL+T_OSCOPE+T_CLSCOPE+T_COLON):
                 self.advance()
             elif(self.current_token.tok == T_KEYWORD):
                 self.buildKeywordStatement()
             elif(self.current_token.tok == T_ID):
                 self.buildIDStatement()
+            elif(self.current_token.tok == T_OPENP):
+                self.buildLeftsideExpression()
+
             else:
                 throw(UnkownStatementInitiator(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
     def getFinalText(self):

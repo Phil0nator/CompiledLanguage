@@ -117,3 +117,7 @@ class InvalidLabelDeclaration(Error):
 class MissingSemiColon(Error):
     def __init__(self, start, end, details, tok):
         super().__init__(start,end,"Missing Semicolon on end of line", details, tok)
+
+class InvalidLefthandExpression(Error):
+    def __init__(self, start, end, details, tok):
+        super().__init__(start,end,"Invalid Left Hand Expression", details, tok)

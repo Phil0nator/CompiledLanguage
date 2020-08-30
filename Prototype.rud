@@ -3,6 +3,13 @@ var bruhman = 100;
 final var endl = "\n";
 
 
+function addtwo(ref){
+     print_integer(*ref);
+     (&ref)@0]=(*ref)*2;
+     return ref;
+
+}
+
 
 function main(args, numargs){
 
@@ -12,7 +19,19 @@ function main(args, numargs){
      var[50] ch2;
      memcpy(&ch2, ch1, 25);
      print_string(&ch2);
+     var t = 6;
+     var fntest = addtwo;
+     (fntest)(&t)->t;
+     print_integer(t);
+
+
+     var ch;
+     (&ch2)[0]->ch;
+     char(ch)->ch;
+     print_char(ch);
+
      
+
 
 
 }
