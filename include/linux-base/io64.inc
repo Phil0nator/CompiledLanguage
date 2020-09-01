@@ -60,6 +60,10 @@ CEXTERN thrd_equal
 CEXTERN thrd_detach
 CEXTERN thrd_join
 
+
+
+CEXTERN inet_aton
+
 ; Make stack be 16 bytes aligned
 %macro ALIGN_STACK 0.nolist
     enter 0, 0

@@ -61,6 +61,10 @@ CEXTERN thrd_equal
 CEXTERN thrd_detach
 CEXTERN thrd_join
 
+
+
+CEXTERN inet_aton
+
 ; Make stack be 16 bytes aligned
 %macro ALIGN_STACK 0.nolist
     enter 0, 0
@@ -1098,9 +1102,10 @@ STRING_CONSTANT_15: db `[ `, 0
 STRING_CONSTANT_16: db `%s, `, 0
 STRING_CONSTANT_17: db `%s ]\n`, 0
 STRING_CONSTANT_18: db `Stack: Error: StackOverflow.`, 0
-STRING_CONSTANT_19: db `\n`, 0
-STRING_CONSTANT_20: db `The number of commandline arguments is: %u\n`, 0
-STRING_CONSTANT_21: db `This is a piece of memory`, 0
+STRING_CONSTANT_19: db `The number of commandline arguments is: %u\n`, 0
+STRING_CONSTANT_20: db `127.0.0.1`, 0
+STRING_CONSTANT_21: db `Could Not Bind`, 0
+STRING_CONSTANT_22: db `Could not bind`, 0
 __FLT_STANDARD_1: dq __float32__(1.0)
 __BOOL_STANDARD_TRUE: dq -0x1
 __BOOL_STANDARD_FALSE: dq 0x0
@@ -1139,7 +1144,59 @@ O_CREATE: dq 0x40
 SEEK_CUR: dq 0x1
 RAND_MAX: dq __float32__(32767.0)
 CLOCK_MONOTONIC: dq 0x1
-endl: db `\n`, 0
+SOCK_STREAM: dq 0x1
+SOCK_DGRAM: dq 0x2
+SOCK_RAW: dq 0x3
+SOCK_RDM: dq 0x4
+SOCK_SEQPACKET: dq 0x5
+SOCK_PACKET: dq 0xa
+AF_UNSPEC: dq 0x0
+AF_UNIX: dq 0x1
+AF_INET: dq 0x2
+AF_AX25: dq 0x3
+AF_IPX: dq 0x4
+AF_APPLETALK: dq 0x5
+AF_NETROM: dq 0x6
+AF_BRIDGE: dq 0x7
+AF_AAL5: dq 0x8
+AF_X25: dq 0x9
+AF_INET6: dq 0xa
+AF_MAX: dq 0xc
+SOCK_NOPROT: dq 0x0
+SOMAXCONN: dq 0x80
+MSG_OOB: dq 0x1
+MSG_PEEK: dq 0x2
+MSG_DONTROUTE: dq 0x4
+MSG_PROXY: dq 0x10
+SOL_IP: dq 0x0
+SOL_IPX: dq 0x100
+SOL_AX25: dq 0x101
+SOL_ATALK: dq 0x102
+SOL_NETROM: dq 0x103
+SOL_TCP: dq 0x6
+SOL_UDP: dq 0x11
+IP_TOS: dq 0x1
+IPTOS_LOWDELAY: dq 0x10
+IPTOS_THROUGHPUT: dq 0x8
+IPTOS_RELIABILITY: dq 0x4
+IP_TTL: dq 0x2
+IP_HDRINCL: dq 0x3
+IP_OPTIONS: dq 0x4
+IP_MULTICAST_IF: dq 0x20
+IP_MULTICAST_TTL: dq 0x21
+IP_MULTICAST_LOOP: dq 0x22
+IP_ADD_MEMBERSHIP: dq 0x23
+IP_DROP_MEMBERSHIP: dq 0x24
+IP_DEFAULT_MULTICAST_TTL: dq 0x1
+IP_DEFAULT_MULTICAST_LOOP: dq 0x1
+IP_MAX_MEMBERSHIPS: dq 0x14
+IPX_TYPE: dq 0x1
+TCP_NODELAY: dq 0x1
+TCP_MAXSEG: dq 0x2
+SOPRI_INTERACTIVE: dq 0x0
+SOPRI_NORMAL: dq 0x1
+SOPRI_BACKGROUND: dq 0x2
+SIZEOF_SOCKADDR_IN: dq 0x20
 FLT_STANDARD_ZERO: dq __float32__(0.0)
 isFloat: dq 0x1
 
@@ -1212,7 +1269,6 @@ __expstack_int31: resb 0x8
 __expstack_flt31: resb 0x8
 currentVector: resb 0x8
 current_filereader: resb 0x8
-bruhman: resb 0x8
 
 
 
@@ -1230,13 +1286,13 @@ sub rsp, 0x8
 ALIGN_STACK
    xor r11, r11
    xor r12, r12
-   mov rdi, 0x30
+   mov rdi, 0x20
    call malloc
    xor r11, r11
    xor r12, r12
    test rax, rax ; check for error
 
-   ;mov byte[rax+0x30], 0x0
+   ;mov byte[rax+0x20], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -1253,13 +1309,13 @@ sub rsp, 0x8
 ALIGN_STACK
    xor r11, r11
    xor r12, r12
-   mov rdi, 0x20
+   mov rdi, 0x10
    call malloc
    xor r11, r11
    xor r12, r12
    test rax, rax ; check for error
 
-   ;mov byte[rax+0x20], 0x0
+   ;mov byte[rax+0x10], 0x0
 
    mov r8, rax
    UNALIGN_STACK
@@ -1268,98 +1324,6 @@ ret
 
         
 FileReader:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-ALIGN_STACK
-   xor r11, r11
-   xor r12, r12
-   mov rdi, 0x38
-   call malloc
-   xor r11, r11
-   xor r12, r12
-   test rax, rax ; check for error
-
-   ;mov byte[rax+0x38], 0x0
-
-   mov r8, rax
-   UNALIGN_STACK
-leave
-ret
-
-        
-FileWriter:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-ALIGN_STACK
-   xor r11, r11
-   xor r12, r12
-   mov rdi, 0x20
-   call malloc
-   xor r11, r11
-   xor r12, r12
-   test rax, rax ; check for error
-
-   ;mov byte[rax+0x20], 0x0
-
-   mov r8, rax
-   UNALIGN_STACK
-leave
-ret
-
-        
-TimeSpec:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-ALIGN_STACK
-   xor r11, r11
-   xor r12, r12
-   mov rdi, 0x30
-   call malloc
-   xor r11, r11
-   xor r12, r12
-   test rax, rax ; check for error
-
-   ;mov byte[rax+0x30], 0x0
-
-   mov r8, rax
-   UNALIGN_STACK
-leave
-ret
-
-        
-LLNode:
-
-push rbp
-mov rbp, rsp
-sub rsp, 0x8
-
-ALIGN_STACK
-   xor r11, r11
-   xor r12, r12
-   mov rdi, 0x20
-   call malloc
-   xor r11, r11
-   xor r12, r12
-   test rax, rax ; check for error
-
-   ;mov byte[rax+0x20], 0x0
-
-   mov r8, rax
-   UNALIGN_STACK
-leave
-ret
-
-        
-LinkedList:
 
 push rbp
 mov rbp, rsp
@@ -1382,7 +1346,168 @@ leave
 ret
 
         
+FileWriter:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x10
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   ;mov byte[rax+0x10], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+TimeSpec:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x20
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   ;mov byte[rax+0x20], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+LLNode:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x10
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   ;mov byte[rax+0x10], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+LinkedList:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x18
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   ;mov byte[rax+0x18], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
 Stack:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x10
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   ;mov byte[rax+0x10], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+sockaddr_in:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x20
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   ;mov byte[rax+0x20], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+in_addr:
+
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+
+ALIGN_STACK
+   xor r11, r11
+   xor r12, r12
+   mov rdi, 0x8
+   call malloc
+   xor r11, r11
+   xor r12, r12
+   test rax, rax ; check for error
+
+   ;mov byte[rax+0x8], 0x0
+
+   mov r8, rax
+   UNALIGN_STACK
+leave
+ret
+
+        
+TCPSocket:
 
 push rbp
 mov rbp, rsp
@@ -2018,19 +2143,19 @@ mov QWORD [rbp-0x18], r8
 call Vector
 mov QWORD [rbp-0x8], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x18]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
+add r8, 0x10
+mov rax, 0x0
+mov [r8], rax
+mov r8, QWORD [rbp-0x8]
+add r8, 0x18
+mov rax, 0x0
+mov [r8], rax
+mov r8, QWORD [rbp-0x8]
 add r8, 0x20
-mov rax, 0x0
-mov [r8], rax
-mov r8, QWORD [rbp-0x8]
-add r8, 0x28
-mov rax, 0x0
-mov [r8], rax
-mov r8, QWORD [rbp-0x8]
-add r8, 0x30
 mov rax, QWORD [rbp-0x10]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
@@ -2049,13 +2174,13 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x28], rcx
 mov r9, QWORD [rbp-0x18]
@@ -2068,16 +2193,16 @@ mov QWORD [rbp-0x20], r8
 mov r14, QWORD [rbp-0x20]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__Vector.resize__0x1bb
+push __cmpblock__Vector.resize__0x1ba
 je memerror
 add rsp, 0x8
-__cmpblock__Vector.resize__0x1bb:
+__cmpblock__Vector.resize__0x1ba:
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x20]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x10]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
@@ -2106,7 +2231,7 @@ sub rsp, 0x30
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov rbx, QWORD [rbp-0x10]
@@ -2114,18 +2239,18 @@ mov rcx, 0x1
 add rbx, rcx
 mov QWORD [rbp-0x10], rbx
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x10]
 mov [r8], rax
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x28], rcx
 mov r9, QWORD [rbp-0x18]
@@ -2136,7 +2261,7 @@ mov r10,rax
 call reallocate
 mov QWORD [rbp-0x20], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x20]
 mov [r8], rax
 mov r8, QWORD [rbp-0x10]
@@ -2157,38 +2282,38 @@ mov rbx, QWORD [rbp-0x8]
 mov [currentVector], rbx
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x28], rcx
 mov QWORD [rbp-0x30], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x28
+add r8, 0x18
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x30], rcx
 mov r14, QWORD [rbp-0x20]
 mov r15, QWORD [rbp-0x30]
 cmp r14, r15
-push __cmpblock__Vector.push__0x233
+push __cmpblock__Vector.push__0x232
 jge expand_current_vector
 add rsp, 0x8
-__cmpblock__Vector.push__0x233:
+__cmpblock__Vector.push__0x232:
 mov QWORD [rbp-0x30], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x30]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov rax, QWORD [rbp-0x20]
@@ -2203,7 +2328,7 @@ mov rcx, 0x1
 add rbx, rcx
 mov QWORD [rbp-0x20], rbx
 mov r8, QWORD [rbp-0x8]
-add r8, 0x28
+add r8, 0x18
 mov rax, QWORD [rbp-0x20]
 mov [r8], rax
 mov r8, QWORD [rbp-0x10]
@@ -2224,16 +2349,16 @@ mov [currentVector], rbx
 mov QWORD [rbp-0x10], 0x0
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x28
+add r8, 0x18
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov rbx, QWORD [rbp-0x20]
@@ -2247,7 +2372,7 @@ mov rbx, QWORD [rbp-0x10]
 mov r15,QWORD [rbx+rax]
 mov QWORD [rbp-0x28], r15
 mov r8, QWORD [rbp-0x8]
-add r8, 0x28
+add r8, 0x18
 mov rax, QWORD [rbp-0x20]
 mov [r8], rax
 mov r8, QWORD [rbp-0x28]
@@ -2266,13 +2391,13 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x28], rcx
 mov rax, QWORD [rbp-0x10]
@@ -2300,11 +2425,11 @@ mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x28], rcx
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov rax, QWORD [rbp-0x10]
@@ -2326,17 +2451,17 @@ sub rsp, 0x40
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov r9, STRING_CONSTANT_4
@@ -2403,17 +2528,17 @@ sub rsp, 0x40
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov r9, STRING_CONSTANT_7
@@ -2501,7 +2626,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r8, QWORD [rbp-0x10]
@@ -2523,7 +2648,7 @@ mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov QWORD [rbp-0x30], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x30], rcx
 mov QWORD [rbp-0x38], 0x0
@@ -2568,7 +2693,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x10]
@@ -2692,11 +2817,11 @@ mov r9, QWORD [rbp-0x18]
 mov r10, QWORD [rbp-0x10]
 call strcpy
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x18]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x20]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
@@ -2715,7 +2840,7 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
@@ -2741,7 +2866,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r8, QWORD [rbp-0x10]
@@ -2760,12 +2885,12 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x10]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov r9, QWORD [rbp-0x18]
@@ -2773,7 +2898,7 @@ mov r10, QWORD [rbp-0x20]
 call strAppend
 mov QWORD [rbp-0x18], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x18]
 mov [r8], rax
 mov QWORD [rbp-0x28], 0x0
@@ -2781,7 +2906,7 @@ mov r9, QWORD [rbp-0x18]
 call strlen
 mov QWORD [rbp-0x28], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x28]
 mov [r8], rax
 mov r8, QWORD [rbp-0x18]
@@ -2800,7 +2925,7 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r9, QWORD [rbp-0x18]
@@ -2808,7 +2933,7 @@ mov r10, QWORD [rbp-0x10]
 call strAppend
 mov QWORD [rbp-0x18], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x18]
 mov [r8], rax
 mov QWORD [rbp-0x20], 0x0
@@ -2816,7 +2941,7 @@ mov r9, QWORD [rbp-0x18]
 call strlen
 mov QWORD [rbp-0x20], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x20]
 mov [r8], rax
 mov r8, QWORD [rbp-0x18]
@@ -2834,7 +2959,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x10]
@@ -2856,7 +2981,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r8, QWORD [rbp-0x10]
@@ -2874,7 +2999,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x10]
@@ -2892,7 +3017,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x10]
@@ -2911,7 +3036,7 @@ mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov QWORD [rbp-0x28], 0x0
@@ -2952,7 +3077,7 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov rbx, QWORD [rbp-0x18]
@@ -2980,12 +3105,12 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x10]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov QWORD [rbp-0x28], 0x0
@@ -3127,12 +3252,12 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x10]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov QWORD [rbp-0x28], 0x0
@@ -3246,7 +3371,7 @@ sub rsp, 0x20
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
@@ -3272,7 +3397,7 @@ mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x28], rcx
 mov QWORD [rbp-0x30], 0x0
@@ -3672,23 +3797,23 @@ mov r10, QWORD [rbp-0x30]
 call reallocate
 mov QWORD [rbp-0x28], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rax, QWORD [rbp-0x20]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x28]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
+add r8, 0x18
+mov rax, 0x0
+mov [r8], rax
+mov r8, QWORD [rbp-0x8]
+add r8, 0x10
+mov rax, 0x0
+mov [r8], rax
+mov r8, QWORD [rbp-0x8]
 add r8, 0x28
-mov rax, 0x0
-mov [r8], rax
-mov r8, QWORD [rbp-0x8]
-add r8, 0x20
-mov rax, 0x0
-mov [r8], rax
-mov r8, QWORD [rbp-0x8]
-add r8, 0x38
 mov rax, QWORD [rbp-0x30]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
@@ -3706,14 +3831,14 @@ sub rsp, 0x20
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x30
+add r8, 0x20
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x10]
 call closeFile
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r9, QWORD [rbp-0x18]
@@ -3734,7 +3859,7 @@ mov rbp, rsp
 sub rsp, 0x10
 mov QWORD [rbp-0x8], 0x0
 mov r8, [current_filereader]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x8], rcx
 mov rbx, QWORD [rbp-0x8]
@@ -3742,7 +3867,7 @@ mov rcx, 0x1
 add rbx, rcx
 mov QWORD [rbp-0x8], rbx
 mov r8, [current_filereader]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x8]
 mov [r8], rax
 
@@ -3759,12 +3884,12 @@ mov rbx, QWORD [rbp-0x8]
 mov [current_filereader], rbx
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x28
+add r8, 0x18
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
@@ -3777,16 +3902,16 @@ mov rcx, 0x1
 add rbx, rcx
 mov QWORD [rbp-0x10], rbx
 mov r8, QWORD [rbp-0x8]
-add r8, 0x28
+add r8, 0x18
 mov rax, QWORD [rbp-0x10]
 mov [r8], rax
 mov r14, QWORD [rbp-0x20]
 mov r15, 0xa
 cmp r14, r15
-push __cmpblock__FileReader.nextChar__0x275
+push __cmpblock__FileReader.nextChar__0x274
 je FileReader.incline
 add rsp, 0x8
-__cmpblock__FileReader.nextChar__0x275:
+__cmpblock__FileReader.nextChar__0x274:
 mov r8, QWORD [rbp-0x20]
 cvtsi2ss xmm8,r8
 jmp __FileReader.nextChar__leave_ret_
@@ -3805,7 +3930,7 @@ call String
 mov QWORD [rbp-0x10], r8
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r9, QWORD [rbp-0x10]
@@ -3835,7 +3960,7 @@ mov r11, [WMODE_WPLUSA]
 call openFile
 mov QWORD [rbp-0x20], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x20]
 mov [r8], rax
 mov QWORD [rbp-0x28], 0x0
@@ -3846,7 +3971,7 @@ mov r10, STRING_CONSTANT_11
 call String.init
 mov QWORD [rbp-0x28], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x28]
 mov [r8], rax
 mov r8, QWORD [rbp-0x8]
@@ -3866,7 +3991,7 @@ mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r9, QWORD [rbp-0x10]
@@ -3888,14 +4013,14 @@ sub rsp, 0x20
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x10]
 call String.destroy
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r9, QWORD [rbp-0x18]
@@ -4086,7 +4211,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r8, QWORD [rbp-0x10]
@@ -4104,7 +4229,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r8, QWORD [rbp-0x10]
@@ -4122,7 +4247,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov rax, QWORD [rbp-0x10]
@@ -4148,19 +4273,19 @@ mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov QWORD [rbp-0x30], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r8, QWORD [rbp-0x10]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x28], rcx
 mov r8, QWORD [rbp-0x10]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x30], rcx
 mov rbx, QWORD [rbp-0x18]
@@ -4175,17 +4300,17 @@ mov r8, 0
 mov r14, QWORD [rbp-0x18]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__TimeSpec.equals__0x2c0
+push __cmpblock__TimeSpec.equals__0x2be
 jne __TimeSpec.equals__leave_ret_
 add rsp, 0x8
-__cmpblock__TimeSpec.equals__0x2c0:
+__cmpblock__TimeSpec.equals__0x2be:
 mov r14, QWORD [rbp-0x28]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__TimeSpec.equals__0x36f
+push __cmpblock__TimeSpec.equals__0x36d
 jne __TimeSpec.equals__leave_ret_
 add rsp, 0x8
-__cmpblock__TimeSpec.equals__0x36f:
+__cmpblock__TimeSpec.equals__0x36d:
 mov r8, 0x1
 cvtsi2ss xmm8,r8
 jmp __TimeSpec.equals__leave_ret_
@@ -4205,19 +4330,19 @@ mov QWORD [rbp-0x20], 0x0
 mov QWORD [rbp-0x28], 0x0
 mov QWORD [rbp-0x30], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r8, QWORD [rbp-0x10]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x28], rcx
 mov r8, QWORD [rbp-0x10]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x30], rcx
 mov rbx, QWORD [rbp-0x18]
@@ -4232,25 +4357,25 @@ mov r8, 1
 mov r14, QWORD [rbp-0x18]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__TimeSpec.isLaterThan__0x2c0
+push __cmpblock__TimeSpec.isLaterThan__0x2be
 jg __TimeSpec.isLaterThan__leave_ret_
 add rsp, 0x8
-__cmpblock__TimeSpec.isLaterThan__0x2c0:
+__cmpblock__TimeSpec.isLaterThan__0x2be:
 mov r8, 0
 mov r14, QWORD [rbp-0x28]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__TimeSpec.isLaterThan__0x391
+push __cmpblock__TimeSpec.isLaterThan__0x38f
 jl __TimeSpec.isLaterThan__leave_ret_
 add rsp, 0x8
-__cmpblock__TimeSpec.isLaterThan__0x391:
+__cmpblock__TimeSpec.isLaterThan__0x38f:
 mov r14, QWORD [rbp-0x18]
 mov r15, 0x0
 cmp r14, r15
-push __cmpblock__TimeSpec.isLaterThan__0x44e
+push __cmpblock__TimeSpec.isLaterThan__0x44c
 jne __TimeSpec.isLaterThan__leave_ret_
 add rsp, 0x8
-__cmpblock__TimeSpec.isLaterThan__0x44e:
+__cmpblock__TimeSpec.isLaterThan__0x44c:
 mov r8, 0x1
 cvtsi2ss xmm8,r8
 jmp __TimeSpec.isLaterThan__leave_ret_
@@ -4313,11 +4438,11 @@ mov QWORD [rbp-0x10], 0x0
 call LLNode
 mov QWORD [rbp-0x10], r8
 mov r8, QWORD [rbp-0x10]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x8]
 mov [r8], rax
 mov r8, QWORD [rbp-0x10]
-add r8, 0x20
+add r8, 0x10
 mov rax, 0x0
 mov [r8], rax
 mov r8, QWORD [rbp-0x10]
@@ -4335,7 +4460,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x10]
 mov [r8], rax
 
@@ -4351,14 +4476,14 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov r9, QWORD [rbp-0x10]
 call LLNode.init
 mov QWORD [rbp-0x18], r8
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x18]
 mov [r8], rax
 
@@ -4373,7 +4498,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r8, QWORD [rbp-0x10]
@@ -4391,7 +4516,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r8, QWORD [rbp-0x10]
@@ -4410,7 +4535,7 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x10]
 mov [r8], rax
 mov r8, QWORD [rbp-0x18]
@@ -4428,7 +4553,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x8]
@@ -4454,7 +4579,7 @@ mov r9, QWORD [rbp-0x8]
 call LLNode.init
 mov QWORD [rbp-0x18], r8
 mov r8, QWORD [rbp-0x10]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x18]
 mov [r8], rax
 mov r8, QWORD [rbp-0x10]
@@ -4490,7 +4615,7 @@ sub rsp, 0x30
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
@@ -4542,7 +4667,7 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
@@ -4587,7 +4712,7 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov rbx, QWORD [rbp-0x10]
@@ -4645,7 +4770,7 @@ mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov rbx, QWORD [rbp-0x10]
@@ -4709,7 +4834,7 @@ mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov QWORD [rbp-0x28], 0x0
@@ -4792,7 +4917,7 @@ mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], r11
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov QWORD [rbp-0x28], 0x0
@@ -4897,7 +5022,7 @@ sub rsp, 0x38
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
@@ -4960,7 +5085,7 @@ sub rsp, 0x38
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
@@ -5023,7 +5148,7 @@ sub rsp, 0x28
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
@@ -5076,11 +5201,11 @@ mov r9, QWORD [rbp-0x8]
 call alloc
 mov QWORD [rbp-0x18], r8
 mov r8, QWORD [rbp-0x10]
-add r8, 0x18
+add r8, 0x8
 mov rax, QWORD [rbp-0x18]
 mov [r8], rax
 mov r8, QWORD [rbp-0x10]
-add r8, 0x20
+add r8, 0x10
 mov rbx, QWORD [rbp-0x8]
 mov rax,rbx
 mov [r8], rax
@@ -5100,7 +5225,7 @@ mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov rbx, QWORD [rbp-0x18]
@@ -5126,7 +5251,7 @@ jmp __ifntrue_Stack.push_0x1
 __ifntrue_Stack.push_0x1:
 mov QWORD [rbp-0x20], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x20], rcx
 mov rax, QWORD [rbp-0x18]
@@ -5136,7 +5261,7 @@ mov rbx, QWORD [rbp-0x20]
 mov r15, QWORD [rbp-0x10]
 mov QWORD [rbx+rax], r15
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rax, QWORD [rbp-0x18]
 mov [r8], rax
 
@@ -5151,12 +5276,12 @@ sub rsp, 0x28
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov QWORD [rbp-0x20], 0x0
@@ -5167,7 +5292,7 @@ mov rbx, QWORD [rbp-0x18]
 mov r15,QWORD [rbx+rax]
 mov QWORD [rbp-0x20], r15
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rbx, QWORD [rbp-0x10]
 mov rcx, 0x1
 add rbx, rcx
@@ -5188,7 +5313,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r8, QWORD [rbp-0x10]
@@ -5206,12 +5331,12 @@ sub rsp, 0x20
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov QWORD [rbp-0x18], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x20
+add r8, 0x10
 mov rcx, [r8]
 mov QWORD [rbp-0x18], rcx
 mov rbx, QWORD [rbp-0x10]
@@ -5232,7 +5357,7 @@ sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], 0x0
 mov r8, QWORD [rbp-0x8]
-add r8, 0x18
+add r8, 0x8
 mov rcx, [r8]
 mov QWORD [rbp-0x10], rcx
 mov r9, QWORD [rbp-0x10]
@@ -5244,91 +5369,542 @@ __Stack.destroy__leave_ret_:
 leave
 ret
 
-addtwo:
+sockaddr_in.init:
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
+mov QWORD [rbp-0x20], 0x0
+mov QWORD [rbp-0x28], 0x0
+mov r9, QWORD [rbp-0x10]
+call addres_to_inet
+mov QWORD [rbp-0x20], r8
+call sockaddr_in
+mov QWORD [rbp-0x28], r8
+mov r8, QWORD [rbp-0x28]
+add r8, 0x8
+mov rax, QWORD [rbp-0x8]
+mov [r8], rax
+mov r8, QWORD [rbp-0x28]
+add r8, 0x10
+mov rax, QWORD [rbp-0x18]
+mov [r8], rax
+mov r8, QWORD [rbp-0x28]
+add r8, 0x20
+mov rax, 0x0
+mov [r8], rax
+mov r8, QWORD [rbp-0x28]
+add r8, 0x18
+mov rax, QWORD [rbp-0x20]
+mov [r8], rax
+mov r8, QWORD [rbp-0x28]
+cvtsi2ss xmm8,r8
+jmp __sockaddr_in.init__leave_ret_
+
+__sockaddr_in.init__leave_ret_:
+leave
+ret
+
+sockaddr_in.destroy:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x18
+mov rcx, [r8]
+mov QWORD [rbp-0x10], rcx
+mov r9, QWORD [rbp-0x10]
+call destroy
+mov r9, QWORD [rbp-0x8]
+call destroy
+
+__sockaddr_in.destroy__leave_ret_:
+leave
+ret
+
+addres_to_inet:
 push rbp
 mov rbp, rsp
 sub rsp, 0x10
 mov QWORD [rbp-0x8], r9
-mov rbx, [rbp-0x8]
-mov rbx, [rbx]
-mov r9,rbx
-call print_integer
-mov r15, QWORD [rbp-0x8]
-xor r14, r14
-push r15
-push r14
-mov rbx, [rbp-0x8]
-mov rbx, [rbx]
-mov [__expstack_int1],rbx
-mov rax, [__expstack_int1]
-mov rcx, 0x2
-imul rcx
-mov r13,rax
-pop r14
-pop r15
-mov [r15+r14], r13
+push r9
+mov r9, 8
+call alloc
+mov rsi, r8
+pop r9
+mov rdi, r9
+call inet_aton
 
-__addtwo__leave_ret_:
+__addres_to_inet__leave_ret_:
+leave
+ret
+
+sys_socket:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rax, 41; sys_socket syscall
+mov rdi, r9
+mov rsi, r10
+mov rdx, r11
+syscall
+mov r8, rax
+
+__sys_socket__leave_ret_:
+leave
+ret
+
+sys_connect:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rax, 42 ; sys_connect
+mov rdi, r9
+mov rsi, r10
+mov rdx, r11
+syscall
+mov r8, rax
+
+__sys_connect__leave_ret_:
+leave
+ret
+
+sys_accept:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rax, 43 ;sys_accept
+mov rdi, r9
+mov rsi, r10
+mov rdx, r11
+syscall
+mov r8, rax
+
+__sys_accept__leave_ret_:
+leave
+ret
+
+sys_bind:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rax, 49
+mov rdi, r9
+mov rsi, r10
+mov rdx, r11
+syscall
+mov r8, rax
+
+__sys_bind__leave_ret_:
+leave
+ret
+
+sys_listen:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rax, 50
+mov rdi, r9
+mov rsi, r10
+syscall
+mov r8, rax
+
+__sys_listen__leave_ret_:
+leave
+ret
+
+sys_shutdown:
+push rbp
+mov rbp, rsp
+sub rsp, 0x8
+mov rax, 48
+mov rdi, r9
+mov rsi, r10
+syscall
+mov r8, rax
+
+__sys_shutdown__leave_ret_:
+leave
+ret
+
+socketsend:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
+mov r9, QWORD [rbp-0x8]
+mov r10, QWORD [rbp-0x10]
+mov r11, QWORD [rbp-0x18]
+call writeFile
+
+__socketsend__leave_ret_:
+leave
+ret
+
+socketrecv:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
+mov r9, QWORD [rbp-0x8]
+mov r10, QWORD [rbp-0x10]
+mov r11, QWORD [rbp-0x18]
+call readFile
+
+__socketrecv__leave_ret_:
+leave
+ret
+
+TCPSocket.init:
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], 0x0
+call TCPSocket
+mov QWORD [rbp-0x18], r8
+mov QWORD [rbp-0x20], 0x0
+mov r9, [AF_INET]
+mov r10, QWORD [rbp-0x8]
+mov r11, QWORD [rbp-0x10]
+call sockaddr_in.init
+mov QWORD [rbp-0x20], r8
+mov r8, QWORD [rbp-0x18]
+add r8, 0x20
+mov rax, QWORD [rbp-0x20]
+mov [r8], rax
+mov r8, QWORD [rbp-0x18]
+add r8, 0x10
+mov rax, QWORD [rbp-0x8]
+mov [r8], rax
+mov r8, QWORD [rbp-0x18]
+add r8, 0x18
+mov rax, QWORD [rbp-0x10]
+mov [r8], rax
+mov QWORD [rbp-0x28], 0x0
+mov r9, [AF_INET]
+mov r10, [SOCK_STREAM]
+mov r11, [SOCK_NOPROT]
+call sys_socket
+mov QWORD [rbp-0x28], r8
+mov r8, QWORD [rbp-0x18]
+add r8, 0x8
+mov rax, QWORD [rbp-0x28]
+mov [r8], rax
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __TCPSocket.init__leave_ret_
+
+__TCPSocket.init__leave_ret_:
+leave
+ret
+
+TCPSocket.bind:
+push rbp
+mov rbp, rsp
+sub rsp, 0x28
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x20
+mov rcx, [r8]
+mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-0x18], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x8
+mov rcx, [r8]
+mov QWORD [rbp-0x18], rcx
+mov QWORD [rbp-0x20], 0x0
+mov r9, QWORD [rbp-0x18]
+mov r10, QWORD [rbp-0x10]
+mov r11, [SIZEOF_SOCKADDR_IN]
+call sys_bind
+mov QWORD [rbp-0x20], r8
+mov r8, QWORD [rbp-0x20]
+cvtsi2ss xmm8,r8
+jmp __TCPSocket.bind__leave_ret_
+
+__TCPSocket.bind__leave_ret_:
+leave
+ret
+
+TCPSocket.listen:
+push rbp
+mov rbp, rsp
+sub rsp, 0x20
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x8
+mov rcx, [r8]
+mov QWORD [rbp-0x10], rcx
+mov QWORD [rbp-0x18], 0x0
+mov r9, QWORD [rbp-0x10]
+mov r10, 0x1
+call sys_listen
+mov QWORD [rbp-0x18], r8
+mov r8, QWORD [rbp-0x18]
+cvtsi2ss xmm8,r8
+jmp __TCPSocket.listen__leave_ret_
+
+__TCPSocket.listen__leave_ret_:
+leave
+ret
+
+TCPSocket.accept:
+push rbp
+mov rbp, rsp
+sub rsp, 0x40
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov QWORD [rbp-0x18], 0x0
+call sockaddr_in
+mov QWORD [rbp-0x18], r8
+call TCPSocket
+mov QWORD [rbp-0x10], r8
+mov QWORD [rbp-0x20], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x8
+mov rcx, [r8]
+mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], 0x0
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x18]
+mov rbx, SIZEOF_SOCKADDR_IN
+mov r11,rbx
+call sys_accept
+mov QWORD [rbp-0x28], r8
+mov r8, QWORD [rbp-0x10]
+add r8, 0x8
+mov rax, QWORD [rbp-0x28]
+mov [r8], rax
+mov r8, QWORD [rbp-0x10]
+add r8, 0x20
+mov rax, QWORD [rbp-0x18]
+mov [r8], rax
+mov QWORD [rbp-0x30], 0x0
+mov rax, 0x2
+mov r15, 0x8
+mul r15
+mov rbx, QWORD [rbp-0x18]
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x30], r15
+mov QWORD [rbp-0x38], 0x0
+mov rax, 0x1
+mov r15, 0x8
+mul r15
+mov rbx, QWORD [rbp-0x18]
+mov r15,QWORD [rbx+rax]
+mov QWORD [rbp-0x38], r15
+mov r8, QWORD [rbp-0x10]
+add r8, 0x10
+mov rax, QWORD [rbp-0x30]
+mov [r8], rax
+mov r8, QWORD [rbp-0x10]
+add r8, 0x18
+mov rax, QWORD [rbp-0x38]
+mov [r8], rax
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __TCPSocket.accept__leave_ret_
+
+__TCPSocket.accept__leave_ret_:
+leave
+ret
+
+TCPSocket.send:
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
+mov QWORD [rbp-0x20], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x8
+mov rcx, [r8]
+mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], 0x0
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x10]
+mov r11, QWORD [rbp-0x18]
+call socketsend
+mov QWORD [rbp-0x28], r8
+mov r8, QWORD [rbp-0x28]
+cvtsi2ss xmm8,r8
+jmp __TCPSocket.send__leave_ret_
+
+__TCPSocket.send__leave_ret_:
+leave
+ret
+
+TCPSocket.recv:
+push rbp
+mov rbp, rsp
+sub rsp, 0x30
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], r10
+mov QWORD [rbp-0x18], r11
+mov QWORD [rbp-0x20], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x8
+mov rcx, [r8]
+mov QWORD [rbp-0x20], rcx
+mov QWORD [rbp-0x28], 0x0
+mov r9, QWORD [rbp-0x20]
+mov r10, QWORD [rbp-0x10]
+mov r11, QWORD [rbp-0x18]
+call socketrecv
+mov QWORD [rbp-0x28], r8
+mov r8, QWORD [rbp-0x28]
+cvtsi2ss xmm8,r8
+jmp __TCPSocket.recv__leave_ret_
+
+__TCPSocket.recv__leave_ret_:
+leave
+ret
+
+TCPSocket.getaddr:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x10
+mov rcx, [r8]
+mov QWORD [rbp-0x10], rcx
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __TCPSocket.getaddr__leave_ret_
+
+__TCPSocket.getaddr__leave_ret_:
+leave
+ret
+
+TCPSocket.getport:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x18
+mov rcx, [r8]
+mov QWORD [rbp-0x10], rcx
+mov r8, QWORD [rbp-0x10]
+cvtsi2ss xmm8,r8
+jmp __TCPSocket.getport__leave_ret_
+
+__TCPSocket.getport__leave_ret_:
+leave
+ret
+
+TCPSocket.destroy:
+push rbp
+mov rbp, rsp
+sub rsp, 0x18
+mov QWORD [rbp-0x8], r9
+mov QWORD [rbp-0x10], 0x0
+mov r8, QWORD [rbp-0x8]
+add r8, 0x20
+mov rcx, [r8]
+mov QWORD [rbp-0x10], rcx
+mov r9, QWORD [rbp-0x10]
+call sockaddr_in.destroy
+mov r9, QWORD [rbp-0x8]
+call destroy
+
+__TCPSocket.destroy__leave_ret_:
 leave
 ret
 
 m:
 push rbp
 mov rbp, rsp
-sub rsp, 0x1e0
+sub rsp, 0x48
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
-mov r9, STRING_CONSTANT_20
+mov r9, STRING_CONSTANT_19
 mov r10, QWORD [rbp-0x10]
 call printformat
-mov rbx, STRING_CONSTANT_21
-mov QWORD [rbp-0x18], rbx
-mov QWORD [rbp-0x1b8], rbp
-sub QWORD [rbp-0x1b8], 0x28
-mov rbx, rbp
-sub rbx, 0x1b8
-mov r9,rbx
-mov r10, QWORD [rbp-0x18]
-mov r11, 0x19
-call memcpy
-mov rbx, rbp
-sub rbx, 0x1b8
-mov r9,rbx
+mov QWORD [rbp-0x18], 0x0
+mov QWORD [rbp-0x20], 0x0
+mov r9, STRING_CONSTANT_20
+mov r10, 0x157c
+call TCPSocket.init
+mov QWORD [rbp-0x18], r8
+mov r9, QWORD [rbp-0x18]
+call TCPSocket.bind
+mov QWORD [rbp-0x20], r8
+mov r14, QWORD [rbp-0x20]
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_m_0x1
+mov r9, STRING_CONSTANT_21
 call print_string
-mov rbx, 0x6
-mov QWORD [rbp-0x1c0], rbx
-mov QWORD [rbp-0x1c8], addtwo
-mov r15, QWORD [rbp-0x1c8]
-mov rbx, rbp
-sub rbx, 0x1c0
-mov r9,rbx
-call r15
-mov r9, QWORD [rbp-0x1c0]
+mov r9, 0x1
+call exit
+jmp __ifntrue_m_0x1
+__ifntrue_m_0x1:
+mov r9, QWORD [rbp-0x20]
 call print_integer
-mov QWORD [rbp-0x1d0], 0x0
-mov rbx, rbp
-sub rbx, 0x1b8
-mov r9,rbx
-mov r10, 0x19
-call memdup
-mov QWORD [rbp-0x1d0], r8
-mov r9, QWORD [rbp-0x1d0]
+mov r9, QWORD [rbp-0x18]
+call TCPSocket.listen
+mov QWORD [rbp-0x20], r8
+mov r14, QWORD [rbp-0x20]
+mov r15, -1
+cmp r14, r15
+jne __ifntrue_m_0x2
+mov r9, STRING_CONSTANT_22
 call print_string
-mov QWORD [rbp-0x1d8], 0x0
-mov rbx, rbp
-sub rbx, 0x1b8
-mov r15,rbx
-mov rax, 0x0
-mov rbx, 0x8
-mul rbx
-mov r14, rax
-mov rbx, [r15+r14]
-mov [rbp-0x1d8],rbx
-mov r9, QWORD [rbp-0x1d8]
-call char
-mov QWORD [rbp-0x1d8], r8
-mov r9, QWORD [rbp-0x1d8]
-call print_char
+mov r9, 0x1
+call exit
+jmp __ifntrue_m_0x2
+__ifntrue_m_0x2:
+mov r9, QWORD [rbp-0x20]
+call print_integer
+mov QWORD [rbp-0x28], 0x0
+mov QWORD [rbp-0x30], 0x0
+mov r9, 0x64
+call alloc
+mov QWORD [rbp-0x30], r8
+mov QWORD [rbp-0x38], 0x0
+__m__flp0x38:
+mov r9, QWORD [rbp-0x18]
+call TCPSocket.accept
+mov QWORD [rbp-0x28], r8
+mov r9, QWORD [rbp-0x28]
+mov r10, QWORD [rbp-0x30]
+mov r11, 0x32
+call TCPSocket.recv
+mov r9, QWORD [rbp-0x30]
+call print_string
+__m__flp_end_0x38:
+mov rbx, QWORD [rbp-0x38]
+mov rcx, 0x1
+cmp rbx, rcx
+mov rbx, 0
+jge __blncmpncnd_m_0x0
+mov rbx, -1
+__blncmpncnd_m_0x0:
+mov QWORD [rbp-0x40], rbx
+mov rbx, QWORD [rbp-0x38]
+mov QWORD [rbp-0x38], rbx
+mov rdi, QWORD [rbp-0x40]
+mov rsi, -1
+cmp rdi, rsi
+je __m__flp0x38
+__m__flp_end_final0x38:
 
 __m__leave_ret_:
 leave
@@ -5350,7 +5926,6 @@ mov r10, rdi
 align 16
 mov QWORD [currentVector], 0x0
 mov QWORD [current_filereader], 0x0
-mov QWORD [bruhman], 0x64
 call m
 NEWLINE
 ret

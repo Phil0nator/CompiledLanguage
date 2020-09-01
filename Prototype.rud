@@ -1,41 +1,37 @@
 #include "include:all.rud"
-var bruhman = 100;
-final var endl = "\n";
 
-
-function addtwo(ref){
-     print_integer(*ref);
-     (ref)=(*ref)*2;
-     
-
-}
 
 
 function main(args, numargs){
 
      
      printformat("The number of commandline arguments is: %u\n", numargs);
-     var ch1 = "This is a piece of memory";
-     var[50] ch2;
-     memcpy(&ch2, ch1, 25);
-     print_string(&ch2);
-     var t = 6;
-     var fntest = addtwo;
-     (fntest)(&t);
-     print_integer(t);
+     var socket;
+     var err;
+     TCPSocket.init("127.0.0.1", 5500)->socket;
+     TCPSocket.bind(socket)->err;
+     if(err){
+          print_string("Could Not Bind");
+          exit(1);
+     }
+     print_integer(err);
+     TCPSocket.listen(socket)->err;
+     if(err){
+          print_string("Could not bind");
+          exit(1);
 
-     var ch3;
-     memdup(&ch2, 25)->ch3;
-     print_string(ch3);
+     }
+     print_integer(err);
+     var sock;
+     var msg;
+     alloc(100)->msg;
+     for(var i; i < 1; i=i;){
 
+          TCPSocket.accept(socket)->sock;
+          TCPSocket.recv(sock,msg, 50);
+          print_string(msg);
 
-     var ch;
-     (&ch2)[0]->ch;
-     char(ch)->ch;
-     print_char(ch);
-
-     
-
+     }
 
 
 }

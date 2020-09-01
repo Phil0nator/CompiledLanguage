@@ -114,7 +114,7 @@ class PreLexer:
 
 class Preprocessor:
     def __init__(self, data, cc, fn):
-        self.data = data
+        self.data = data.replace("\t", " ").replace("\r","")
         self.cc = cc
         self.lexer = PreLexer(0,data)
         self.tokens, error = self.lexer.make_tokens()

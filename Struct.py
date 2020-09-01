@@ -23,7 +23,7 @@ class Struct:
     
     
     def compile(self):
-        allocationspace = 16
+        allocationspace = 0
         prevwaskey = False
         prevflt = False
         for t in self.tokens:

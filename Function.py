@@ -117,7 +117,7 @@ class Function:
                     else:
                         self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                         params.append(flt_parameter_registers[len(params)])
-                elif (self.current_token.tok == T_INT or self.current_token.tok == T_FLOAT):
+                elif (self.current_token.tok == T_INT or self.current_token.tok == T_FLOAT or self.current_token.tok == "&" or self.current_token.tok == "*"):
                     if(t == "var"):
                         self.evaluation_wrapper(reg=parameter_registers[len(params)])
                         params.append(parameter_registers[len(params)])
@@ -128,6 +128,8 @@ class Function:
                     else:
                         self.evaluation_wrapper(reg=flt_parameter_registers[len(params)])
                         params.append(flt_parameter_registers[len(params)])
+
+                    
                 else:
                     throw(InvalidParameter(self.current_token.start,self.current_token.end,self.current_token.value, self.current_token.tok))
         #params are filled
