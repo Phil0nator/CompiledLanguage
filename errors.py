@@ -8,7 +8,7 @@ class Error:
         self.tok = tok
     def as_string(self):
         result = f'{self.error} on token : {self.tok}\nValue Given: {self.details}\n'
-        result += f'File : {cc["FILES"][len(cc["FILES"])-1-self.start.fn]}, line : {self.start.ln+1}'
+        result += f'File : {cc["FILES"][self.start.fn]}, line : {self.start.ln+1}'
         result += f"\n"
         return result
 

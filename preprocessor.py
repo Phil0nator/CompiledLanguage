@@ -152,7 +152,7 @@ class Preprocessor:
             self.advance()
             return
 
-        self.cc["FILES"].append(file)
+        self.cc["FILES"].insert(0,file)
         if("include:" in file):
             with open("include/"+file.replace("include:",""), "rb") as f:
                 newdata = pre_process(f.read().decode(),self.cc)
