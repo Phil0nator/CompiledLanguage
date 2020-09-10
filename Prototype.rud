@@ -6,14 +6,7 @@ function main(args, numargs){
 
      
      printformat("The number of commandline arguments is: %u\n", numargs);
-     var arguments;
-     Array(numargs)->arguments;
-     memcpy(args, arguments, numargs*8);
-     var str;
-     for (var i; i < numargs; i ++){
-          arguments[i]->str;
-          print_string(str);
-     }
-
+    
+  
 }
 

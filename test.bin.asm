@@ -5828,53 +5828,12 @@ ret
 m:
 push rbp
 mov rbp, rsp
-sub rsp, 0x38
+sub rsp, 0x18
 mov QWORD [rbp-0x8], r9
 mov QWORD [rbp-0x10], r10
 mov r9, STRING_CONSTANT_19
 mov r10, QWORD [rbp-0x10]
 call printformat
-mov QWORD [rbp-0x18], 0x0
-mov r9, QWORD [rbp-0x10]
-call Array
-mov QWORD [rbp-0x18], r8
-mov r9, QWORD [rbp-0x8]
-mov r10, QWORD [rbp-0x18]
-mov rax, QWORD [rbp-0x10]
-mov rcx, 0x8
-imul rcx
-mov r11,rax
-call memcpy
-mov QWORD [rbp-0x20], 0x0
-mov QWORD [rbp-0x28], 0x0
-__m__flp0x28:
-mov r9, QWORD [rbp-0x18]
-call print_integer
-mov rax, QWORD [rbp-0x28]
-mov r15, 0x8
-mul r15
-mov rbx, QWORD [rbp-0x18]
-mov r15,QWORD [rbx+rax]
-mov QWORD [rbp-0x20], r15
-mov r9, QWORD [rbp-0x20]
-call print_string
-__m__flp_end_0x28:
-mov rbx, QWORD [rbp-0x28]
-mov rcx, QWORD [rbp-0x10]
-cmp rbx, rcx
-mov rbx, 0
-jge __blncmpncnd_m_0x0
-mov rbx, -1
-__blncmpncnd_m_0x0:
-mov QWORD [rbp-0x30], rbx
-mov rax, QWORD [rbp-0x28]
-inc rax
-mov QWORD [rbp-0x28], rax
-mov rdi, QWORD [rbp-0x30]
-mov rsi, -1
-cmp rdi, rsi
-je __m__flp0x28
-__m__flp_end_final0x28:
 
 __m__leave_ret_:
 leave

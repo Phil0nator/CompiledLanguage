@@ -42,7 +42,7 @@ def main():
     cc["DEF"] = [{"__%s__"%platform.system():"1"}]
     cc["GL_VAR"] = []
     cc["FILES"] = [__fileinput__]
-    cc["WSPACE"] = []
+    cc["LINDEX"] = []
     
 
     with open(__fileinput__, "rb") as f:
@@ -51,7 +51,6 @@ def main():
     
 
     data = pre_process(data,cc)
-    
     
 
     l = Lexer(0, data)

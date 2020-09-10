@@ -41,12 +41,11 @@ class Lexer:
 
 
             elif (ord(self.current_char) == 3):#file counter
-                self.fn+=1
-                print(cc["FILES"][self.fn])
-                self.loc.fn+=1
+#                self.fn+=1
+#                self.loc.fn+=1
                 #self.loc.ln = self.text[0:self.loc.idx].count(chr(3))
-                self.loc.ln =0
-                self.loc.col = 0
+ #               self.loc.ln =0
+ #               self.loc.col = 0
                 
                 self.advance()
             elif self.current_char in T_NUMBERS:

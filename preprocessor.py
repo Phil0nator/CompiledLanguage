@@ -7,11 +7,14 @@ from errors import *
 #The PreLexer class works the same as the Lexer class, but it is designed to look for things only significant to the preprocessor.
 '''
 class PreLexer:
-    def __init__(self, fn ,text):
+    def __init__(self, fn ,text, filename):
         self.fn = fn
         self.text=text
         self.loc = Location(-1,0,-1,fn,text)
         self.current_char = None
+        self.filename = filename
+        for line in text.split("\n"):
+            cc["LINDEX"].append(self.filename)
         self.advance()
 
     def advance(self):
@@ -116,12 +119,15 @@ class Preprocessor:
     def __init__(self, data, cc, fn):
         self.data = data.replace("\t", " ").replace("\r","")
         self.cc = cc
-        self.lexer = PreLexer(0,data)
+        self.filename = self.cc["FILES"][0]
+        self.lexer = PreLexer(0,data, self.filename)
         self.tokens, error = self.lexer.make_tokens()
 
         self.current_token = self.tokens[0]
         self.ifstack = 0
         self.ct_idx = 0
+
+        print(self.filename)
 
     def advance(self):
         self.ct_idx+=1
